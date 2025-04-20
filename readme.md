@@ -586,4 +586,68 @@ END;
 GO
 
 ```
-##### Uso de `sp_recompile`
+##### Uso de `sp_recompile` y cursor local
+
+La instrucción `sp_recompile` permite eliminar (hacer drop) los planes de ejecución que existen actualmente para un procedimiento almacenado (SP), trigger o función, con la finalidad de que se genere un nuevo plan la próxima vez que se ejecute.
+
+Esto es útil porque esos planes de ejecución se crean considerando la cantidad de datos que hay en ese momento. Si la cantidad de datos crece con el tiempo, ese plan ya no es tan eficiente. Al recompilar, se genera un plan optimizado para la cantidad de datos actual y así se mejora el rendimiento.
+
+
+¿Cómo podría estar recompilando todos los SP existentes cada cierto tiempo?
+
+    -> Por medio de la asigancion de un job a un SQL SERVER Agent, el cual se le asigna la ejecucion del comando *EXEC recompileAllProc;* de forma recurrente y diaria a las 2am.
+
+    ###### Paso a Paso de la creacion del agente
+    Crea un nuevo JOB llamado RecompileAllProcedures_Job
+    ![alt text](<CreacionJob.jpg>)
+
+    ---
+    Asigna el comando que el job va a ejecutar
+    ![alt text](<AsignacionComando.jpg>)
+
+    ---
+    Defino un schecule al job, en este caso de forma recurrente con frecuencia diaria y a la hora que se van a recompilar todos los SP es a las 2 AM sin fecha de finalizacion
+    ![alt text](schedule.png)
+
+
+El uso de un *cursor local* en la siguiente procedure es que a la hora almacenar el conjunto de filas que devuelve la instruccion SELECT o tambien conocidas como conjunto de resultados. El cursos puede colocarse en una fila especifica o recuperar fila por fila del conjunto de datos, en este caso se usa para recorrer cada fija de la consulta que provee los PROC de la base de datos. 
+
+Al ser local, el nombre del cursor solo es valido en la sesion de ejecucion y se puede hacer referencia al mismo dentro del SP que lo almacena la asignacion del cursor se cancela cuando la ejecucion finaliza. Un ejecmplo de la visibilidad se encuentra en el bloque de codigo el cual dara error si se intenta acceder fuera del SP en el que fue declarado, ya que solamente es visible dentro.
+
+```sql
+-- USO DE CURSOR LOCAL Y SP_RECOMPILE
+CREATE PROCEDURE recompileAllProc
+AS
+BEGIN
+    -- CURSOR LOCAL QUE RECORRE LOS RESULTADOS DE LA CONSULTA
+    DECLARE CURSOR_PROC CURSOR FOR 
+    (
+        -- OBTIENE LOS NOMBRES DE LOS PROCEDIMIENTOS, FUNCIONES Y TRIGGERS
+        SELECT QUOTENAME(S.NAME) + '.' + QUOTENAME(O.NAME) AS PROCNAME 
+        FROM 
+           SYS.OBJECTS O
+           INNER JOIN SYS.SCHEMAS S ON O.SCHEMA_ID = S.SCHEMA_ID
+        WHERE O.[TYPE] IN ('P', 'FN', 'IF', 'TR') -- PROCEDIMIENTOS (P), FUNCIONES (FN), IN-LINE FUNCTIONS (IF) Y TRIGGERS (TR) ESTOS SON LOS TIPOS DE PROC QUE SE VAN A RECOMPILAR
+    );
+
+    DECLARE @PROCNAME SYSNAME; --EL SYSNAME EQUIVALE A NVARCHAR(128) POR SI HAY CARACTERES UNICODE
+
+	--ABRE EL CURSOR Y LO LLEVA AL PRIMER REGISTRO DE LA CONSULTA
+    OPEN CURSOR_PROC;
+    FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME; 
+
+    WHILE @@FETCH_STATUS = 0 -- MIENTRAS EL CURSOR NO LLEGUE AL FINAL DE LOS REGISTROS, RECOMPILAR CADA PROCEDIMIENTO
+    BEGIN
+        EXEC SP_RECOMPILE @PROCNAME; -- EJECUTA LA RECOMPILACIÓN PARA EL PROCEDIMIENTO ALMACENADO
+        FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME; -- EL CURSOR PASA AL SIGUIENTE PROCEDIMIENTO
+    END;
+
+    -- CIERRA EL CURSOR UTILIZADO
+    CLOSE CURSOR_PROC;
+    DEALLOCATE CURSOR_PROC;
+END;
+
+--mostrando que el cursos local utilizado recompileAllProc y llamado CURSOR_PROC en no es visible fuera de la sesión de la base de datos
+--Al intentar hacer referencia al cursor local dara error pues el cursor solo existe dentro de la sesion que se esta ejecutando esto se debe a que es local.
+FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
+```
