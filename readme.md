@@ -597,17 +597,26 @@ Esto es útil porque esos planes de ejecución se crean considerando la cantidad
 
 Por medio de la asigancion de un job a un SQL SERVER Agent, el cual se le asigna la ejecucion del comando *EXEC recompileAllProc;* de forma recurrente y diaria a las 2am.
 
-###### Paso a Paso de la creacion del agente
-Crea un nuevo JOB llamado RecompileAllProcedures_Job
-![alt text](<CreacionJob.jpg>)
+###### Paso a Paso de la creación del Agente
+
+### 1. Crear un nuevo Job llamado `RecompileAllProcedures_Job`
+
+![Creación del Job](CreacionJob.jpg)
 
 ---
-Asigna el comando que el job va a ejecutar
-![alt text](<AsignacionComando.jpg>)
+
+### 2. Asignar el comando que el Job va a ejecutar
+
+![Asignación del Comando](AsignacionComando.jpg)
 
 ---
-Defino un schecule al job, en este caso de forma recurrente con frecuencia diaria y a la hora que se van a recompilar todos los SP es a las 2 AM sin fecha de finalizacion
-    [alt text](schedule.png)
+
+### 3. Definir un horario (schedule) para el Job
+
+En este caso se define de forma recurrente, con frecuencia **diaria**, y se establece que la hora de ejecución sea a las **2:00 AM**, sin fecha de finalización.
+
+![Horario Programado](schedule.png)
+
 
 
 El uso de un *cursor local* en la siguiente procedure es que a la hora almacenar el conjunto de filas que devuelve la instruccion SELECT o tambien conocidas como conjunto de resultados. El cursos puede colocarse en una fila especifica o recuperar fila por fila del conjunto de datos, en este caso se usa para recorrer cada fija de la consulta que provee los PROC de la base de datos. 
