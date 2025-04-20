@@ -595,19 +595,19 @@ Esto es útil porque esos planes de ejecución se crean considerando la cantidad
 
 ¿Cómo podría estar recompilando todos los SP existentes cada cierto tiempo?
 
-    -> Por medio de la asigancion de un job a un SQL SERVER Agent, el cual se le asigna la ejecucion del comando *EXEC recompileAllProc;* de forma recurrente y diaria a las 2am.
+Por medio de la asigancion de un job a un SQL SERVER Agent, el cual se le asigna la ejecucion del comando *EXEC recompileAllProc;* de forma recurrente y diaria a las 2am.
 
-    ###### Paso a Paso de la creacion del agente
-    Crea un nuevo JOB llamado RecompileAllProcedures_Job
-    ![alt text](<CreacionJob.jpg>)
+###### Paso a Paso de la creacion del agente
+Crea un nuevo JOB llamado RecompileAllProcedures_Job
+![alt text](<CreacionJob.jpg>)
 
-    ---
-    Asigna el comando que el job va a ejecutar
-    ![alt text](<AsignacionComando.jpg>)
+---
+Asigna el comando que el job va a ejecutar
+![alt text](<AsignacionComando.jpg>)
 
-    ---
-    Defino un schecule al job, en este caso de forma recurrente con frecuencia diaria y a la hora que se van a recompilar todos los SP es a las 2 AM sin fecha de finalizacion
-    ![alt text](schedule.png)
+---
+Defino un schecule al job, en este caso de forma recurrente con frecuencia diaria y a la hora que se van a recompilar todos los SP es a las 2 AM sin fecha de finalizacion
+    [alt text](schedule.png)
 
 
 El uso de un *cursor local* en la siguiente procedure es que a la hora almacenar el conjunto de filas que devuelve la instruccion SELECT o tambien conocidas como conjunto de resultados. El cursos puede colocarse en una fila especifica o recuperar fila por fila del conjunto de datos, en este caso se usa para recorrer cada fija de la consulta que provee los PROC de la base de datos. 
