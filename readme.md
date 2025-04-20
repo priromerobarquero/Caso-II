@@ -60,8 +60,6 @@ Crear scripts de llenado utilizando exclusivamente T-SQL, cumpliendo los siguien
 ---
 #### Catalogo Base del sistema
 El siguiente script corresponde a la carga de catálogos base del sistema, desarrollado en T-SQL:
-
----
 #### Tipos de Recordatorios (`caipi_remindertypes`)
 ```sql
 INSERT INTO [dbo].[caipi_remindertypes] ([name], [description])
