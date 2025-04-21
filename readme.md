@@ -183,12 +183,11 @@ BEGIN
 		IF @@FETCH_STATUS <> 0 -- Ya no hay más registros
 		BEGIN
 			-- Reinicia el cursor a la primera fila
-			CLOSE cursor_example;
-			DEALLOCATE cursor_example;
+			CLOSE method_cursor;
 
 			-- Reabriendo el cursor
-			OPEN cursor_example;
-			FETCH NEXT FROM cursor_example INTO @name, @methodId; -- Vuelve al primer registro
+			OPEN method_cursor;
+			FETCH NEXT FROM method_cursor INTO @name, @methodId; -- Vuelve al primer registro
 		END
     END
 
