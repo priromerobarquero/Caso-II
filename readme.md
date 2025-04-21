@@ -601,13 +601,13 @@ Por medio de la asigancion de un job a un SQL SERVER Agent, el cual se le asigna
 
 ### 1. Crear un nuevo Job llamado `RecompileAllProcedures_Job`
 
-![Creación del Job](CreacionJob.jpg)
+![Creación del Job](imagenes/CreacionJob.jpg)
 
 ---
 
 ### 2. Asignar el comando que el Job va a ejecutar
 
-![Asignación del Comando](AsignacionComando.jpg)
+![Asignación del Comando](imagenes/AsignacionComando.jpg)
 
 ---
 
@@ -615,7 +615,7 @@ Por medio de la asigancion de un job a un SQL SERVER Agent, el cual se le asigna
 
 En este caso se define de forma recurrente, con frecuencia **diaria**, y se establece que la hora de ejecución sea a las **2:00 AM**, sin fecha de finalización.
 
-![Horario Programado](schedule.png)
+![Horario Programado](imagenes/schedule.png)
 
 
 
