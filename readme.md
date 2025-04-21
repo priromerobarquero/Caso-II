@@ -198,6 +198,127 @@
   }
 ```
 
+```json
+{
+    "proveedores": [
+      {
+        "id": "01",
+        "nombre": "SmartFit",
+        "url": "https://www.smartfit.com",
+        "logo": "https://logo.clearbit.com/smartfit.com"
+      },
+      {
+        "id": "02",
+        "nombre": "Lavadería Pressto",
+        "url": "https://www.pressto.com",
+        "logo": "https://logo.clearbit.com/pressto.com"
+      },
+      {
+        "id": "03",
+        "nombre": "Broomday",
+        "url": "https://broomday.cr",
+        "logo": "https://imgur.com/broomday_logo.png"
+      },
+      {
+        "id": "04",
+        "nombre": "Petroleos Delta",
+        "url": "https://www.deltacr.com",
+        "logo": "https://logo.clearbit.com/deltacr.com"
+      },
+      {
+        "id": "05",
+        "nombre": "Vainilla beauty",
+        "url": "https://www.instagram.com/vainillabeautycr/",
+        "logo": "https://imgur.com/vainilla_logo.png"
+      },
+      {
+        "id": "06",
+        "nombre": "El novillo alegre",
+        "url": "https://www.elnovilloalegre.com",
+        "logo": "https://logo.clearbit.com/elnovilloalegre.com"
+      },
+      {
+        "id": "07",
+        "nombre": "Rostipollos",
+        "url": "https://www.rostipollos.com",
+        "logo": "https://logo.clearbit.com/rostipollos.com"
+      },
+      {
+        "id": "08",
+        "nombre": "Kolbi",
+        "url": "https://www.kolbi.cr",
+        "logo": "https://logo.clearbit.com/kolbi.cr"
+      },
+      {
+        "id": "09",
+        "nombre": "Valet Parking",
+        "url": "https://valetparking.cr",
+        "logo": "https://imgur.com/valetparking_logo.png"
+      },
+      {
+        "id": "10",
+        "nombre": "Gym Tec",
+        "url": "https://gymtec.cr",
+        "logo": "https://imgur.com/gymtec_logo.png"
+      },
+      {
+        "id": "11",
+        "nombre": "Hipermascotas",
+        "url": "https://hipermascotas.cr",
+        "logo": "https://imgur.com/hipermascotas_logo.png"
+      },
+      {
+        "id": "12",
+        "nombre": "La Vete",
+        "url": "https://lavete.cr",
+        "logo": "https://imgur.com/lavete_logo.png"
+      },
+      {
+        "id": "13",
+        "nombre": "Crol Swimming",
+        "url": "https://www.crolswimming.com",
+        "logo": "https://logo.clearbit.com/crolswimming.com"
+      },
+      {
+        "id": "14",
+        "nombre": "Uber Eats",
+        "url": "https://www.ubereats.com",
+        "logo": "https://logo.clearbit.com/ubereats.com"
+      },
+      {
+        "id": "15",
+        "nombre": "Uber",
+        "url": "https://www.uber.com",
+        "logo": "https://logo.clearbit.com/uber.com"
+      },
+      {
+        "id": "16",
+        "nombre": "Spa Vida Zen",
+        "url": "https://www.spavidazen.com",
+        "logo": "https://logo.clearbit.com/spavidazen.com"
+      },
+      {
+        "id": "17",
+        "nombre": "Fresh Market",
+        "url": "https://www.freshmarket.cr",
+        "logo": "https://logo.clearbit.com/freshmarket.cr"
+      },
+      {
+        "id": "18",
+        "nombre": "Café Arte",
+        "url": "https://cafearte.cr",
+        "logo": "https://imgur.com/cafearte_logo.png"
+      },
+      {
+        "id": "19",
+        "nombre": "Cinemark",
+        "url": "https://www.cinemarkca.com",
+        "logo": "https://logo.clearbit.com/cinemarkca.com"
+      }
+    ]
+  }
+```
+
 ##### Promociones
 ```json
 {
