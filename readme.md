@@ -511,6 +511,194 @@ INSERT INTO [dbo].[caipi_typesBranch]
            ('Soporte Técnico', 1, 0);
 ```
 
+#### Plan Types
+```sql
+INSERT INTO caipi_planTypes (name, enable, deleted)
+VALUES 
+('Básico', 1, 0),
+('Personalizado', 1, 0),
+('Familiar', 1, 0),
+('Corporativo', 1, 0),
+('Estudiantil', 1, 0),
+('Salud y Bienestar', 1, 0);
+```
+
+#### Plans
+```sql
+CREATE PROCEDURE LlenarPlanes
+AS
+BEGIN
+    DECLARE @countPlanes INT = 15;
+    DECLARE @planesID INT;
+    DECLARE @Name VARCHAR(30);
+    DECLARE @planType INT;
+    DECLARE @checkSum VARBINARY(255); -- HASHBYTES devuelve VARBINARY
+    DECLARE @fecha DATETIME;
+    DECLARE @total DECIMAL(5,2);
+    DECLARE @mensual DECIMAL(5,2);
+
+    DECLARE @nombres TABLE (nombre VARCHAR(30));
+    
+    -- Se insertan los 15 planes disponibles 
+    INSERT INTO @nombres(nombre)
+    VALUES 
+        ('Joven Deportista'), ('Familia de Verano'), ('Viajero Frecuente'), ('Nómada Digital'),
+        ('Profesional en Movimiento'), ('Estudiante Proactivo'), ('Creativo Freelance'), ('Full Wellness'),
+        ('Tiempo en Familia'), ('Explorador Urbano'), ('Hogar Equilibrado'), ('Fit & Chill'),
+        ('EcoVida'), ('Combo Soltura'), ('Zen Diario');
+
+    DECLARE @i INT = 1;
+
+ -- Se inicia el ciclo para insertar los 15 planes
+    WHILE @i <= 15
+    BEGIN
+        SET @planesID = @i;
+
+        SELECT @Name = nombre FROM (
+            SELECT nombre, ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS rn FROM @nombres
+        ) AS nombres_ordenados
+        WHERE rn = @i;
+
+        -- Tipo de plan entre 1 y 6
+        SET @planType = FLOOR(1 + RAND() * 6);
+
+        -- Fecha aleatoria entre 2024-06-01 y hoy
+        DECLARE @startDate DATETIME = '2024-06-01 00:00:00';
+        DECLARE @secondsRange INT = DATEDIFF(SECOND, @startDate, GETDATE());
+        SET @fecha = DATEADD(SECOND, FLOOR(RAND(CHECKSUM(NEWID())) * @secondsRange), @startDate);
+
+        -- Monto total entre 100 y 200
+        SET @total = ROUND(100 + (RAND() * 100), 2); 
+        -- Monto Mensual entre 50 y 60
+        SET @mensual = ROUND(50 + (RAND() * 10), 2);
+
+        -- Checksum
+        SET @checkSum = HASHBYTES('SHA2_512', CONCAT(@planesID, @Name, 'fbsdinaldkna3193'));
+
+        -- Insertamos en la tabla
+        INSERT INTO caipi_plans(name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount, monthlyAmount)
+        VALUES (
+            @Name, 'Esta es la descripción', 1, 0, @checkSum, @planType, @fecha, @total, @mensual
+        );
+
+        SET @i += 1;
+    END
+END
+```
+
+#### Media File Types
+```sql
+INSERT INTO caipi_mediaFileType (name, enable, deleted)
+VALUES
+('imagen', 1, 0),
+('video', 1, 0);
+```
+
+#### Media Files
+```sql
+INSERT INTO caipi_mediaFiles (idmediaFiles, mediaURL, filename, lastUpdate, idmediaFileType)
+VALUES
+    (1, 'https://media.soltura.com/plan_fitness_4_personas.mp4', 'Plan de Gimnasio 4 Personas', GETDATE(), 2),
+    (2, 'https://media.soltura.com/plan_yoga_familiar.mp4', 'Plan Yoga Familiar', GETDATE(), 2),
+    (3, 'https://media.soltura.com/plan_grooming_mascota.jpg', 'Plan Grooming para Mascota', GETDATE(), 1),
+    (4, 'https://media.soltura.com/plan_revision_veterinaria.jpg', 'Plan Revisión Veterinaria', GETDATE(), 1),
+    (5, 'https://media.soltura.com/plan_clases_natacion_futbol.jpg', 'Plan Clases de Natación y Fútbol Niños', GETDATE(), 1),
+    (6, 'https://media.soltura.com/servicio_combustible_gas_diesel.jpg', 'Servicio de Combustible Gas o Diésel', GETDATE(), 1),
+    (7, 'https://media.soltura.com/servicio_uber_eats.jpg', 'Servicio Uber Eats', GETDATE(), 1),
+    (8, 'https://media.soltura.com/servicio_uber_rides.jpg', 'Servicio Uber Rides', GETDATE(), 1),
+    (9, 'https://media.soltura.com/servicio_mantenimiento_mascota.jpg', 'Servicio de Mantenimiento de Mascotas', GETDATE(), 1),
+    (10, 'https://media.soltura.com/servicio_plan_clases_futbol.jpg', 'Plan de Clases de Fútbol', GETDATE(), 1),
+    (11, 'https://media.soltura.com/servicio_grooming_mascota.jpg', 'Grooming para Mascotas', GETDATE(), 1),
+    (12, 'https://media.soltura.com/servicio_revision_salud.jpg', 'Revisión de Salud', GETDATE(), 1),
+    (13, 'https://media.soltura.com/servicio_activacion_plan.jpg', 'Activación de Plan', GETDATE(), 1),
+    (14, 'https://media.soltura.com/servicio_subscripcion_plan.jpg', 'Suscripción a Planes', GETDATE(), 1),
+    (15, 'https://media.soltura.com/servicio_pagos_suscripcion.jpg', 'Pagos de Suscripción', GETDATE(), 1);
+```
+
+#### Schedules
+```sql
+CREATE PROCEDURE llenadoSchedules
+AS
+BEGIN
+
+    DECLARE @horarios TABLE (
+        name VARCHAR(50),
+        recurrencyType VARCHAR(20),
+        repetition INT
+    );
+-- Se realiza una inserción en tabla temporal 
+    INSERT INTO @horarios (name, recurrencyType, repetition)
+    VALUES 
+        ('Cada semana', 'semanal', 1),
+        ('Cada mes', 'mensual', 1),
+        ('Cada 15 días', 'semanal', 2);
+
+    DECLARE @i INT = 1;
+    DECLARE @mes INT;
+    DECLARE @dia INT;
+    DECLARE @endDate DATE;
+-- Se insertan en bloques de 13
+    WHILE @i <= 13
+    BEGIN
+        
+        SET @mes = FLOOR(RAND(CHECKSUM(NEWID())) * 8) + 5; -- Mes aleatorio
+
+        SET @dia = FLOOR(RAND(CHECKSUM(NEWID())) * 28) + 1; -- Dia aleatorio
+
+        SET @endDate = DATEFROMPARTS(2025, @mes, @dia);
+
+        -- Insertar 3 registros por vuelta
+        INSERT INTO caipi_schedules (name, recurrencyType, repetition, endType, endDate)
+        SELECT name, recurrencyType, repetition, 'NA', @endDate
+        FROM @horarios;
+
+        SET @i += 1;
+    END
+END;
+```
+
+#### Supplier Categories
+```sql
+INSERT INTO caipi_supplierCategories(name, enable, deleted)
+VALUES
+('Gimnasios y Fitness', 1, 0),
+('Estudios de Yoga', 1, 0),
+('Grooming para Mascotas', 1, 0),
+('Clínicas Veterinarias', 1, 0),
+('Escuelas de Natación', 1, 0),
+('Estaciones de Combustible', 1, 0),
+('Restaurantes y Comida Rápida', 1, 0),
+('Agencias de Viajes', 1, 0),
+('Centros de Cuidado Animal', 1, 0),
+('Clubes Deportivos', 1, 0),
+('Centros de Estética', 1, 0),
+('Consultorios Nutricionales', 1, 0),
+('Parqueos Privados', 1, 0),
+('Entrenadores Personales', 1, 0),
+('Proveedores Varios', 1, 0);
+```
+
+#### Suppliers 
+```
+INSERT INTO [dbo].[caipi_suppliers] ([name], [enable], [idsupplierCategories], [idmediaFiles], [idagreementTerms], [deleted])
+VALUES
+('The Retreat Costa Rica', 1, 1, 1, 1, 0), 
+('Vida Mia Healing Center', 1, 2, 2, 2, 0),
+('Agromédica Veterinaria', 1, 4, 4, 4, 0), 
+('Paws & Co.', 1, 3, 3, 3, 0), 
+('The Pets Club', 1, 9, 9, 9, 0), 
+('VolAir Studio', 1, 2, 2, 2, 0), 
+('Smart Fit', 1, 1, 1, 1, 0), 
+('AmaSer', 1, 2, 2, 2, 0), 
+('Pure Jungle Spa', 1, 11, 11, 11, 0), 
+('Aloha Skincare and Wellness', 1, 11, 11, 11, 0), 
+('Central de Mascotas', 1, 9, 9, 9, 0), 
+('Veterinaria Arroyo y Solano', 1, 4, 4, 4, 0),
+('Spoon', 1, 7, 7, 7, 0), 
+('Rostipollos', 1, 7, 7, 7, 0), 
+('KOKi Beach', 1, 7, 7, 7, 0); 
+```
+
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
