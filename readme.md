@@ -58,10 +58,8 @@ Crear scripts de llenado utilizando exclusivamente T-SQL, cumpliendo los siguien
 - Para cada plan de servicios, deben existir entre 3 y 6 suscripciones, cada una asignada a usuarios únicos que no estén repetidos en otras combinaciones.
 
 ---
-#### Catalogo Base del sistema
+### Catalogo Base del sistema
 El siguiente script corresponde a la carga de catálogos base del sistema, desarrollado en T-SQL:
-
----
 #### Tipos de Recordatorios (`caipi_remindertypes`)
 ```sql
 INSERT INTO [dbo].[caipi_remindertypes] ([name], [description])
