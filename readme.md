@@ -679,7 +679,7 @@ VALUES
 ```
 
 #### Suppliers 
-```
+```sql
 INSERT INTO [dbo].[caipi_suppliers] ([name], [enable], [idsupplierCategories], [idmediaFiles], [idagreementTerms], [deleted])
 VALUES
 ('The Retreat Costa Rica', 1, 1, 1, 1, 0), 
