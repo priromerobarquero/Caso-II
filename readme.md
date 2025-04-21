@@ -27,8 +27,372 @@
 
 ---
 ## 🧱 Diseño de la Base de Datos - 20 pts
-- **MongoDB:**  
-  > 
+- **MongoDB:**
+###### Paquetes informativos
+```json
+{
+    "paquete": [
+      {
+        "paquete_id": "001",
+        "titulo": "Paquete Profesional Joven",
+        "descripcion": "Paquete dirigido a profesionales jovenes.",
+        "moneda": "CRC",
+        "precio": "₡200,000 colones",
+        "limitePersonas": 2,
+        "imagenURL": "https://img.com/1",
+        "creacion": "2025-04-02T12:30:00Z",
+        "tiempoValido": "1 mes",
+        "beneficios": [
+          { 
+            "proveedor": "01",
+            "beneficio": "Gimnasio", 
+            "cantidad": "6 horas por semana" 
+          },
+          { 
+            "proveedor": "02",
+            "beneficio": "Lavandería y aplanchado",
+            "cantidad": "1 servicio" 
+          },
+          { 
+            "proveedor": "03",
+            "beneficio": "Limpieza básica de hogar",
+            "cantidad": "2 días" 
+          },
+          { 
+            "proveedor": "Petroleos Delta",
+            "beneficio": "Combustible (gas o diésel)", 
+            "cantidad": "₡50,000 colones" 
+          },
+          { 
+            "proveedor": "05",
+            "beneficio": "Corte de pelo",
+            "cantidad": "1 corte" 
+          },
+          { 
+            "proveedor": "06",
+            "beneficio": "Cenas seleccionadas",
+            "cantidad": "2 cenas" 
+          },
+          { 
+            "proveedor": "07",
+            "beneficio": "Almuerzos seleccionados",
+            "cantidad": "4 almuerzos" 
+          },
+          { 
+            "proveedor": "08",
+            "beneficio": "Plan móvil",
+            "cantidad": "Ilimitado" 
+          },
+          { 
+            "proveedor": "09",
+            "beneficio": "Parqueo", 
+            "cantidad": "10 horas" 
+          }
+        ],
+        "estado": "activo"
+      },
+      {
+        "paquete_id": "002",
+        "titulo": "Paquete Full Modern Family",
+        "descripcion": "Paquete ideal para familias modernas.",
+        "moneda": "CRC",
+        "precio": "₡170,000 colones",
+        "limitePersonas": 4,
+        "imagenURL": "https://img.com/2",
+        "creacion": "2025-04-02T12:30:00Z",
+        "tiempoValido": "2 meses",
+        "beneficios": [
+          { 
+            "proveedor": "01",
+            "beneficio": "Gimnasio (4 personas)", 
+            "cantidad": "4 horas por semana" 
+          },
+          { "proveedor": "10",
+            "beneficio": "Yoga o Pilates (familiar)",
+            "cantidad": "4 horas" 
+          },
+          {
+            "proveedor": "11",
+            "beneficio": "Grooming para mascota", 
+            "cantidad": "1 servicio" 
+          },
+          { 
+            "proveedor": "12",
+            "beneficio": "Revisión veterinaria",
+            "cantidad": "1 consulta" 
+          },
+          { 
+            "proveedor": "13",
+            "beneficio": "Clases de natación o fútbol (niños)", 
+            "cantidad": "3 clases" 
+          },
+          { 
+            "proveedor": "04",
+            "beneficio": "Combustible (gas o diésel)", 
+            "cantidad": "₡100,000 colones" 
+          },
+          { 
+            "proveedor": "14",
+            "beneficio": "Comida en casa", 
+            "cantidad": "10 pedidos (envío gratis + 20% dto.)" 
+          },
+          { 
+            "proveedor": "15",
+            "beneficio": "Uber Rides", 
+            "cantidad": "₡7,000 colones en viajes" 
+          }
+        ],
+        "estado": "inactivo"
+      },
+      {
+        "paquete_id": "003",
+        "titulo": "Paquete Relax & Wellness",
+        "descripcion": "Paquete perfecto para relajarse y recargar energías en pareja.",
+        "moneda": "CRC",
+        "precio": "₡155,000 colones",
+        "limitePersonas": 5,
+        "imagenURL": "https://img.com/3",
+        "creacion": "2025-04-10T10:00:00Z",
+        "tiempoValido": "1 mes",
+        "beneficios": [
+          {
+            "proveedor": "16",
+            "beneficio": "Masaje relajante para 2 personas",
+            "cantidad": "1 sesión de 45 minutos"
+          },
+          {
+            "proveedor": "10",
+            "beneficio": "Clases de yoga o meditación",
+            "cantidad": "4 clases"
+          },
+          {
+            "proveedor": "17",
+            "beneficio": "Canasta saludable",
+            "cantidad": "1 canasta de snacks y jugos"
+          },
+          {
+            "proveedor": "18",
+            "beneficio": "Desayuno gourmet",
+            "cantidad": "2 desayunos"
+          },
+          {
+            "proveedor": "19",
+            "beneficio": "Entradas al cine",
+            "cantidad": "2 entradas + palomitas"
+          },
+          {
+            "proveedor": "15",
+            "beneficio": "Transporte incluido",
+            "cantidad": "₡5,000 colones en viajes"
+          },
+          {
+            "proveedor": "08",
+            "beneficio": "Plan de datos temporal",
+            "cantidad": "Internet ilimitado por 1 semana"
+          }
+        ],
+        "estado": "activo"
+      }
+      
+    ]
+  }
+```
+
+##### Promociones
+```json
+{
+    "promociones": [
+      {
+        "promo_id": "001",
+        "titulo": "Descuento en gimnasio con SmartFit",
+        "descripcion": "Obtén un 25% de descuento en membresías mensuales con SmartFit al adquirir el Paquete Profesional Joven.",
+        "creado_el": "2025-04-10T09:00:00Z",
+        "valido_hasta": "2025-05-10T23:59:59Z",
+        "imagenURL": "https://imgpromo.com/smartfit25.png",
+        "promoURL": "https://soltura.cr/promociones/001",
+        "codigoBarras": "1234567890123",
+        "condiciones": [
+          "Válido solo para nuevas membresías.",
+          "No acumulable con otras promociones.",
+          "Aplicable únicamente en gimnasios SmartFit participantes."
+        ],
+        "tipoPromocion": "descuento",
+        "estado": "inactivo"
+      },
+      {
+        "promo_id": "002",
+        "titulo": "10% de descuento en tu primer plan Soltura personalizado",
+        "descripcion": "Arma tu propio paquete con los servicios que más usás: gimnasio, comida, belleza, transporte y más. ¡Y obtené un 10% de descuento en tu primer mes!",
+        "creado_el": "2025-04-14T08:00:00Z",
+        "valido_hasta": "2025-05-31T23:59:59Z",
+        "imagenURL": "https://soltura.cr/media/promo-soltu-personal.png",
+        "promoURL": "https://soltura.cr/promociones/002",
+        "codigoBarras": "7894561230123",
+        "condiciones": [
+            "Válido solo para nuevos usuarios de planes personalizados.",
+            "El descuento se aplica únicamente al primer mes del plan.",
+            "No acumulable con otras promociones activas.",
+            "Promoción válida únicamente en planes creados desde la app oficial de Soltura."
+        ],
+        "tipoPromocion": "descuento",
+        "estado": "activo"
+      },
+      {
+        "promo_id": "003",
+        "titulo": "¡Invitá a un amigo y ambos obtienen 1 mes gratis!",
+        "descripcion": "Recomendá Soltura a tus amigos y por cada uno que se registre y active su primer plan, ambos recibirán un mes completamente gratis en su membresía.",
+        "creado_el": "2025-04-14T08:00:00Z",
+        "valido_hasta": "2025-06-30T23:59:59Z",
+        "imagenURL": "https://soltura.cr/media/promo-amigos.png",
+        "promoURL": "https://soltura.cr/promociones/003",
+        "codigoBarras": "998877665544",
+        "condiciones": [
+          "La persona referido debe activar un plan Soltura en los primeros 7 días tras registrarse.",
+          "La promoción aplica únicamente si ambos usuarios completan el proceso de verificación.",
+          "Solo se otorga 1 mes gratuito por cada referido.",
+          "Promoción válida hasta agotar existencias de meses gratuitos o hasta la fecha de finalización."
+        ],
+        "tipoPromocion": "referido",
+        "estado": "activo"
+      }    
+    ]
+  }
+```
+
+##### Mercadeo y Media
+```json
+{
+    "marketing_media": [
+      {
+        "media_id": "001",
+        "tipo": "video",
+        "titulo": "Soltura: Lo que tu rutina necesitaba",
+        "descripcion": "Historias reales de usuarios que transformaron su día a día con Soltura.",
+        "videourl": "https://soltura.cr/media/vida-simplificada.mp4",
+        "url_thumbnail": "https://soltura.cr/media/thumb-vida.jpg",
+        "duracion": "03:02",
+        "formato": "mp4",
+        "etiquetas": ["vida real", "usuarios", "transformación", "ahorro"],
+        "fecha_publicacion": "2025-04-10T10:00:00Z",
+        "estadisticas": {
+            "vistas": 3200,
+            "comentarios": 15
+        },
+        "estado": "activo"
+      },
+      {
+        "media_id": "002",
+        "tipo": "imagen",
+        "titulo": "Una vida más ligera empieza con Soltura",
+        "descripcion": "Historias visuales: día relajado, cero trámites, todo resuelto. Soltura es la libertad en acción.",
+        "imagenURL": "https://soltura.cr/media/vida-ligera.jpg",
+        "formato": "jpg",
+        "resolucion": "2480x3508 px",
+        "dimensiones": {
+          "ancho": 1080,
+          "alto": 1080
+        },
+        "etiquetas": ["vida ligera", "beneficios"],
+        "fecha_publicacion": "2025-04-13T12:00:00Z",
+        "estadisticas": {
+            "vistas": 5200,
+            "comentarios": 12
+        },
+        "estado": "activo"
+      },
+      {
+        "media_id": "003",
+        "tipo": "video",
+        "titulo": "Soltura ahora en todo el país",
+        "descripcion": "Ahora puedes simplificar tu vida desde cualquier lugar. Ampliamos cobertura a 5 ciudades nuevas.",
+        "videourl": "https://soltura.cr/media/ampliacion.mp4",
+        "url_thumbnail": "https://soltura.cr/media/thumb-ampliacion.jpg",
+        "duracion": "01:10",
+        "formato": "mp4",
+        "etiquetas": ["Costa Rica", "beneficios", "ahorro"],
+        "fecha_publicacion": "2025-05-13T12:00:00Z",
+        "estadisticas": {
+            "vistas": 200,
+            "comentarios": 2
+        },
+        "estado": "activo"
+      }
+
+    ]
+  }
+```
+
+##### Servicio al cliente - Seguimento de casos - Reviews - Resolución de quejas
+```json
+{
+  "casos": [
+    {
+      "id_caso": "CASO-2024-001",
+      "fecha_apertura": "2024-05-15T09:30:00-06:00",
+      "agente_asignado": "Carol Araya",  
+      "cliente": {
+        "nombre": "Carlos Abarca",
+        "identificacion": "1-1923-0668",
+        "contacto": {
+          "medio": "WhatsApp Business",
+          "detalle": "+506 8888-1234"
+        }
+      },
+      "asunto": {
+        "tipo": "Reclamo",
+        "subtipo": "Facturación incorrecta",
+        "descripcion": "Cobro duplicado en factura #45678 del servicio Premium."
+      },
+      "atencion": [
+        {
+          "fecha": "2024-05-15T09:35:00-06:00",
+          "accion": "Verificación de factura en sistema",
+          "comentario": "Se confirma cobro duplicado por error de sistema."
+        },
+        {
+          "fecha": "2024-05-15T10:00:00-06:00",
+          "accion": "Solución propuesta",
+          "comentario": "Se programa reembolso automático en 3 días hábiles.",
+          "respuesta_cliente": "Cliente conforme con la solución."
+        }
+      ],
+      "estado": "resuelto",
+      "fecha_cierre": "2024-05-15T10:15:00-06:00"
+    },
+    {
+      "id_caso": "CASO-2024-002",
+      "fecha_apertura": "2024-05-16T14:20:00-06:00",
+      "agente_asignado": "Priscilla Barquero",  
+      "cliente": {
+        "nombre": "Daniel Sequeira",
+        "identificacion": "2-3456-7890",
+        "contacto": {
+          "medio": "Llamada telefónica",
+          "detalle": "+506 7000-5678"
+        }
+      },
+      "asunto": {
+        "tipo": "Consulta",
+        "subtipo": "Cobertura de servicios",
+        "descripcion": "¿Incluye el Plan Básico consultas médicas urgentes?"
+      },
+      "atencion": [
+        {
+          "fecha": "2024-05-16T14:25:00-06:00",
+          "accion": "Revisión de cobertura",
+          "comentario": "Se explica que solo cubre consultas no urgentes."
+        },
+        {
+          "fecha": "2024-05-16T14:28:00-06:00",
+          "accion": "Solución propuesta",
+          "comentario": "Se explican los planes que sí incluyen consultas médicas urgentes.",
+          "respuesta_cliente": "Cliente conforme con la solución."
+        }
+      ]
+    }
+  ]
+}
+```
 
 - **SQL Server:**  
   > 
