@@ -1351,6 +1351,12 @@ Este cursor puede ser referenciado en la conexion. Es decir, puede utilizarse en
 
 
 
+```sql
+
+
+
+```
+
 ##### Uso de `sp_recompile` y cursor local
 
 La instrucción `sp_recompile` permite eliminar (hacer drop) los planes de ejecución que existen actualmente para un procedimiento almacenado (SP), trigger o función, con la finalidad de que se genere un nuevo plan la próxima vez que se ejecute.
