@@ -1227,40 +1227,130 @@ Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. P
 ##### Uso de un TRIGGER
 El TRIGGER es un SP que se ejecuta automaticamente en respuesta de un evento en una tabla o vista desde la base de datos. En este caso, se utiliza con fines de auditoria, en caso de generarse una actualizacion de datos en un usuario, el trigger despues de la actualizacion *UPDATE* genera una incersion en la tabla `caipi_logs` en el cual el registro almacena el movimiento. Con el TRIGGER, se puede acceder los datos anteriores y los datos insertados, en el caso de T-SQL un *UPDATE* es manipulado por un DELETED (Viejos datos) y un INSERTED (Nuevos datos)
 ```sql
-DROP TRIGGER IF EXISTS log_insertUserUpdate;
-GO
 
-CREATE TRIGGER log_insertUserUpdate
-ON caipi_users --nombre de la tabla
-AFTER UPDATE --accion sobre la tabla
+-- TRIGGER El cual dispara cuando un usuario es actualizado
+--Realiza una comparacion de datos nuevos y antiguos con la finalidad de almacenar el el log los cambios hechos en la actualizacion
+
+CREATE OR ALTER TRIGGER log_insertUserUpdate
+ON caipi_users
+AFTER UPDATE
 AS
 BEGIN
-    SET NOCOUNT ON;--para que no devuelva cuantas filas fueron afectadas
-	--Inserta el registro en el log
+    SET NOCOUNT ON;
+	--declara las variables que se van a utilizar en la consulta
+    DECLARE @userId INT,
+            @username NVARCHAR(100),
+            @old_username NVARCHAR(100),
+            @name NVARCHAR(100),
+            @old_name NVARCHAR(100),
+            @lastname NVARCHAR(100),
+            @old_lastname NVARCHAR(100),
+            @password NVARCHAR(100),
+            @old_password NVARCHAR(100),
+            @role NVARCHAR(100),
+            @old_role NVARCHAR(100),
+            @changedColumns NVARCHAR(MAX);
+
+	--Utilza un cursor local para almacenar los datos de la consulta, del registro insertado y del registro eliminado
+    DECLARE cur CURSOR FOR
+        SELECT i.userId, i.username, d.username,
+               i.name, d.name,
+               i.lastname, d.lastname,
+               i.password, d.password,
+               i.role, d.role
+        FROM INSERTED i
+        INNER JOIN DELETED d ON i.userId = d.userId;
+
+	--abre el cursor para comenzar a recorrer las filas de la consulta
+    OPEN cur;
+    FETCH NEXT FROM cur INTO @userId, @username, @old_username,
+                            @name, @old_name,
+                            @lastname, @old_lastname,
+                            @password, @old_password,
+                            @role, @old_role;
+
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+		--validacion de cambio de datos almacena los cambios realizados en el usuario
+        SET @changedColumns = '';
+		
+        IF @username <> @old_username SET @changedColumns += 'username, ';
+        IF @name <> @old_name SET @changedColumns += 'name, ';
+        IF @lastname <> @old_lastname SET @changedColumns += 'lastname, ';
+        IF @password <> @old_password SET @changedColumns += 'password, ';
+        IF @role <> @old_role SET @changedColumns += 'role, ';
+
+        -- Quitar última coma si existe
+        IF RIGHT(@changedColumns, 2) = ', ' 
+            SET @changedColumns = LEFT(@changedColumns, LEN(@changedColumns) - 2);
+
+	    --Ejecuta el SP que genera el log de actualizar usuario
+        EXECUTE sp_LogUpdateUser
+            @userId,
+            @username,
+            @name,
+            @lastname,
+            @password,
+            @role,
+            @changedColumns;
+
+		-- recorre el siguiente registro actualizado
+        FETCH NEXT FROM cur INTO @userId, @username, @old_username,
+                                @name, @old_name,
+                                @lastname, @old_lastname,
+                                @password, @old_password,
+                                @role, @old_role;
+    END;
+
+    CLOSE cur;
+    DEALLOCATE cur;
+END;
+GO
+
+```
+#### SP que es llamado por el trigger para insertar y log con la finalidad de guardar la integridad del check sum
+
+```sql
+
+CREATE OR ALTER PROCEDURE sp_LogUpdateUser
+    @userId INT,
+    @username NVARCHAR(100),
+    @name NVARCHAR(100),
+    @lastname NVARCHAR(100),
+    @password NVARCHAR(100),
+    @role NVARCHAR(100),
+    @changedColumns NVARCHAR(MAX)
+AS
+BEGIN
     INSERT INTO caipi_logs (
         [description], [computer], [username], [trace],
         [referenceId1], [referenceId2], [value1], [value2],
         [chechsum], [logSeverityId], [logSourceId], [logTypeId]
     )
-    SELECT
-        'Usuario Actualizado - UserName: ' + CAST(i.username AS VARCHAR(100)),
+    VALUES (
+        'Usuario Actualizado - UserName: ' + @username,
         HOST_NAME(),
         SYSTEM_USER,
         'TRACE-' + CAST(ABS(CHECKSUM(NEWID())) % 10000 AS VARCHAR(10)),
-        'Rol',
-        'Nombre Usuario',
-        i.role,
-        i.name+i.lastname,
-        CHECKSUM(i.userId,d.userid, i.name,d.name, i.lastname,d.lastname, i.password,d.password, i.role,d.role),
-        3, -- Medium severity
-        5, -- Payment system source
-        1  -- Information type
-    FROM INSERTED i
-    INNER JOIN DELETED d ON i.userId = d.userId;
+        'Id Usuario',
+        'Cambios Realizados',
+        @userId,
+        @changedColumns,
+        CHECKSUM(@userId, @name, @lastname, @password, @role,@username),
+        3,
+        5,
+        1
+    );
 END;
 GO
 
 ```
+
+### Uso de Cursor global, accesible desde otras sesiones de la base de datos.
+Este cursor puede ser referenciado en la conexion. Es decir, puede utilizarse en cualquier SP u otro procediminertos que se esté ejecuctando en la conexion. Por un lado, para ser declarado debe especificarse mediante la palabra reservada `GLOBAL`, en caso de no ser utilizada por defecto será *local*, por otro lado, puede declarse afuera de un procedimiento o bloque.
+
+
+
 ##### Uso de `sp_recompile` y cursor local
 
 La instrucción `sp_recompile` permite eliminar (hacer drop) los planes de ejecución que existen actualmente para un procedimiento almacenado (SP), trigger o función, con la finalidad de que se genere un nuevo plan la próxima vez que se ejecute.
