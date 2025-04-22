@@ -1224,7 +1224,7 @@ Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. P
 
 16. `DISTINCT` para evitar duplicados en servicios asignados por ejemplo.
 ---
-##### Uso de un TRIGGER
+#### Uso de un TRIGGER
 El TRIGGER es un SP que se ejecuta automaticamente en respuesta de un evento en una tabla o vista desde la base de datos. En este caso, se utiliza con fines de auditoria, en caso de generarse una actualizacion de datos en un usuario, el trigger despues de la actualizacion *UPDATE* genera una incersion en la tabla `caipi_logs` en el cual el registro almacena el movimiento. Con el TRIGGER, se puede acceder los datos anteriores y los datos insertados, en el caso de T-SQL un *UPDATE* es manipulado por un DELETED (Viejos datos) y un INSERTED (Nuevos datos)
 ```sql
 
@@ -1346,7 +1346,7 @@ GO
 
 ```
 
-### Uso de Cursor global, accesible desde otras sesiones de la base de datos.
+#### Uso de Cursor global, accesible desde otras sesiones de la base de datos.
 Este cursor puede ser referenciado en la conexion. Es decir, puede utilizarse en cualquier SP u otro procediminertos que se esté ejecuctando en la conexion. Por un lado, para ser declarado debe especificarse mediante la palabra reservada `GLOBAL`, en caso de no ser utilizada por defecto será *local*, por otro lado, puede declarse afuera de un procedimiento o bloque.
 
 
