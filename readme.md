@@ -1427,6 +1427,8 @@ BEGIN
     DEALLOCATE CURSOR_PROC;
 END;
 
+> [!NOTE]
+> Esta funcion es ejecutada en otra sesion o fuera del procedimiento con la finalidad de mostrar un cursor local
 --mostrando que el cursos local utilizado recompileAllProc y llamado CURSOR_PROC en no es visible fuera de la sesión de la base de datos
 --Al intentar hacer referencia al cursor local dara error pues el cursor solo existe dentro de la sesion que se esta ejecutando esto se debe a que es local.
 FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
