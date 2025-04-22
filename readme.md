@@ -1417,12 +1417,12 @@ GO
 ``` sql
 
 EXEC Dec_Cursor_Services
-GO
-EXEC Fetch_Cursor_Services
-CLOSE Services_Cursor;
-GO
-DEALLOCATE Services_Cursor;
-GO
+GO;
+EXEC Fetch_Cursor_Services;
+CLOSE Services_Cursor
+GO;
+DEALLOCATE Services_Cursor
+GO;
 
 ```
 ##### Uso de `sp_recompile` y cursor local
