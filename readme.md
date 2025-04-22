@@ -135,7 +135,7 @@ VALUES
 
 #### InsertarPaymentMethods Procedure
 ```sql
-CREATE PROCEDURE InsertarPaymentMethods
+CREATE OR ALTER PROCEDURE InsertarPaymentMethods
 	--no hay parametros
 AS
 BEGIN
@@ -199,7 +199,12 @@ END
 
 #### AddPaymentMethodsPerSupplier Procedure
 ```sql
-CREATE PROCEDURE AddPaymentMethodsPerSupplier
+/*
+
+	Crea la relacion de los metodos de pago existentes y disponibles para cada proveedor, asigna solo 1 y diferente para el mismo.
+
+*/
+CREATE OR ALTER PROCEDURE AddPaymentMethodsPerSupplier
 	--SIN PARAMETROS
 AS
 BEGIN
