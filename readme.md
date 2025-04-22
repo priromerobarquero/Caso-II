@@ -1395,7 +1395,7 @@ El uso de un *cursor local* en la siguiente procedure es que a la hora almacenar
 Al ser local, el nombre del cursor solo es valido en la sesion de ejecucion y se puede hacer referencia al mismo dentro del SP que lo almacena la asignacion del cursor se cancela cuando la ejecucion finaliza. Un ejecmplo de la visibilidad se encuentra en el bloque de codigo el cual dara error si se intenta acceder fuera del SP en el que fue declarado, ya que solamente es visible dentro.
 
 ```sql
--- USO DE CURSOR LOCAL Y SP_RECOMPILE
+
 CREATE PROCEDURE recompileAllProc
 AS
 BEGIN
@@ -1427,9 +1427,7 @@ BEGIN
     DEALLOCATE CURSOR_PROC;
 END;
 
-
 ```
-
 > [!NOTE]
 > Esta funcion es ejecutada en otra sesion o fuera del procedimiento con la finalidad de mostrar un cursor local
 ```sql
