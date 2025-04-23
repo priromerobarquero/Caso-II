@@ -1551,9 +1551,9 @@ SELECT idagreementTerm, startDate, finalDate, agreementPrice,
 ##### Uso de SUBSTRING y LTRIM
 
 La instruccion `SUBSTRING` se utiliza para extraer una cantidad especifica de carcateres de  una cadena con el fin de manipular cadenas de una mejor manera al ser de longitud más pequeña.
-Por otro lado, la instrucción `LTRIM` elimina cualquier espacio en blaco que este a la izquiera o inicio de una cadena, esto se utiliza para los datos mal formateados.
+Por otro lado, la instrucción `LTRIM` elimina cualquier espacio en blaco que este a la izquierda o inicio de una cadena, esto se utiliza para los datos mal formateados.
 
-En este caso, `SUBSTRING` se utiliza para extraer el numero de telefono de cada usuario dejando de lado el codigo de país al inicio de cada valor. Además se utiliza `LTRIM` para eliminar cualquier espacio en blanco que se presente al incio del nombre y apellido del .
+En este caso, `SUBSTRING` se utiliza para extraer el numero de telefono de cada usuario dejando de lado el codigo de país al inicio de cada valor. Además se utiliza `LTRIM` para eliminar cualquier espacio en blanco que se presente al incio del nombre y apellido del usuario .
 
 ```sql
 SELECT 
