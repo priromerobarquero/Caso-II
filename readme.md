@@ -1503,3 +1503,66 @@ END;
 --Al intentar hacer referencia al cursor local dara error pues el cursor solo existe dentro de la sesion que se esta ejecutando esto se debe a que es local.
 FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
 ```
+
+##### Uso de MERGE
+
+La instruccion `MERGE` funciona para sincronizar datos de una tabla origen a una tabla destino, se pueden hacer insert, update y delete de una forma más eficiente al ser en una sola sentencia.
+En este caso los datos actuales los tiene la tabla destino _Plans_ y por otra parte la tabla origen _PlansActualizados_ tiene los datos actualizados que queremos sincronizar a _Plans_.  Se realizan unicamente las operaciones de Insert y Update dependiendo de la coincidencia según el ID de ambas tablas
+
+
+```sql
+MERGE INTO caipi_plans AS Destino -- tabla que será actualizada
+USING caipi_plansActualizados AS Origen	-- tabla que se utiliza para actualizar 
+ON Destino.idPlan = Origen.idPlanActualizado -- el atributo que se usará para identificar coincidencia
+
+-- Cuando sus id coincidan actuliza los siguientes campos
+WHEN MATCHED THEN
+	UPDATE SET 
+		destino.name = origen.name, 
+		destino.idplanTypes = origen.idplanTypes, 
+		destino.effectiveDate = origen.effectiveDate,
+		destino.totalAmount = origen.totalAmount, 
+		destino.monthlyAmount = origen.monthlyAmount
+
+-- Si hay datos en PlansActualizados pero no en plans, realiza nuevas inserciones
+WHEN NOT MATCHED BY TARGET THEN
+	INSERT (name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount, monthlyAmount)
+	VALUES (Origen.name, Origen.description, Origen.enable, Origen.deleted, Origen.checkSum, Origen.idplanTypes, Origen.effectiveDate, 
+			Origen.totalAmount, Origen.monthlyAmount);
+```
+
+
+##### Uso de COALESCE
+
+La instruccion `COALESCE` devuelve el primer valor no nulo de una columna solicitada y se utiliza para gestionar la información faltante de los campos en cada columna.
+En este caso se utiliza la tabla de _agreement Terms_ ya que muchos de los valores que se manejan esta tabla pueden ser nulos dependiendo del tipo de agreement 
+establecido.  En esta consulta lo que se hace es identifiacr los valores nulos de la fecha de firma y en caso de que no haya valor se establece que el contrato
+no ha sido firmado.
+
+
+```sql
+SELECT idagreementTerm, startDate, finalDate, agreementPrice,
+	COALESCE (signedDate, 'El contrato no ha sido firmado') AS Signed_Date
+	FROM caipi_agreementTerms
+	ORDER BY idagreementTerm
+```
+
+
+##### Uso de SUBSTRING y LTRIM
+
+La instruccion `SUBSTRING` se utiliza para extraer una cantidad especifica de carcateres de  una cadena con el fin de manipular cadenas de una mejor manera al ser de longitud más pequeña.
+Por otro lado, la instrucción `LTRIM` elimina cualquier espacio en blaco que este a la izquiera o inicio de una cadena, esto se utiliza para los datos mal formateados.
+
+En este caso, `SUBSTRING` se utiliza para extraer el numero de telefono de cada usuario dejando de lado el codigo de país al inicio de cada valor. Además se utiliza `LTRIM` para eliminar cualquier espacio en blanco que se presente al incio del nombre y apellido del .
+
+```sql
+SELECT 
+    LTRIM(u.name) AS Nombre, 
+    LTRIM(u.lastname) AS Apellido, -- Nombre y apellido limpios 
+    SUBSTRING(ci.value, 5, 8) AS Contacto -- empieza a leer la cadena en la pos 5 y deja 8 caracteres
+
+FROM caipi_contactInfoPerUsers ci
+INNER JOIN caipi_users u ON u.userid = ci.userid
+WHERE ci.contactInfoTypeId IN (2, 5); -- Numero telefonico y movil
+```
+
