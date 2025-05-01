@@ -1266,6 +1266,57 @@ BEGIN
 END
 ```
 
+#### Adresses para usuarios
+```sql
+create procedure dbo.sp_insertardireccionesparausuarios
+as
+begin
+    set nocount on;
+
+    -- contador para crear 100 direcciones
+    declare @i int = 1;
+    while @i <= 100
+    begin
+        -- linea 1: calle + numero
+        declare @line1 varchar(200) = 'calle ' + cast((abs(checksum(newid())) % 200 + 1) as varchar) + ' #' + cast((abs(checksum(newid())) % 1000 + 1) as varchar);
+        
+        -- linea 2: apto o null
+        declare @line2 varchar(200);
+        if (abs(checksum(newid())) % 2) = 0
+            set @line2 = 'apto ' + cast((abs(checksum(newid())) % 100 + 1) as varchar);
+        else
+            set @line2 = null;
+
+        -- codigo postal formato 5 digitos[-4]
+        declare @zip varchar(9) = right('00000' + cast(abs(checksum(newid())) % 100000 as varchar),5)
+                                 + '-' + right('0000' + cast(abs(checksum(newid())) % 10000 as varchar),4);
+
+        -- generar punto geometrico con lat/lon en costa rica aproximado
+        declare @rand float = rand(checksum(newid()));
+        declare @lat float = 8 + @rand * 3;      -- entre 8 y 11 grados
+        declare @lon float = -85 + @rand * 3;    -- entre -85 y -82 grados
+        declare @location geometry = geometry::Point(@lon, @lat, 4326);
+
+        -- habilitado aleatorio
+        declare @enable bit = cast((abs(checksum(newid())) % 2) as bit);
+
+        -- id de direccion secuencial
+        declare @adressId int = @i+100;
+
+        -- id de ciudad aleatorio entre 1 y 18
+        declare @cityId int = abs(checksum(newid())) % 18 + 1;
+
+        -- insertar registro
+        insert into dbo.caipi_Adresses
+            (line1, line2, zipcode, location, enable, adressId, cityId)
+        values
+            (@line1, @line2, @zip, @location, @enable, @adressId, @cityId);
+
+        -- siguiente contador
+        set @i = @i + 1;
+    end
+end
+```
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
