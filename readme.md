@@ -1188,6 +1188,84 @@ VALUES
 ('KOKi Beach', 1, 7, 7, 7, 0); 
 ```
 
+#### Users
+```sql
+CREATE PROCEDURE dbo.sp_crearusuarios
+AS
+BEGIN
+    -- este bloque desactiva mensajes de conteo de filas
+    SET NOCOUNT ON;
+
+    -- este bloque crea una tabla temporal con nombres comunes
+    DECLARE @FirstNames TABLE (Name NVARCHAR(50));
+    INSERT INTO @FirstNames (Name)
+    VALUES ('Jose'),('Maria'),('Juan'),('Ana'),('Luis'),('Carmen'),('Miguel'),('Laura'),('Carlos'),('Lucia');
+
+    -- este bloque crea una tabla temporal con apellidos comunes
+    DECLARE @LastNames TABLE (Lastname NVARCHAR(50));
+    INSERT INTO @LastNames (Lastname)
+    VALUES ('Garcia'),('Rodriguez'),('Martinez'),('Hernandez'),('Lopez'),('Gonzalez'),('Perez'),('Sanchez'),('Ramirez'),('Torres');
+
+    -- este bloque inicia el contador para insertar 100 usuarios
+    DECLARE @i INT = 1;
+    WHILE @i <= 100
+    BEGIN
+        -- este bloque elige un nombre aleatorio
+        DECLARE @FirstName NVARCHAR(50) = (
+            SELECT TOP 1 Name FROM @FirstNames ORDER BY NEWID()
+        );
+        -- este bloque elige un apellido aleatorio
+        DECLARE @LastName NVARCHAR(50) = (
+            SELECT TOP 1 Lastname FROM @LastNames ORDER BY NEWID()
+        );
+
+        -- este bloque crea el username usando inicial del nombre, apellido y contador
+        DECLARE @Username NVARCHAR(50) = LOWER(
+            LEFT(@FirstName,1) + @LastName + RIGHT('00' + CAST(@i AS VARCHAR),3)
+        );
+
+        -- este bloque genera fecha de nacimiento entre 18 y 65 anos
+        DECLARE @Birth DATE = DATEADD(
+            DAY,
+            - (ABS(CHECKSUM(NEWID())) % (47 * 365) + (18 * 365)),
+            CAST(GETDATE() AS DATE)
+        );
+
+        -- este bloque genera contrasena como hash sha2_256 de pass + contador
+        DECLARE @Password VARBINARY(255) = HASHBYTES('SHA2_256', 'pass' + CAST(@i AS NVARCHAR));
+
+        -- este bloque define flags de estado eliminacion y activo
+        DECLARE @Deleted BIT = 0;
+        DECLARE @Active BIT = 1;
+
+        -- este bloque crea fecha de registro aleatoria en el ultimo ano
+        DECLARE @RegisterDate DATE = DATEADD(
+            DAY,
+            - (ABS(CHECKSUM(NEWID())) % 365),
+            CAST(GETDATE() AS DATE)
+        );
+        -- este bloque asigna la fecha y hora actual como ultima actualizacion
+        DECLARE @LastUpdate DATETIME = GETDATE();
+
+        -- este bloque asigna un rol aleatorio entre 1 y 3
+        DECLARE @Role TINYINT = CAST((ABS(CHECKSUM(NEWID())) % 3 + 1) AS TINYINT);
+
+        -- este bloque crea urls de perfil e imagen usando el username
+        DECLARE @ProfileUrl NVARCHAR(200) = 'https://example.com/users/' + @Username;
+        DECLARE @ImgProfileUrl NVARCHAR(200) = 'https://example.com/images/' + @Username + '.jpg';
+
+        -- este bloque inserta el usuario generado en la tabla principal
+        INSERT INTO dbo.caipi_users
+            (username, [name], lastname, birth, [password], deleted, active, last_update, role, registerdate, profile_url, img_profile_url)
+        VALUES
+            (@Username, @FirstName, @LastName, @Birth, @Password, @Deleted, @Active, @LastUpdate, @Role, @RegisterDate, @ProfileUrl, @ImgProfileUrl);
+
+        -- este bloque incrementa el contador
+        SET @i = @i + 1;
+    END
+END
+```
+
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
