@@ -1560,6 +1560,189 @@ VALUES
   ('2025-04-18','2025-04-18', 0.00199,       1,      1,                   1);
 ```
 
+#### caipi_AgreementType
+```sql
+INSERT INTO caipi_AgreementType (name, description, dataType)
+VALUES
+('Descuento Porcentaje', 'Aplica un porcentaje de descuento sobre el precio original.', 'porcentaje'),
+('Precio Fijo', 'Precio acordado fijo sin descuento adicional.', 'decimal'),
+('Membresía Mensual', 'Acceso a un servicio durante un mes.', 'tiempo'),
+('Acceso Ilimitado', 'Servicio disponible sin restricción durante el periodo contratado.', 'bool'),
+('Promoción Especial', 'Descuento o beneficio temporal sobre el precio de lista.', 'porcentaje');
+```
+
+#### caipi_agreementTerms
+```sql
+-- SMART FIT (idSupplier = 7)
+INSERT INTO caipi_agreementTerms (
+ enable, checkSum, startDate, idMeasureUnit, idService, finalDate, idSupplier,
+ signedDate, deleted, access, disccountPercentage, originalPrice, agreementPrice,
+ salePrice, IVA, idAgreementType, currencyId, quantity, scheduleId, userDisccount
+) VALUES
+(1, HASHBYTES('SHA2_256', 'SmartFit-Gym'), '2025-05-01', 1, 2, '2025-12-31', 7, GETDATE(), 0, 1, 15.00, 850.00, 722.50, 722.50, 1, 1, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'SmartFit-Personal'), '2025-05-01', 1, 15, '2025-12-31', 7, GETDATE(), 0, 1, 10.00, 700.00, 630.00, 630.00, 1, 2, 1, 4, NULL, NULL);
+
+-- AMASER (idSupplier = 8)
+INSERT INTO caipi_agreementTerms VALUES
+(1, HASHBYTES('SHA2_256', 'AmaSer-Yoga'), '2025-05-01', 1, 3, '2025-12-31', 8, GETDATE(), 0, 1, 20.00, 600.00, 480.00, 480.00, 1, 3, 1, 4, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'AmaSer-Nutrición'), '2025-05-01', 1, 13, '2025-12-31', 8, GETDATE(), 0, 1, 25.00, 800.00, 600.00, 600.00, 1, 1, 1, 2, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'AmaSer-Personal'), '2025-05-01', 1, 15, '2025-12-31', 8, GETDATE(), 0, 1, 15.00, 750.00, 637.50, 637.50, 1, 5, 1, 2, NULL, NULL);
+
+-- SPOON (idSupplier = 13)
+INSERT INTO caipi_agreementTerms VALUES
+(1, HASHBYTES('SHA2_256', 'Spoon-Comida'), '2025-05-01', 1, 8, '2025-12-31', 13, GETDATE(), 0, 1, 10.00, 500.00, 450.00, 450.00, 1, 2, 1, 5, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'Spoon-Nutrición'), '2025-05-01', 1, 13, '2025-12-31', 13, GETDATE(), 0, 1, 5.00, 600.00, 570.00, 570.00, 1, 1, 1, 1, NULL, NULL);
+
+-- CENTRAL DE MASCOTAS (idSupplier = 11)
+INSERT INTO caipi_agreementTerms VALUES
+(1, HASHBYTES('SHA2_256', 'Central-Grooming'), '2025-05-01', 1, 4, '2025-12-31', 11, GETDATE(), 0, 1, 20.00, 400.00, 320.00, 320.00, 1, 5, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'Central-Veterinaria'), '2025-05-01', 1, 5, '2025-12-31', 11, GETDATE(), 0, 1, 15.00, 500.00, 425.00, 425.00, 1, 1, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'Central-Mantenimiento'), '2025-05-01', 1, 10, '2025-12-31', 11, GETDATE(), 0, 1, 30.00, 700.00, 490.00, 490.00, 1, 3, 1, 1, NULL, NULL);
+
+-- VIDA MIA (idSupplier = 2)
+INSERT INTO caipi_agreementTerms VALUES
+(1, HASHBYTES('SHA2_256', 'VidaMia-Yoga'), '2025-05-01', 1, 3, '2025-12-31', 2, GETDATE(), 0, 1, 25.00, 500.00, 375.00, 375.00, 1, 1, 1, 2, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'VidaMia-Belleza'), '2025-05-01', 1, 12, '2025-12-31', 2, GETDATE(), 0, 1, 20.00, 700.00, 560.00, 560.00, 1, 2, 1, 1, NULL, NULL);
+
+-- THE PETS CLUB (idSupplier = 5)
+INSERT INTO caipi_agreementTerms VALUES
+(1, HASHBYTES('SHA2_256', 'PetsClub-Grooming'), '2025-05-01', 1, 4, '2025-12-31', 5, GETDATE(), 0, 1, 20.00, 450.00, 360.00, 360.00, 1, 1, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'PetsClub-Mantenimiento'), '2025-05-01', 1, 10, '2025-12-31', 5, GETDATE(), 0, 1, 10.00, 550.00, 495.00, 495.00, 1, 4, 1, 1, NULL, NULL);
+
+-- VOLAIR STUDIO (idSupplier = 6)
+INSERT INTO caipi_agreementTerms VALUES
+(1, HASHBYTES('SHA2_256', 'VolAir-Yoga'), '2025-05-01', 1, 3, '2025-12-31', 6, GETDATE(), 0, 1, 10.00, 600.00, 540.00, 540.00, 1, 3, 1, 2, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'VolAir-Nutrición'), '2025-05-01', 1, 13, '2025-12-31', 6, GETDATE(), 0, 1, 15.00, 700.00, 595.00, 595.00, 1, 5, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'VolAir-Entrenamiento'), '2025-05-01', 1, 15, '2025-12-31', 6, GETDATE(), 0, 1, 12.00, 750.00, 660.00, 660.00, 1, 1, 1, 1, NULL, NULL);
+
+SELECT * FROM caipi_AgreementsPerPlan
+SELECT idPlan, name FROM caipi_plans ORDER BY idPlan;
+SELECT idagreementTerm, idSupplier, idService
+FROM caipi_agreementTerms
+ORDER BY idagreementTerm;
+```
+
+#### caipi_AgreementsPerPlan
+```sql
+INSERT INTO caipi_AgreementsPerPlan (
+    enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount
+)
+VALUES (
+    1,
+    0,
+    16,
+    7,
+    '1 mes',
+    1,
+    722.50,
+    127.50
+);
+
+-- Plan 16: Joven Deportista
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 16, 7, '1 mes', 1, 722.50, 127.50),
+(1, 0, 16, 9, '1 mes', 1, 630.00, 70.00);
+
+-- Plan 17: Familia de Verano
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 17, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 17, 11, '1 mes', 1, 600.00, 200.00),
+(1, 0, 17, 12, '1 mes', 1, 637.50, 112.50);
+
+-- Plan 18: Viajero Frecuente
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 18, 13, '1 mes', 1, 450.00, 50.00),
+(1, 0, 18, 14, '1 mes', 1, 570.00, 30.00);
+
+-- Plan 19: Nómada Digital
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 19, 18, '1 mes', 1, 375.00, 125.00),
+(1, 0, 19, 19, '1 mes', 1, 560.00, 140.00);
+
+-- Plan 20: Profesional en Movimiento
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 20, 20, '1 mes', 1, 425.00, 75.00),
+(1, 0, 20, 21, '1 mes', 1, 495.00, 55.00),
+(1, 0, 20, 15, '1 mes', 1, 360.00, 90.00);
+
+-- Plan 21: Estudiante Proactivo
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 21, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 21, 19, '1 mes', 1, 560.00, 140.00);
+
+-- Plan 22: Creativo Freelance
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 22, 7, '1 mes', 1, 722.50, 127.50),
+(1, 0, 22, 9, '1 mes', 1, 630.00, 70.00),
+(1, 0, 22, 17, '1 mes', 1, 490.00, 210.00);
+
+-- Plan 23: Full Wellness
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 23, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 23, 22, '1 mes', 1, 540.00, 60.00),
+(1, 0, 23, 24, '1 mes', 1, 660.00, 90.00);
+
+-- Plan 24: Tiempo en Familia
+INSERT INTO caipi_AgreementsPerPlan VALUES
+(1, 0, 24, 13, '1 mes', 1, 450.00, 50.00),
+(1, 0, 24, 14, '1 mes', 1, 570.00, 30.00),
+(1, 0, 24, 16, '1 mes', 1, 425.00, 75.00),
+(1, 0, 24, 11, '1 mes', 1, 600.00, 200.00); 
+```
+
+### caipi_subscriptions
+```sql
+-- Plan 16
+INSERT INTO caipi_subscriptions (suscription_typeid, userid, social, enable, startdate, deleted, statusid, scheduleId, auto_renew, created_at, idPlan) VALUES
+(1, 1, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16),
+(1, 2, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16),
+(1, 3, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16);
+
+-- Plan 17
+INSERT INTO caipi_subscriptions VALUES
+(1, 4, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
+(1, 5, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
+(1, 6, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
+(1, 7, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17);
+
+-- Plan 18
+INSERT INTO caipi_subscriptions VALUES
+(1, 8, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
+(1, 9, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
+(1, 10, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
+(1, 11, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
+(1, 12, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18);
+
+-- Plan 19
+INSERT INTO caipi_subscriptions VALUES
+(1, 13, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19),
+(1, 14, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19),
+(1, 15, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19);
+
+-- Plan 20
+INSERT INTO caipi_subscriptions VALUES
+(1, 16, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
+(1, 17, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
+(1, 18, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
+(1, 19, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
+(1, 20, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
+(1, 21, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20);
+
+-- Plan 21
+INSERT INTO caipi_subscriptions VALUES
+(1, 22, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
+(1, 23, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
+(1, 24, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
+(1, 25, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21);
+
+-- Plan 22
+INSERT INTO caipi_subscriptions VALUES
+(1, 26, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
+(1, 27, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
+(1, 28, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
+(1, 29, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
+(1, 30, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22);
+```
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
@@ -2022,4 +2205,108 @@ EXEC sp_rename
   'COLUMN';
 -- Msg 15336, Level 16, State 1, Procedure sp_rename, Line 612 [Batch Start Line 89]
 -- Object 'dbo.caipi_users.username' cannot be renamed because the object participates in enforced dependencies.
+```
+
+##### Uso de ENCRYPTION y EXECUTE AS
+
+WITH ENCRYPTION se utiliza para ocultar el código fuente de un procedimiento almacenado, protegiendo la lógica interna contra lecturas no autorizadas.
+EXECUTE AS USER permite ejecutar instrucciones con los permisos de otro usuario, útil para delegar control sin otorgar acceso directo a objetos sensibles.
+
+En este caso, se crea un procedimiento encriptado que inserta un usuario especial (id = 101), y se ejecuta con EXECUTE AS USER = 'dbo' para simular que lo ejecuta un usuario con privilegios completos. Esto demuestra cómo aplicar seguridad y control en escenarios reales.
+
+```sql
+IF OBJECT_ID('dbo.CrearUsuarioEspecial', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.CrearUsuarioEspecial;
+GO
+
+CREATE PROCEDURE dbo.CrearUsuarioEspecial
+WITH ENCRYPTION
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SET IDENTITY_INSERT dbo.caipi_users ON;
+
+    INSERT INTO dbo.caipi_users
+        (userid, username, [name], lastname, birth, [password], deleted, active, last_update, role, registerdate, profile_url, img_profile_url)
+    VALUES
+        (
+            101,
+            'admin101',
+            'Admin',
+            'Especial',
+            DATEADD(YEAR, -30, GETDATE()),
+            HASHBYTES('SHA2_256', 'admin101pass'),
+            0,
+            1,
+            GETDATE(),
+            1,
+            GETDATE(),
+            'https://example.com/users/admin101',
+            'https://example.com/images/admin101.jpg'
+        );
+
+    SET IDENTITY_INSERT dbo.caipi_users OFF;
+END;
+GO
+
+EXECUTE AS USER = 'dbo'; -- o tu usuario admin
+EXEC dbo.CrearUsuarioEspecial;
+REVERT;
+```
+
+##### Uso de UNION
+La instrucción UNION se utiliza para combinar los resultados de dos consultas con estructuras compatibles, eliminando duplicados por defecto. Es útil cuando se desea presentar datos de distintas fuentes o categorías como un solo conjunto coherente.
+
+En este caso, se usa UNION para unir planes de tipo individual (como "Básico" o "Familiar") y planes de tipo empresarial (como "Corporativo" o "Personalizado"), clasificándolos según el tipo de cliente. Esto permite visualizar ambos tipos de planes en una misma lista diferenciada, simulando una segmentación lógica de oferta en el sistema.
+
+```sql
+-- UNION de planes individuales y empresariales basados en tipo de plan
+
+-- Planes Individuales
+SELECT
+    p.idPlan,
+    p.name AS planName,
+    pt.name AS planType,
+    'Individual' AS tipoCliente
+FROM
+    caipi_plans p
+INNER JOIN
+    caipi_planTypes pt ON p.idplanTypes = pt.idplanTypes
+WHERE
+    pt.name IN ('Básico', 'Familiar', 'Salud y Bienestar')
+
+UNION
+
+-- Planes Empresariales
+SELECT
+    p.idPlan,
+    p.name AS planName,
+    pt.name AS planType,
+    'Empresarial' AS tipoCliente
+FROM
+    caipi_plans p
+INNER JOIN
+    caipi_planTypes pt ON p.idplanTypes = pt.idplanTypes
+WHERE
+    pt.name IN ('Corporativo', 'Personalizado')
+ORDER BY
+    tipoCliente, planName;
+```
+
+##### Uso de DISTINCT
+La cláusula DISTINCT se utiliza para eliminar registros duplicados en una consulta, mostrando únicamente combinaciones únicas de columnas.
+En este caso, se aplica para listar servicios que han sido asignados al menos una vez en acuerdos (agreementTerms), sin repetirlos aunque estén vinculados a múltiples proveedores o combinaciones. Esto permite obtener una vista clara y sin redundancias de los servicios activos en el sistema.
+
+```sql
+-- Mostrar servicios únicos que han sido asignados en caipi_agreementTerms
+SELECT DISTINCT
+    s.serviceId,
+    s.name AS serviceName
+FROM
+    caipi_agreementTerms at
+INNER JOIN
+    caipi_services s ON at.idService = s.serviceId
+ORDER BY
+    s.serviceId;
 ```
