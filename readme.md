@@ -1354,6 +1354,65 @@ BEGIN
 END
 ```
 
+#### contactInfoPerUsers
+```sql
+CREATE PROCEDURE dbo.sp_insertarInfoContactoUsuarios
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- declaramos las variables
+    DECLARE @userid INT = 101;
+    DECLARE @contactTypeId INT;
+    DECLARE @email VARCHAR(100);
+    DECLARE @phone VARCHAR(100);
+    DECLARE @mobile VARCHAR(100);
+    DECLARE @fax VARCHAR(100);
+    DECLARE @web VARCHAR(100);
+    DECLARE @fecha DATETIME;
+
+    -- recorremos los usuarios del 101 al 300
+    WHILE @userid <= 300
+    BEGIN
+        -- generamos una fecha aleatoria
+        SET @fecha = DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 365, '2024-04-01');
+
+        -- generamos un correo electronico
+        SET @email = 'user' + CAST(@userid AS VARCHAR) + '@correo.com';
+        INSERT INTO caipi_contactInfoPerUsers (enable, lastUpdate, value, userid, contactInfoTypeId)
+        VALUES (1, @fecha, @email, @userid, 1); -- 1 es email
+
+        -- generamos un numero telefonico fijo
+        SET @phone = '+506 2222' + RIGHT('000' + CAST(@userid AS VARCHAR), 4);
+        INSERT INTO caipi_contactInfoPerUsers (enable, lastUpdate, value, userid, contactInfoTypeId)
+        VALUES (1, @fecha, @phone, @userid, 2); -- 2 es telefono fijo
+
+        -- generamos un numero movil
+        SET @mobile = '+506 88' + RIGHT('000000' + CAST(@userid AS VARCHAR), 6);
+        INSERT INTO caipi_contactInfoPerUsers (enable, lastUpdate, value, userid, contactInfoTypeId)
+        VALUES (1, @fecha, @mobile, @userid, 5); -- 5 es numero movil
+
+        -- generamos un fax (opcional, no todos tendran)
+        IF @userid % 3 = 0
+        BEGIN
+            SET @fax = '+506 2288' + RIGHT('000' + CAST(@userid AS VARCHAR), 4);
+            INSERT INTO caipi_contactInfoPerUsers (enable, lastUpdate, value, userid, contactInfoTypeId)
+            VALUES (1, @fecha, @fax, @userid, 3); -- 3 es fax
+        END
+
+        -- generamos un sitio web (opcional, algunos tendran)
+        IF @userid % 4 = 0
+        BEGIN
+            SET @web = 'https://usuario' + CAST(@userid AS VARCHAR) + '.com';
+            INSERT INTO caipi_contactInfoPerUsers (enable, lastUpdate, value, userid, contactInfoTypeId)
+            VALUES (1, @fecha, @web, @userid, 4); -- 4 es sitio web
+        END
+
+        SET @userid = @userid + 1;
+    END
+END
+```
+
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
 
