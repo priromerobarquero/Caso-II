@@ -1506,29 +1506,30 @@ FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
 
 ##### Uso de MERGE
 
-La instruccion `MERGE` funciona para sincronizar datos de una tabla origen a una tabla destino, se pueden hacer insert, update y delete de una forma más eficiente al ser en una sola sentencia.
-En este caso los datos actuales los tiene la tabla destino _Plans_ y por otra parte la tabla origen _PlansActualizados_ tiene los datos actualizados que queremos sincronizar a _Plans_.  Se realizan unicamente las operaciones de Insert y Update dependiendo de la coincidencia según el ID de ambas tablas
+La instruccion `MERGE` funciona para sincronizar datos a una tabla "destino" basado en la información de otra tabla "fuente", se pueden hacer insert, update y delete a partir de ciertas condiciones que se establcen segun los coomponentes de cada una de las tablas.
+En este caso se utiliza para automatizar los reminders, ya que se utiliza esta tabla como la tabla destino que será actualizada a partir de la tabla de suscripciones.  Se busca que cada vez que algun registro de la tabla de suscripciones sufra un cambio en su estado y pase a tenerlo como "expirado", se genere automaticamente un mensaje al usuario advirtiendole sobre esto.
 
 
 ```sql
-MERGE INTO caipi_plans AS Destino -- tabla que será actualizada
-USING caipi_plansActualizados AS Origen	-- tabla que se utiliza para actualizar 
-ON Destino.idPlan = Origen.idPlanActualizado -- el atributo que se usará para identificar coincidencia
+MERGE INTO caipi_reminders AS Destino	-- Tabla a actualizar
 
--- Cuando sus id coincidan actuliza los siguientes campos
-WHEN MATCHED THEN
-	UPDATE SET 
-		destino.name = origen.name, 
-		destino.idplanTypes = origen.idplanTypes, 
-		destino.effectiveDate = origen.effectiveDate,
-		destino.totalAmount = origen.totalAmount, 
-		destino.monthlyAmount = origen.monthlyAmount
+-- subconsulta para extraer solo las suscripciones con estado 'expirado' y que no hayan sido eliminadas
+USING ( 
+    SELECT S.statusid, S.subscriptionid, S.userid	
+    FROM caipi_subscriptions S
+    WHERE S.statusid = 4 AND S.deleted = 0 ) AS Origen	-- Tabla utilizada para generar los cambios
 
--- Si hay datos en PlansActualizados pero no en plans, realiza nuevas inserciones
+-- Se establecen las condiciones que se deben verificar antes de generar un nuevo mensaje
+ON Destino.userid = Origen.userid  AND 
+   Destino.ticketid = CAST(Origen.subscriptionid AS VARCHAR(10)) AND
+   Destino.createddate >= DATEADD(DAY, -30, GETDATE())
+
+-- En caso de que las condiciones no se encuentren en 'reminders' se genera un nuevo mensaje
 WHEN NOT MATCHED BY TARGET THEN
-	INSERT (name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount, monthlyAmount)
-	VALUES (Origen.name, Origen.description, Origen.enable, Origen.deleted, Origen.checkSum, Origen.idplanTypes, Origen.effectiveDate, 
-			Origen.totalAmount, Origen.monthlyAmount);
+    INSERT ( message, createddate, lastreminder, ticketid, requestid, expectedresult, successinfo, userid, 
+        notificationmethods_notificationmethodid, remindertypeid)
+    VALUES ('La suscripcion ha exiprado. Por favor renueve su plan', GETDATE(), 1, 
+		CAST(Origen.subscriptionid AS VARCHAR(10)), NULL, NULL, NULL, Origen.userid, 1, 1  );
 ```
 
 
