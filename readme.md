@@ -1499,6 +1499,37 @@ BEGIN
 END;
 ```
 
+
+#### Currencies
+```sql
+INSERT INTO dbo.caipi_currencies (name, acronym, symbol)
+VALUES ('Colón Costa Rica', 'CRC', '¢'),('Dólar Estados Unidos', 'USD', '$');
+```
+
+#### ExchangeRates
+```sql
+-- inserciones USD ? CRC (currencyId = 2)
+INSERT INTO dbo.caipi_ExchangeRates
+  (startDate,    endDate,      exchangeRate, enable, currentExchangeRate, currencyId)
+VALUES
+  ('2025-04-14','2025-04-14', 511.52,        1,      0,                   2),
+  ('2025-04-15','2025-04-15', 512.99828,     1,      0,                   2),
+  ('2025-04-16','2025-04-16', 502.61598,     1,      0,                   2),
+  ('2025-04-17','2025-04-17', 502.26978,     1,      0,                   2),
+  ('2025-04-18','2025-04-18', 502.26978,     1,      1,                   2);
+
+-- inserciones CRC ? USD (currencyId = 1)
+INSERT INTO dbo.caipi_ExchangeRates
+  (startDate,    endDate,      exchangeRate, enable, currentExchangeRate, currencyId)
+VALUES
+  ('2025-04-14','2025-04-14', 0.00195,       1,      0,                   1),
+  ('2025-04-15','2025-04-15', 0.0019493,     1,      0,                   1),
+  ('2025-04-16','2025-04-16', 0.0019896,     1,      0,                   1),
+  ('2025-04-17','2025-04-17', 0.00199,       1,      0,                   1),
+  ('2025-04-18','2025-04-18', 0.00199,       1,      1,                   1);
+```
+
+
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
 
