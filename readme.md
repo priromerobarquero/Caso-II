@@ -1318,6 +1318,42 @@ begin
 end
 ```
 
+#### AdressessPerUser
+```sql
+CREATE PROCEDURE dbo.sp_insertardireccionesparausuariosporusuario
+AS
+BEGIN
+    -- este bloque evita mensajes de conteo de filas
+    SET NOCOUNT ON;
+
+    -- contador para crear 200 registros (direcciones por usuario)
+    DECLARE @i INT = 1;
+    WHILE @i <= 200
+    BEGIN
+        -- id secuencial de la relacion
+        DECLARE @addressPerUserId INT = @i;
+
+        -- flag habilitado aleatorio
+        DECLARE @enable BIT = CAST((ABS(CHECKSUM(NEWID())) % 2) AS BIT);
+
+        -- direccion id de 1 a 200
+        DECLARE @adressId INT = @i;
+
+        -- usuario id de 101 a 300
+        DECLARE @userid INT = 100 + @i;
+
+        -- insertar registro en la tabla de relacion
+        INSERT INTO dbo.caipi_AdressessPerUser
+            (adressPerUserId, enable, adressId, userid)
+        VALUES
+            (@addressPerUserId, @enable, @adressId, @userid);
+
+        -- incrementar contador
+        SET @i = @i + 1;
+    END
+END
+```
+
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
 
