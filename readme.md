@@ -1190,7 +1190,12 @@ VALUES
 
 #### Users
 ```sql
-CREATE PROCEDURE dbo.sp_crearusuarios
+/*
+ procedimiento almacenado: dbo.sp_crearusuarios
+ descripcion: inserta 100 usuarios de ejemplo en dbo.caipi_users
+*/
+GO
+CREATE OR ALTER PROCEDURE dbo.sp_crearusuarios
 AS
 BEGIN
     -- este bloque desactiva mensajes de conteo de filas
@@ -1264,11 +1269,18 @@ BEGIN
         SET @i = @i + 1;
     END
 END
+GO
+
 ```
 
 #### Adresses para usuarios
 ```sql
-create procedure dbo.sp_insertardireccionesparausuarios
+/*
+ procedimiento almacenado: dbo.sp_insertsampleaddresses
+ descripcion: inserta 100 direcciones de ejemplo en dbo.caipi_Adresses
+*/
+go
+CREATE OR ALTER procedure dbo.sp_insertardireccionesparausuarios
 as
 begin
     set nocount on;
@@ -1301,7 +1313,7 @@ begin
         declare @enable bit = cast((abs(checksum(newid())) % 2) as bit);
 
         -- id de direccion secuencial
-        declare @adressId int = @i+100;
+        declare @adressId int = @i;
 
         -- id de ciudad aleatorio entre 1 y 18
         declare @cityId int = abs(checksum(newid())) % 18 + 1;
@@ -1316,11 +1328,18 @@ begin
         set @i = @i + 1;
     end
 end
+go
+
 ```
 
 #### AdressessPerUser
 ```sql
-CREATE PROCEDURE dbo.sp_insertardireccionesparausuariosporusuario
+/*
+ procedimiento almacenado: dbo.sp_insertsampleaddressesperuser
+ descripcion: asigna direcciones a usuarios en dbo.caipi_AdressessPerUser
+*/
+GO
+CREATE OR ALTER PROCEDURE dbo.sp_insertardireccionesparausuariosporusuario
 AS
 BEGIN
     -- este bloque evita mensajes de conteo de filas
@@ -1328,7 +1347,7 @@ BEGIN
 
     -- contador para crear 200 registros (direcciones por usuario)
     DECLARE @i INT = 1;
-    WHILE @i <= 200
+    WHILE @i <= 100
     BEGIN
         -- id secuencial de la relacion
         DECLARE @addressPerUserId INT = @i;
@@ -1339,8 +1358,8 @@ BEGIN
         -- direccion id de 1 a 200
         DECLARE @adressId INT = @i;
 
-        -- usuario id de 101 a 300
-        DECLARE @userid INT = 100 + @i;
+        -- usuario id de 1 A 100
+        DECLARE @userid INT = @i;
 
         -- insertar registro en la tabla de relacion
         INSERT INTO dbo.caipi_AdressessPerUser
@@ -1352,17 +1371,19 @@ BEGIN
         SET @i = @i + 1;
     END
 END
+GO
 ```
 
 #### contactInfoPerUsers
 ```sql
-CREATE PROCEDURE dbo.sp_insertarInfoContactoUsuarios
+GO
+CREATE OR ALTER PROCEDURE dbo.sp_insertarInfoContactoUsuarios
 AS
 BEGIN
     SET NOCOUNT ON;
 
     -- declaramos las variables
-    DECLARE @userid INT = 101;
+    DECLARE @userid INT = 1;
     DECLARE @contactTypeId INT;
     DECLARE @email VARCHAR(100);
     DECLARE @phone VARCHAR(100);
@@ -1372,7 +1393,7 @@ BEGIN
     DECLARE @fecha DATETIME;
 
     -- recorremos los usuarios del 101 al 300
-    WHILE @userid <= 300
+    WHILE @userid <= 100
     BEGIN
         -- generamos una fecha aleatoria
         SET @fecha = DATEADD(DAY, ABS(CHECKSUM(NEWID())) % 365, '2024-04-01');
@@ -1411,17 +1432,26 @@ BEGIN
         SET @userid = @userid + 1;
     END
 END
+GO
+
 ```
 
 #### Subscriptions y Members
 ```sql
-CREATE PROCEDURE dbo.sp_llenarSubscriptionyMembers
+/*
+ procedimiento almacenado: dbo.sp_FillSubscriptionsAndMembers
+ descripcion: asigna suscripciones a un tercio de usuarios (101-300) y miembros a cada suscripcion
+ hay mas usuarios como miembros que como dueños
+ cada suscripcion tendra de 3 a 6 miembros
+*/
+GO
+CREATE OR ALTER PROCEDURE dbo.sp_llenarSubscriptionyMembers
 AS
 BEGIN
     SET NOCOUNT ON;
 
     -- definimos rango de usuarios
-    DECLARE @minUser INT = 101, @maxUser INT = 300;
+    DECLARE @minUser INT = 1, @maxUser INT = 100;
     DECLARE @totalUsers INT = @maxUser - @minUser + 1;
     -- elegimos un tercio de usuarios como dueños
     DECLARE @ownersCount INT = @totalUsers / 3;
@@ -1446,7 +1476,7 @@ BEGIN
     WHILE @@FETCH_STATUS = 0
     BEGIN
         -- datos aleatorios para la suscripcion
-        DECLARE @subscription_typeid INT = CAST(RAND(CHECKSUM(NEWID())) * 15 + 1 AS INT);
+        DECLARE @subscription_typeid INT = CAST(RAND(CHECKSUM(NEWID())) * 8 + 1 AS INT);
         DECLARE @social BIT         = CAST(RAND(CHECKSUM(NEWID())) * 2 AS BIT);
         DECLARE @enable BIT         = 1;
         DECLARE @startdate DATE     = DATEADD(DAY, -CAST(RAND(CHECKSUM(NEWID())) * 365 AS INT), CAST(GETDATE() AS DATE));
@@ -1497,6 +1527,7 @@ BEGIN
     CLOSE owner_cursor;
     DEALLOCATE owner_cursor;
 END;
+GO
 ```
 
 
