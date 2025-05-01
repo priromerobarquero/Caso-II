@@ -1413,6 +1413,92 @@ BEGIN
 END
 ```
 
+#### Subscriptions y Members
+```sql
+CREATE PROCEDURE dbo.sp_llenarSubscriptionyMembers
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- definimos rango de usuarios
+    DECLARE @minUser INT = 101, @maxUser INT = 300;
+    DECLARE @totalUsers INT = @maxUser - @minUser + 1;
+    -- elegimos un tercio de usuarios como dueños
+    DECLARE @ownersCount INT = @totalUsers / 3;
+
+    -- tabla temporal de dueños de suscripcion
+    DECLARE @owners TABLE (userid INT PRIMARY KEY);
+    DECLARE @idx INT = 0;
+    WHILE @idx < @ownersCount
+    BEGIN
+        SET @idx = @idx + 1;
+        INSERT INTO @owners (userid)
+        VALUES (@minUser + @idx - 1);
+    END;
+
+    -- cursor para recorrer cada dueño
+    DECLARE owner_cursor CURSOR FOR
+        SELECT userid FROM @owners;
+    OPEN owner_cursor;
+
+    DECLARE @ownerId INT;
+    FETCH NEXT FROM owner_cursor INTO @ownerId;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        -- datos aleatorios para la suscripcion
+        DECLARE @subscription_typeid INT = CAST(RAND(CHECKSUM(NEWID())) * 15 + 1 AS INT);
+        DECLARE @social BIT         = CAST(RAND(CHECKSUM(NEWID())) * 2 AS BIT);
+        DECLARE @enable BIT         = 1;
+        DECLARE @startdate DATE     = DATEADD(DAY, -CAST(RAND(CHECKSUM(NEWID())) * 365 AS INT), CAST(GETDATE() AS DATE));
+        DECLARE @deleted BIT        = 0;
+        DECLARE @statusid INT       = CAST(RAND(CHECKSUM(NEWID())) * 5 + 1 AS INT);
+        DECLARE @scheduleId INT     = CAST(RAND(CHECKSUM(NEWID())) * 39 + 1 AS INT);
+        DECLARE @auto_renew BIT     = CAST(RAND(CHECKSUM(NEWID())) * 2 AS BIT);
+        DECLARE @created_at DATETIME = DATEADD(MINUTE, -CAST(RAND(CHECKSUM(NEWID())) * 10000 AS INT), GETDATE());
+        DECLARE @idPlan INT         = CAST(RAND(CHECKSUM(NEWID())) * 15 + 1 AS INT);
+
+        -- insertamos la suscripcion y obtenemos su id
+        INSERT INTO dbo.caipi_subscriptions
+            (suscription_typeid, userid, social, enable, startdate, deleted, statusid, scheduleId, auto_renew, created_at, idPlan)
+        VALUES
+            (@subscription_typeid, @ownerId, @social, @enable, @startdate, @deleted, @statusid, @scheduleId, @auto_renew, @created_at, @idPlan);
+        DECLARE @subscriptionId INT = SCOPE_IDENTITY();
+
+        -- determinamos cuántos miembros (3 a 6)
+        DECLARE @membersCount INT = CAST(RAND(CHECKSUM(NEWID())) * 4 + 3 AS INT);
+
+        -- insertamos al dueño como miembro
+        INSERT INTO dbo.caipi_members
+            (subscriptionid, userid, startdate, leftdate, enabled, deleted)
+        VALUES
+            (@subscriptionId, @ownerId, @created_at, NULL, 1, 0);
+
+        -- insertamos miembros adicionales, pueden repetirse en otras suscripciones
+        DECLARE @m INT = 1;
+        WHILE @m < @membersCount
+        BEGIN
+            DECLARE @randUser INT = CAST(RAND(CHECKSUM(NEWID())) * @totalUsers + @minUser AS INT);
+            IF NOT EXISTS(
+                SELECT 1 FROM dbo.caipi_members
+                WHERE subscriptionid = @subscriptionId AND userid = @randUser
+            )
+            BEGIN
+                INSERT INTO dbo.caipi_members
+                    (subscriptionid, userid, startdate, leftdate, enabled, deleted)
+                VALUES
+                    (@subscriptionId, @randUser, @created_at, NULL, 1, 0);
+                SET @m = @m + 1;
+            END;
+        END;
+
+        FETCH NEXT FROM owner_cursor INTO @ownerId;
+    END;
+
+    CLOSE owner_cursor;
+    DEALLOCATE owner_cursor;
+END;
+```
+
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
 
