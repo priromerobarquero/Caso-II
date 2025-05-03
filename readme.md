@@ -29,9 +29,9 @@
 # Índice
 🧩 1. [Ir al Diseño de la Base de Datos](#-diseño-de-la-base-de-datos---20-pts)
 
-🧩 2. [Ir a la Poblacion de Datos](#poblacion-de-datos)
+🧩 2. [Ir a la Población de Datos](#📊-población-de-datos)
 
-🧩 3. [Ir a Demostraciones T-SQL](#demostraciones-t-sql-uso-de-instrucciones-especificas)
+🧩 3. [Ir a Demostraciones T-SQL](#🔎-demostraciones-t-sql-uso-de-instrucciones-específicas)
 
 🧩 4. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
 
