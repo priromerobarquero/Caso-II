@@ -1232,6 +1232,10 @@ VALUES
 ```
 
 #### Users
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 /*
  procedimiento almacenado: dbo.sp_crearusuarios
@@ -1316,7 +1320,13 @@ GO
 
 ```
 
+ </details>
+
 #### Adresses para usuarios
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 /*
  procedimiento almacenado: dbo.sp_insertsampleaddresses
@@ -1375,7 +1385,13 @@ go
 
 ```
 
+ </details>
+
 #### AdressessPerUser
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 /*
  procedimiento almacenado: dbo.sp_insertsampleaddressesperuser
@@ -1417,7 +1433,13 @@ END
 GO
 ```
 
+ </details>
+
 #### contactInfoPerUsers
+
+  <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 GO
 CREATE OR ALTER PROCEDURE dbo.sp_insertarInfoContactoUsuarios
@@ -1479,7 +1501,13 @@ GO
 
 ```
 
+ </details>
+
 #### Subscriptions y Members
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 /*
  procedimiento almacenado: dbo.sp_FillSubscriptionsAndMembers
@@ -1573,14 +1601,25 @@ END;
 GO
 ```
 
+ </details>
 
 #### Currencies
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO dbo.caipi_currencies (name, acronym, symbol)
 VALUES ('Colón Costa Rica', 'CRC', '¢'),('Dólar Estados Unidos', 'USD', '$');
 ```
 
+ </details>
+
 #### ExchangeRates
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 -- inserciones USD ? CRC (currencyId = 2)
 INSERT INTO dbo.caipi_ExchangeRates
@@ -1602,6 +1641,8 @@ VALUES
   ('2025-04-17','2025-04-17', 0.00199,       1,      0,                   1),
   ('2025-04-18','2025-04-18', 0.00199,       1,      1,                   1);
 ```
+
+ </details>
 
 #### caipi_AgreementType
 ```sql
