@@ -2243,90 +2243,59 @@ FROM caipi_contactInfoPerUsers ci
 INNER JOIN caipi_users u ON u.userid = ci.userid
 WHERE ci.contactInfoTypeId IN (2, 5); -- Numero telefonico y movil
 ```
-##### Uso de AVG
+##### Uso de AVG, TOP, &&/AND, SCHEMABINDING
 
 La instruccion `AVG` en SQL sirve para calcular el promedio aritmético de un conjunto de valores numérico.
-
-La siguiente query muestra promedio de montos pagados por usuario.
-
-```sql
-SELECT 
-	u.userid AS id,
-	u.name +' '+ u.lastname AS 'name',
-	AVG(p.totalAmount) AS promedio
-FROM caipi_users AS u
-JOIN caipi_members AS m ON u.userid = m.userid
-JOIN caipi_subscriptions AS s on m.subscriptionid = s.subscriptionid
-JOIN caipi_plans AS p ON s.idPlan = p.idPlan
-GROUP BY u.userid, u.name +' '+ u.lastname
-ORDER BY promedio DESC;
-```
-
-##### Uso de TOP
-
 La instruccion `TOP` se usa para limitar la cantidad de filas que retorna una consulta. Es como decir “quiero solo los primeros N resultados”.
-
-La siguiente query muestra el `top` 5 de planes mas populares.
-
-```sql
-SELECT
-	 TOP (5) p.name AS nombre,
-	COUNT(p.idPlan) AS ranking
-FROM caipi_plans AS p
-JOIN caipi_subscriptions AS s ON p.idPlan = s.idPlan
-JOIN caipi_members AS m ON s.subscriptionid = m.subscriptionid
-GROUP BY p.name
-ORDER BY ranking DESC;
-```
-
-##### Uso de AND / &&
-
-La instruccion AND es un operador lógico que se usa para combinar dos o más condiciones en una cláusula.
-
-La siguiente query muestra los usuario con suscripcion activas entre los meses 1 `and` 2 `and` si el tipo contiene Trimestral.
-
-```sql
-SELECT
-	u.name +' '+ u.lastname AS nombre,
-	s.startdate,
-	t.name AS 'plan'
-FROM caipi_users AS u
-JOIN caipi_subscriptions AS s ON u.userid = s.userid
-JOIN caipi_subscription_types AS t ON s.suscription_typeid = t.suscription_typeid
-WHERE 
-	MONTH(s.startdate) BETWEEN 1 AND 2
-	AND t.name LIKE '%Trimestral%';
-```
-
-##### Uso de SCHEMABINDING
-
+La instruccion `AND` es un operador lógico que se usa para combinar dos o más condiciones en una cláusula.
 La instruccion `SCHEMABINDING` se usa para “atar” un objeto al esquema de las tablas, de modo que no podrás renombrar, 
 eliminar ni cambiar tipo de columna en las tablas referenciadas mientras el `SCHEMABINDING` exista.
 
-La siguiente vista muestra agrupaciones de usuarios y cuenta cuántas membresías tienen
+La siguiente view con schemabinding muestra el top 20 de promedios de 
+montos pagados por usuarios activos con plan, subs y membership activas
+y de plan tipo familiar
 
 ```sql
-CREATE VIEW dbo.vw_UserMemberships
-WITH SCHEMABINDING
-AS
-    SELECT 
-        u.userid,
-        u.username,
-        COUNT_BIG(*)    AS MemberCount   -- con COUNT_BIG requerido para schemabinding
-    FROM dbo.caipi_users    AS u         -- nombres de objeto siempre con esquema
-    JOIN dbo.caipi_members  AS m 
-      ON u.userid = m.userid
-    GROUP BY 
-        u.userid,
-        u.username;
+IF OBJECT_ID('dbo.caipi_VW_UserAvgPayFamilyPlan','V') IS NOT NULL
+    DROP VIEW dbo.caipi_VW_UserAvgPayFamilyPlan;
 GO
 
+CREATE VIEW dbo.caipi_VW_UserAvgPayFamilyPlan
+WITH SCHEMABINDING
+AS
+  SELECT 
+	  u.userid AS id,
+	  u.name + ' ' + u.lastname AS nombre,
+	  AVG(p.totalAmount) AS promedio
+  FROM dbo.caipi_users AS u
+  JOIN dbo.caipi_members AS m ON u.userid = m.userid
+  JOIN dbo.caipi_subscriptions AS s ON m.subscriptionid = s.subscriptionid
+  JOIN dbo.caipi_plans AS p ON s.idPlan = p.idPlan
+  JOIN dbo.caipi_planTypes AS pt ON p.idplanTypes = pt.idplanTypes
+  WHERE 
+	pt.name = 'Familiar'
+    AND u.active = 1
+    AND m.enabled = 1
+    AND s.enable = 1
+    AND p.enable = 1
+  GROUP BY u.userid, u.name, u.lastname;
+GO
+
+
+SELECT TOP(20) id, nombre, promedio
+FROM dbo.caipi_VW_UserAvgPayFamilyPlan
+ORDER BY promedio DESC;
+
+SELECT * FROM caipi_users;
+
+
 EXEC sp_rename 
-  'dbo.caipi_users.username', 
-  'user_name', 
+  'dbo.caipi_users.name', 
+  'name_', 
   'COLUMN';
--- Msg 15336, Level 16, State 1, Procedure sp_rename, Line 612 [Batch Start Line 89]
--- Object 'dbo.caipi_users.username' cannot be renamed because the object participates in enforced dependencies.
+
+-- Msg 15336, Level 16, State 1, Procedure sp_rename, Line 612 [Batch Start Line 77]
+-- Object 'dbo.caipi_users.name' cannot be renamed because the object participates in enforced dependencies.
 ```
 
 ##### Uso de ENCRYPTION y EXECUTE AS
