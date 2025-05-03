@@ -41,7 +41,11 @@
 ---
 ## 🧱 Diseño de la Base de Datos - 20 pts
 - **MongoDB:**
-###### Paquetes informativos
+##### Paquetes informativos
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```json
 {
     "paquete": [
@@ -210,6 +214,12 @@
     ]
   }
 ```
+</details>
+
+##### Proveedores
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```json
 {
@@ -331,8 +341,13 @@
     ]
   }
 ```
+</details>
 
 ##### Promociones
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```json
 {
     "promociones": [
@@ -392,8 +407,15 @@
     ]
   }
 ```
+</details>
+
 
 ##### Mercadeo y Media
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
+
 ```json
 {
     "marketing_media": [
@@ -456,7 +478,14 @@
   }
 ```
 
+</details>
+
+
 ##### Servicio al cliente - Seguimento de casos - Reviews - Resolución de quejas
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```json
 {
   "casos": [
@@ -527,6 +556,7 @@
   ]
 }
 ```
+</details>
 
 - **SQL Server:**  
   > 
