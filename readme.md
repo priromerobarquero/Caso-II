@@ -2272,12 +2272,12 @@ AS
   JOIN dbo.caipi_subscriptions AS s ON m.subscriptionid = s.subscriptionid
   JOIN dbo.caipi_plans AS p ON s.idPlan = p.idPlan
   JOIN dbo.caipi_planTypes AS pt ON p.idplanTypes = pt.idplanTypes
-  WHERE 
+  WHERE
 	pt.name = 'Familiar'
-    AND u.active = 1
-    AND m.enabled = 1
-    AND s.enable = 1
-    AND p.enable = 1
+    	AND u.active = 1
+    	AND m.enabled = 1
+    	AND s.enable = 1
+    	AND p.enable = 1
   GROUP BY u.userid, u.name, u.lastname;
 GO
 
@@ -2285,8 +2285,6 @@ GO
 SELECT TOP(20) id, nombre, promedio
 FROM dbo.caipi_VW_UserAvgPayFamilyPlan
 ORDER BY promedio DESC;
-
-SELECT * FROM caipi_users;
 
 
 EXEC sp_rename 
