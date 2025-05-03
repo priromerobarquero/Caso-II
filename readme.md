@@ -26,6 +26,18 @@
 |  Carlos Abarca Mora       | `2024138701` |
 
 ---
+# Índice
+🧩 1. [Ir al Diseño de la Base de Datos](#-diseño-de-la-base-de-datos---20-pts)
+
+🧩 2. [Ir a la Población de Datos](#población-de-datos)
+
+🧩 3. [Ir a Demostraciones T-SQL](#demostraciones-t-sql-uso-de-instrucciones-especificas)
+
+🧩 4. [Ir a la Migración de los usuarios de Payment Assistant](#migración-de-los-usuarios-de-payment-assistant)
+
+
+
+---
 ## 🧱 Diseño de la Base de Datos - 20 pts
 - **MongoDB:**
 ###### Paquetes informativos
@@ -2310,3 +2322,26 @@ INNER JOIN
 ORDER BY
     s.serviceId;
 ```
+
+# Migracion de los usuarios de Payment Assistant
+Previo a la semana santa, la empresa Soltura estuvo en conversaciones con los dueños e inversionistas de varias empresas ya establecidas en el país, entre ellas "payment assistant" y "app assistant" (como grupo de trabajo escogen solo una del entregable del caso #1), esas empresas ya han logrado cierta tracción y público en Costa Rica y han decidido que dichas aplicaciones podrían ser dadas como parte de los planes de subscripción de Soltura.
+
+En lugar de negociar con los dueños para verlos como proveedores, quieren usarlas para aumentar su cartera de usuarios, haciendo que por el mismo precio que ya pagan por el servicio, obtengan un plan que obtengan mínimo lo mismo y dos servicios más adicionales. Esto para el periodo de adquisición y dejar que los mismos usuarios posteriormente se muevan a otros planes.
+
+Esto ha hecho que ustedes como equipo de tecnología les toque realizar una migración de los datos importantes de la base de datos del sistema adquirido, a la base de datos del sistema de soltura. No se pretende copiar las tablas, si no más bien migrar los usuarios y sus subscripciones del sistema adquirido, de tal forma que esos usuarios y sus planes ahora sean parte de los usuarios y planes de soltura. Para esta migración se sabe lo siguiente con respecto al sistema adquirido (payment assistant, app assistant):
+
+- Existen poco más de 1000 usuarios activos
+
+- El 70% de los usuarios tienen un plan activo que se paga mensualmente y el resto un plan pagado anual.
+
+- Hay 2 planes activos en el sistema.
+
+- Las fechas de pago de los planes y los montos se deben conversar al momento de hacer la migración de datos.
+
+- Los usuarios consumidores deben conversar sus permisos en el app.
+
+- Se debe crear algún tipo de mecanismo o tabla que haga correspondencia entre los usuarios del sistema adquirido y los usuarios en Soltura, de tal forma que para las rutinas en Soltura sea transparente el tipo de usuario .
+
+- Todos los usuarios migrados van a tener un nuevo usuario en Soltura con su email respectivo y sus datos respectivos de perfil de usuario, pero al hacer login deben estar forzados a ingresar un nuevo password pues no puede ser migrado el password del sistema anterior.
+
+- Soltura va crear una imagen en el home page y un banner publicitario indicando que dicho sistema (payment assistant o app assistant) ahora es Soltura, la fecha a partir de cuando se hace la migración y un link hacia la guía de pasos que deben seguir los usuarios ese día (este link no existe solo se pone). No hay que hacer los banner ni nada, solo el ingreso de los datos en los collections respectivos.
