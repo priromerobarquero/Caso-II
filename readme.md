@@ -1644,6 +1644,44 @@ VALUES
 
  </details>
 
+ #### AvailiablePaymentMethodsPerUser
+
+<details>
+   <summary>Haz clic para expandir</summary>
+
+```sql
+CREATE OR ALTER PROCEDURE dbo.caipi_SP_AddPaymentMethodsPerUser
+	--SIN PARAMETROS
+AS
+BEGIN
+	--Declare local variables
+	DECLARE @UserQuantity INT = 100 --cantidad de usuarios
+	DECLARE @MethodsQuantity INT = 5 --cantidad de metodos disponibles
+	DECLARE @MethodId INT --Id del metodo seleccionado de forma aleatoria
+	DECLARE @UserCount INT = 1 --Contador de ciclo que recorre los registros de usuarios el cual funciona tambien como ID del users
+
+
+	WHILE @UserCount <= @UserQuantity
+    BEGIN
+		--Escoge un metodo de pago disponible entre los id registrados con el checkscum obtengo distintos valores en cada interacion de RAND
+		SET @MethodId = FLOOR(1 + RAND(CHECKSUM(NEWID())) * @MethodsQuantity);
+
+		INSERT INTO dbo.caipi_AvailiablePaymentMethodsPerUser
+			   ([enable]
+			   ,[paymentMethodId]
+			   ,[idUser])
+		 VALUES
+			   (1
+			   ,@MethodId
+			   ,@UserCount)
+
+		SET @UserCount +=1;
+	END
+END;
+```
+
+</details>
+
 #### caipi_AgreementType
 ```sql
 INSERT INTO caipi_AgreementType (name, description, dataType)
