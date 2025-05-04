@@ -1923,6 +1923,9 @@ Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. P
 16. `DISTINCT` para evitar duplicados en servicios asignados por ejemplo.
 ---
 #### Uso de un TRIGGER
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 El TRIGGER es un SP que se ejecuta automaticamente en respuesta de un evento en una tabla o vista desde la base de datos. En este caso, se utiliza con fines de auditoria, en caso de generarse una actualizacion de datos en un usuario, el trigger despues de la actualizacion *UPDATE* genera una incersion en la tabla `caipi_logs` en el cual el registro almacena el movimiento. Con el TRIGGER, se puede acceder los datos anteriores y los datos insertados, en el caso de T-SQL un *UPDATE* es manipulado por un DELETED (Viejos datos) y un INSERTED (Nuevos datos)
 ```sql
 
@@ -2006,6 +2009,7 @@ END;
 GO
 
 ```
+
 #### SP que es llamado por el trigger para insertar y log con la finalidad de guardar la integridad del check sum
 
 ```sql
@@ -2043,8 +2047,12 @@ END;
 GO
 
 ```
+</details>
 
 #### Uso de Cursor global, accesible desde otras sesiones de la base de datos.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 Este cursor puede ser referenciado en la conexion. Es decir, puede utilizarse en cualquier SP u otro procediminertos que se esté ejecuctando en la conexion. Por un lado, para ser declarado debe especificarse mediante la palabra reservada `GLOBAL`, en caso de no ser utilizada por defecto será *local*, por otro lado, puede declarse afuera de un procedimiento o bloque.
 
 
@@ -2123,8 +2131,12 @@ DEALLOCATE Services_Cursor
 GO;
 
 ```
+</details>
+
 ##### Uso de `sp_recompile` y cursor local
 
+ <details>
+   <summary>Haz clic para expandir</summary>
 La instrucción `sp_recompile` permite eliminar (hacer drop) los planes de ejecución que existen actualmente para un procedimiento almacenado (SP), trigger o función, con la finalidad de que se genere un nuevo plan la próxima vez que se ejecute.
 
 Esto es útil porque esos planes de ejecución se crean considerando la cantidad de datos que hay en ese momento. Si la cantidad de datos crece con el tiempo, ese plan ya no es tan eficiente. Al recompilar, se genera un plan optimizado para la cantidad de datos actual y así se mejora el rendimiento.
@@ -2201,9 +2213,12 @@ END;
 --Al intentar hacer referencia al cursor local dara error pues el cursor solo existe dentro de la sesion que se esta ejecutando esto se debe a que es local.
 FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
 ```
+</details>
 
 ##### Uso de MERGE
-
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 La instruccion `MERGE` funciona para sincronizar datos a una tabla "destino" basado en la información de otra tabla "fuente", se pueden hacer insert, update y delete a partir de ciertas condiciones que se establcen segun los coomponentes de cada una de las tablas.
 En este caso se utiliza para automatizar los reminders, ya que se utiliza esta tabla como la tabla destino que será actualizada a partir de la tabla de suscripciones.  Se busca que cada vez que algun registro de la tabla de suscripciones sufra un cambio en su estado y pase a tenerlo como "expirado", se genere automaticamente un mensaje al usuario advirtiendole sobre esto.
 
@@ -2230,6 +2245,7 @@ WHEN NOT MATCHED BY TARGET THEN
 		CAST(Origen.subscriptionid AS VARCHAR(10)), NULL, NULL, NULL, Origen.userid, 1, 1  );
 ```
 
+</details>
 
 ##### Uso de COALESCE
 
@@ -2446,10 +2462,12 @@ Esto ha hecho que ustedes como equipo de tecnología les toque realizar una migr
 
 #### Migrado de la base de Datos
 
+ <details>
+   <summary>Haz clic para expandir</summary>
 Para poder realizar la migración de datos se ha decidido implementar la base de datos utilizada para la aplicacion de Payment Assistant
 
 ```py
-# Librerias
+#Librerias
 import pymysql
 import pandas as pd
 from sqlalchemy import create_engine
@@ -2461,10 +2479,10 @@ from urllib.parse import quote_plus
 import random
 from datetime import datetime
 
-# Conexion a la bd MYSQL (Payment Assistant)
+#Conexion a la bd MYSQL (Payment Assistant)
 conex_mysql = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/paymentdb")
 
-# Conexion a la bd SQL Server (caipiIA)
+#Conexion a la bd SQL Server (caipiIA)
 #conex_sql = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};''SERVER=localhost;''DATABASE=Clinica;''Trusted_Connection=yes;')
 
 # Set up SQLAlchemy engine for SQL Server connection    
@@ -2509,7 +2527,7 @@ except Exception as e:
 
 
 
-# Actualiza el campo 'migrado' a 1 para cada usuario en la tabla
+#Actualiza el campo 'migrado' a 1 para cada usuario en la tabla
 with conex_mysql.begin() as connection:
     for index, row in df.iterrows():
         user_id = row['userId']
@@ -2521,7 +2539,7 @@ with conex_mysql.begin() as connection:
 
 #------------------------INFORMACION DE CONTACTO DE USUARIOS-----------------
 
-# Recorre cada fila de 'df' (usuarios)
+#Recorre cada fila de 'df' (usuarios)
 for index, row in df.iterrows():
     user_id = row['userId']
     username = row['username']
@@ -2532,7 +2550,7 @@ for index, row in df.iterrows():
         WHERE enabled = 1 AND FK_userId = %s
     """
     
-    # Pasa por parametro el id del usuario que se esta buscando
+    #Pasa por parametro el id del usuario que se esta buscando
     contactosUsuario = pd.read_sql(query, conex_mysql, params=(user_id,))
 
     query = """
@@ -2574,36 +2592,36 @@ for index, row in df.iterrows():
 
 #--------------------------------------MIGRADO DE PLANES POR USUARIO---------------------------
 
-# Leer usuarios desde MySQL habilitados
+#Leer usuarios desde MySQL habilitados
 df_users_mysql = pd.read_sql("SELECT userId, firstName, lastName, username FROM payment_users WHERE enabled = 1", conex_mysql)
 
-# Leer id usuarios para poder insertar el id real de sql server
+#Leer id usuarios para poder insertar el id real de sql server
 df_users_sql = pd.read_sql("SELECT userid AS userId_sql, username FROM caipi_users", engine_sql)
 
-# Leer los planes de MySQL
+#Leer los planes de MySQL
 df_plans = pd.read_sql("""SELECT planPerUserId, adquisitionDate, enabled, FK_planPriceId, FK_userId, FK_scheduleId 
     FROM payment_plansPerUser""", conex_mysql)
 
-# Leer los datos de suscripciones para verificar y evitar repeticions
+#Leer los datos de suscripciones para verificar y evitar repeticions
 df_subs = pd.read_sql("""SELECT userid, idPlan, scheduleId FROM caipi_subscriptions""", engine_sql)
 
 
 
-# los users se normalizan a lower case para evitar diferencia 
+#los users se normalizan a lower case para evitar diferencia 
 df_users_mysql['username'] = df_users_mysql['username'].str.lower()
 df_users_sql['username'] = df_users_sql['username'].str.lower()
 
-# Se crea un mapeo entre usuarios de mysql y sqlServer para poder saber su id real basado en el username
+#Se crea un mapeo entre usuarios de mysql y sqlServer para poder saber su id real basado en el username
 df_user_map = pd.merge(df_users_mysql, df_users_sql, on='username', how='inner')
 
-# Se utiliza el nuevo userId que ahora corresponde a SQL server para asociarlo a la suscription 
+#Se utiliza el nuevo userId que ahora corresponde a SQL server para asociarlo a la suscription 
 df_plans = pd.merge(df_plans, df_user_map[['userId', 'userId_sql']], left_on='FK_userId', right_on='userId', how='inner')
 
-# Eviatr planes repetidos en suscriptions
+#Eviatr planes repetidos en suscriptions
 df_plans = pd.merge(df_plans,df_subs,left_on=['userId_sql', 'FK_planPriceId', 'FK_scheduleId'],
     right_on=['userid', 'idPlan', 'scheduleId'],how='left',indicator=True)
 
-# Seleccionamos solo los planes que no han sido insertados en suscriptions 
+#Seleccionamos solo los planes que no han sido insertados en suscriptions 
 df_plans = df_plans[df_plans['_merge'] == 'left_only']
 
 #Se adapta el dataFrame de suscriptions segun los datos de mysql
@@ -2620,13 +2638,17 @@ df_subs['auto_renew'] = 1
 df_subs['created_at'] = datetime.now()
 df_subs['idPlan'] = df_plans['FK_scheduleId'].apply(lambda x: 18 if x == 1 else 19) #Depende del id del plan que se establezca para soltura
 
-# Se realiza la insercion de datos a la tabla suscription s
+#Se realiza la insercion de datos a la tabla suscription s
 df_subs.to_sql('caipi_subscriptions', engine_sql, if_exists='append', index=False)
 
 ```
+</details>
 
 
 #### Banner Publicitario
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 Soltura anuncia que los servicios pertenecientes al sistema de Payment Assistant ahora les pertenece, para esto se realica un banner publicitario dentro del modelo no relacional de mercadeo en el cual se incorpora una imagen que especifica la descripcion de esta noticia, y un link con los pasos a seguir para los clientes
 
@@ -2653,6 +2675,7 @@ Soltura anuncia que los servicios pertenecientes al sistema de Payment Assistant
         "estado": "activo"
       }
 ```
+</details>
 
 > [!NOTE]
 > Este fragmento de código corresponde a la estructura no relacional de Mongo utilizada para abordar los aspectos de mercadeo.
