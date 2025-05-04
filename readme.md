@@ -2448,7 +2448,7 @@ Esto ha hecho que ustedes como equipo de tecnología les toque realizar una migr
 
 Para poder realizar la migración de datos se ha decidido implementar la base de datos utilizada para la aplicacion de Payment Assistant
 
-```ipynb
+```py
 # Librerias
 import pymysql
 import pandas as pd
