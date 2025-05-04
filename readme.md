@@ -2215,12 +2215,14 @@ FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
 ```
 </details>
 
-##### Uso de MERGE
+##### Uso de MERGE y COALESCE
  <details>
    <summary>Haz clic para expandir</summary>
 	 
 La instruccion `MERGE` funciona para sincronizar datos a una tabla "destino" basado en la información de otra tabla "fuente", se pueden hacer insert, update y delete a partir de ciertas condiciones que se establcen segun los coomponentes de cada una de las tablas.
 En este caso se utiliza para automatizar los reminders, ya que se utiliza esta tabla como la tabla destino que será actualizada a partir de la tabla de suscripciones.  Se busca que cada vez que algun registro de la tabla de suscripciones sufra un cambio en su estado y pase a tenerlo como "expirado", se genere automaticamente un mensaje al usuario advirtiendole sobre esto.
+
+Por otro lado, también se incorpora la instruccion`COALESCE`, la cual puede gestionar los valores que permiten NULL  y se insertan de esta manera, puede devolver el primer valor no nulo de una columna solicitada hasta reemplazar la informacion cuando esté faltante. Para este caso, se utiliza coalesce para gestionar los datos que se insertarán como nulos con el objetivo de que al consultarlos no muestren 'NULL' sino que en vez de esto se muestre un string indicando otra cosa por defecto.
 
 
 ```sql
@@ -2242,51 +2244,26 @@ WHEN NOT MATCHED BY TARGET THEN
     INSERT ( message, createddate, lastreminder, ticketid, requestid, expectedresult, successinfo, userid, 
         notificationmethods_notificationmethodid, remindertypeid)
     VALUES ('La suscripcion ha exiprado. Por favor renueve su plan', GETDATE(), 1, 
-		CAST(Origen.subscriptionid AS VARCHAR(10)), NULL, NULL, NULL, Origen.userid, 1, 1  );
+		CAST(Origen.subscriptionid AS VARCHAR(10)), NULL,  COALESCE(NULL, 'No expected res'), 
+		COALESCE(NULL, 'No aplica'), Origen.userid, 1, 1);
 ```
 
 </details>
 
-##### Uso de COALESCE
 
-La instruccion `COALESCE` devuelve el primer valor no nulo de una columna solicitada y se utiliza para gestionar la información faltante de los campos en cada columna.
-En este caso se utiliza la tabla de _agreement Terms_ ya que muchos de los valores que se manejan esta tabla pueden ser nulos dependiendo del tipo de agreement 
-establecido.  En esta consulta lo que se hace es identifiacr los valores nulos de la fecha de firma y en caso de que no haya valor se establece que el contrato
-no ha sido firmado.
-
-
-```sql
-SELECT idagreementTerm, startDate, finalDate, agreementPrice,
-	COALESCE (signedDate, 'El contrato no ha sido firmado') AS Signed_Date
-	FROM caipi_agreementTerms
-	ORDER BY idagreementTerm
-```
-
-
-##### Uso de SUBSTRING y LTRIM
-
-La instruccion `SUBSTRING` se utiliza para extraer una cantidad especifica de carcateres de  una cadena con el fin de manipular cadenas de una mejor manera al ser de longitud más pequeña.
-Por otro lado, la instrucción `LTRIM` elimina cualquier espacio en blaco que este a la izquierda o inicio de una cadena, esto se utiliza para los datos mal formateados.
-
-En este caso, `SUBSTRING` se utiliza para extraer el numero de telefono de cada usuario dejando de lado el codigo de país al inicio de cada valor. Además se utiliza `LTRIM` para eliminar cualquier espacio en blanco que se presente al incio del nombre y apellido del usuario .
-
-```sql
-SELECT 
-    LTRIM(u.name) AS Nombre, 
-    LTRIM(u.lastname) AS Apellido, -- Nombre y apellido limpios 
-    SUBSTRING(ci.value, 5, 8) AS Contacto -- empieza a leer la cadena en la pos 5 y deja 8 caracteres
-
-FROM caipi_contactInfoPerUsers ci
-INNER JOIN caipi_users u ON u.userid = ci.userid
-WHERE ci.contactInfoTypeId IN (2, 5); -- Numero telefonico y movil
-```
-##### Uso de AVG, TOP, &&/AND, SCHEMABINDING
+##### Uso de AVG - TOP - &&/AND - SCHEMABINDING - LTRIM - SUBSTRING
+<details>
+   <summary>Haz clic para expandir</summary>
 
 La instruccion `AVG` en SQL sirve para calcular el promedio aritmético de un conjunto de valores numérico.
 La instruccion `TOP` se usa para limitar la cantidad de filas que retorna una consulta. Es como decir “quiero solo los primeros N resultados”.
 La instruccion `AND` es un operador lógico que se usa para combinar dos o más condiciones en una cláusula.
 La instruccion `SCHEMABINDING` se usa para “atar” un objeto al esquema de las tablas, de modo que no podrás renombrar, 
 eliminar ni cambiar tipo de columna en las tablas referenciadas mientras el `SCHEMABINDING` exista.
+
+La instruccion `SUBSTRING` se utiliza para extraer una cantidad especifica de caracteres de  una cadena con el fin de manipular cadenas de una mejor manera al ser de longitud más pequeña.
+Por otro lado, la instrucción `LTRIM` elimina cualquier espacio en blanco que este a la izquierda o inicio de una cadena, esto se utiliza para los datos mal formateados.
+En este caso, `SUBSTRING` se utiliza para extraer el username de cada usuario dejando de lado los 3 primero caracteres. Además se utiliza `LTRIM` para eliminar cualquier espacio en blanco que se presente al incio del nombre y apellido del usuario.
 
 La siguiente view con schemabinding muestra el top 20 de promedios de 
 montos pagados por usuarios activos con plan, subs y membership activas
@@ -2301,8 +2278,8 @@ CREATE VIEW dbo.caipi_VW_UserAvgPayFamilyPlan
 WITH SCHEMABINDING
 AS
   SELECT 
-	  u.userid AS id,
-	  u.name + ' ' + u.lastname AS nombre,
+	  u.userid AS id, SUBSTRING(u.username,3,9) AS userName,
+	  LTRIM(u.name) + ' ' + LTRIM(u.lastname) AS nombre,
 	  AVG(p.totalAmount) AS promedio
   FROM dbo.caipi_users AS u
   JOIN dbo.caipi_members AS m ON u.userid = m.userid
@@ -2315,11 +2292,11 @@ AS
     	AND m.enabled = 1
     	AND s.enable = 1
     	AND p.enable = 1
-  GROUP BY u.userid, u.name, u.lastname;
+  GROUP BY u.userid, u.username, u.name, u.lastname;
 GO
 
 
-SELECT TOP(20) id, nombre, promedio
+SELECT TOP(20) id, nombre, promedio, userName
 FROM dbo.caipi_VW_UserAvgPayFamilyPlan
 ORDER BY promedio DESC;
 
@@ -2332,6 +2309,7 @@ EXEC sp_rename
 -- Msg 15336, Level 16, State 1, Procedure sp_rename, Line 612 [Batch Start Line 77]
 -- Object 'dbo.caipi_users.name' cannot be renamed because the object participates in enforced dependencies.
 ```
+</details>
 
 ##### Uso de ENCRYPTION y EXECUTE AS
 
