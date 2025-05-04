@@ -33,7 +33,7 @@
 
 🧩 3. [Ir a Demostraciones T-SQL](#-demostraciones-t-sql-uso-de-instrucciones-específicas)
 
-🧩 4. [Ir al Mantenimiento de Seguridad](#-Mantenimiento-de-la-Seguridad)
+🧩 4. [Ir al Mantenimiento de Seguridad](#Mantenimiento-de-la-Seguridad)
 
 🧩 5. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
 
