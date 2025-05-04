@@ -33,7 +33,9 @@
 
 🧩 3. [Ir a Demostraciones T-SQL](#-demostraciones-t-sql-uso-de-instrucciones-específicas)
 
-🧩 4. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
+🧩 4. [Ir al Mantenimiento de Seguridad](#-Mantenimiento-de-la-Seguridad)
+
+🧩 5. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
 
 
 
@@ -2413,6 +2415,137 @@ INNER JOIN
     caipi_services s ON at.idService = s.serviceId
 ORDER BY
     s.serviceId;
+```
+
+# Mantenimiento de la Seguridad
+
+##### Crear un certificado y llave asimétrica.
+```sql
+-- Debido a que SQL Server trabaja con una jerarquía de claves, debemos tener una clave maestra primero
+CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'ClaveMaestra';
+GO	
+
+-- Crear certificado
+CREATE CERTIFICATE CaipiSeguridad
+WITH SUBJECT = 'CaipiCertificado';
+
+-- Crear llave asimétrica
+CREATE ASYMMETRIC KEY CaipiClaveAsimetrica
+WITH ALGORITHM = RSA_2048
+ENCRYPTION BY PASSWORD = 'CaipiCaso2';
+
+-- Creamos una credencial que enlace el certificado con la llave asimetrica 
+CREATE CREDENTIAL CertificadoEnlace
+WITH IDENTITY = 'CaipiSeguridad',
+SECRET = 'CaipiClaveAsimetrica'
+```
+
+##### Crear una llave simétrica.
+```sql
+-- Crear llave simétrica
+CREATE SYMMETRIC KEY ClaveSimetrica
+WITH ALGORITHM = AES_256 
+ENCRYPTION BY PASSWORD = 'CaipiContraseñaSimetrica';
+
+-- Abrir llave
+OPEN SYMMETRIC KEY ClaveSimetrica
+DECRYPTION BY PASSWORD = 'CaipiContraseñaSimetrica'; -- Contraseña original
+
+-- Proteger clave simetrica con asimetrica
+ALTER SYMMETRIC KEY ClaveSimetrica
+ADD ENCRYPTION BY ASYMMETRIC KEY CaipiClaveAsimetrica; -- Usa la llave asimétrica
+
+-- Cerrar la llave
+CLOSE SYMMETRIC KEY ClaveSimetrica;
+
+-- Abrir la llave simétrica usando la llave asimétrica
+OPEN SYMMETRIC KEY ClaveSimetrica
+DECRYPTION BY ASYMMETRIC KEY CaipiClaveAsimetrica
+WITH PASSWORD = 'CaipiCaso2'; -- Contraseña de la llave asimétrica
+
+-- ===================================================================
+-- Ver si la llave está abierta
+-- ===================================================================
+SELECT key_name AS 'Llave Abierta' 
+FROM sys.openkeys;
+```
+
+##### Cifrar datos sensibles usando cifrado simétrico y proteger la llave privada con las llaves asimétrica definidas en un certificado del servidor.
+```sql
+-- ENCRIPTACIÓN DE DATOS 
+
+-- Abrimos la llave simetrica
+OPEN SYMMETRIC KEY ClaveSimetrica
+DECRYPTION BY ASYMMETRIC KEY CaipiClaveAsimetrica
+WITH PASSWORD = 'CaipiCaso2'
+
+-- Encriptación de las contraseñas de los usuarios y nombres
+UPDATE caipi_users
+SET password = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), password),
+name = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), name)
+
+
+-- Encriptación del Mask Account y CallBackURL
+UPDATE caipi_availablePaymentMethods
+SET callbackURL = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), callbackURL),
+	maskAccount = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), maskAccount)
+
+-- Encriptación del authNumber
+UPDATE caipi_payments
+SET authNumber = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), authNumber)
+
+-- Encriptación del computer
+UPDATE caipi_logs
+SET computer = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), computer)
+
+-- Encriptación del quantity (Hace que aunque consigan la otra información, no puedan interpretarla)
+UPDATE caipi_AgreementsPerPlan
+SET quantity = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), quantity)
+
+-- Cerrar la llave
+CLOSE SYMMETRIC KEY ClaveSimetrica;
+```
+
+##### Crear un SP que descifre los datos protegidos usando las llaves anteriores.
+```sql
+-- Modificar el Stored Procedure DesencriptarColumna
+CREATE PROCEDURE DesencriptarColumna
+    @NombreTabla NVARCHAR(128),
+    @NombreColumna NVARCHAR(128),
+    @NombreLlaveSimetrica NVARCHAR(128),
+    @NombreLlaveAsimetrica NVARCHAR(128),
+    @ContraseñaLlaveAsimetrica NVARCHAR(256)
+AS
+BEGIN
+    -- Evitar el conteo de filas afectadas
+    SET NOCOUNT ON;
+
+    -- Construir la consulta dinámicamente
+    DECLARE @SQL NVARCHAR(MAX);
+    SET @SQL = '
+    OPEN SYMMETRIC KEY ' + QUOTENAME(@NombreLlaveSimetrica) + '
+    DECRYPTION BY ASYMMETRIC KEY ' + QUOTENAME(@NombreLlaveAsimetrica) + '
+    WITH PASSWORD = ''' + @ContraseñaLlaveAsimetrica + ''';
+
+    SELECT
+        ' + QUOTENAME(@NombreColumna) + ' AS ColumnaEncriptada,
+        CONVERT(NVARCHAR(MAX), DECRYPTBYKEY(' + QUOTENAME(@NombreColumna) + ')) AS ColumnaDesencriptada
+    FROM ' + QUOTENAME(@NombreTabla) + ';
+
+    CLOSE SYMMETRIC KEY ' + QUOTENAME(@NombreLlaveSimetrica) + ';';
+
+    -- Ejecutar la consulta dinámica
+    EXEC sp_executesql @SQL;
+END;
+GO
+
+-- Ejemplo de uso
+EXEC DesencriptarColumna
+    @NombreTabla = 'caipi_users',
+    @NombreColumna = 'password',
+    @NombreLlaveSimetrica = 'ClaveSimetrica',
+    @NombreLlaveAsimetrica = 'CaipiClaveAsimetrica',
+    @ContraseñaLlaveAsimetrica = 'CaipiCaso2';
 ```
 
 # Migracion de los usuarios de Payment Assistant
