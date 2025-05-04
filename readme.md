@@ -472,6 +472,27 @@
             "comentarios": 2
         },
         "estado": "activo"
+      },
+      {
+        "media_id": "004",
+        "tipo": "imagen",
+        "titulo": "Soltura ahora se hace uno con Payment Assistant, la app #1 para tus pagos recurrentes",
+        "descripcion": "A partir del 1 de Mayo del 2025 podrás acceder a todos los beneficios que Payment Assistant tiene para ti. Visista el link para saber como puedes acceder a ella",
+        "url_masInfo": "https://soltura.cr/informacion/appAssis",
+        "imagenURL": "https://soltura.cr/media/appAssistant.jpg",
+        "formato": "jpg",
+        "resolucion": "2470x3510 px",
+        "dimensiones": {
+          "ancho": 1080,
+          "alto": 1080
+        },
+        "etiquetas": ["pagos ", "beneficios"],
+        "fecha_publicacion": "2025-05-01T12:00:00Z",
+        "estadisticas": {
+            "vistas": 5200,
+            "comentarios": 40
+        },
+        "estado": "activo"
       }
 
     ]
@@ -2422,3 +2443,37 @@ Esto ha hecho que ustedes como equipo de tecnología les toque realizar una migr
 - Todos los usuarios migrados van a tener un nuevo usuario en Soltura con su email respectivo y sus datos respectivos de perfil de usuario, pero al hacer login deben estar forzados a ingresar un nuevo password pues no puede ser migrado el password del sistema anterior.
 
 - Soltura va crear una imagen en el home page y un banner publicitario indicando que dicho sistema (payment assistant o app assistant) ahora es Soltura, la fecha a partir de cuando se hace la migración y un link hacia la guía de pasos que deben seguir los usuarios ese día (este link no existe solo se pone). No hay que hacer los banner ni nada, solo el ingreso de los datos en los collections respectivos.
+
+##### Migrado de la base de Datos
+
+
+##### Banner Publicitario
+Soltura anuncia que los servicios pertenecientes al sistema de Payment Assistant ahora les pertenece, para esto se realica un banner publicitario dentro del modelo no relacional de mercadeo en el cual se incorpora una imagen que especifica la descripcion de esta noticia, y un link con los pasos a seguir para los clientes
+
+```json
+{
+        "media_id": "004",
+        "tipo": "imagen",
+        "titulo": "Soltura ahora se hace uno con Payment Assistant, la app #1 para tus pagos recurrentes",
+        "descripcion": "A partir del 1 de Mayo del 2025 podrás acceder a todos los beneficios que Payment Assistant tiene para ti. Visista el link para saber como puedes acceder a ella",
+        "url_masInfo": "https://soltura.cr/informacion/appAssis",
+        "imagenURL": "https://soltura.cr/media/appAssistant.jpg",
+        "formato": "jpg",
+        "resolucion": "2470x3510 px",
+        "dimensiones": {
+          "ancho": 1080,
+          "alto": 1080
+        },
+        "etiquetas": ["pagos ", "beneficios"],
+        "fecha_publicacion": "2025-05-01T12:00:00Z",
+        "estadisticas": {
+            "vistas": 5200,
+            "comentarios": 40
+        },
+        "estado": "activo"
+      }
+```
+
+> [!NOTE]
+> Este fragmento de código corresponde a la estructura no relacional de Mongo utilizada para abordar los aspectos de mercadeo.
+
