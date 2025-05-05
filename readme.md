@@ -2555,6 +2555,215 @@ Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, 
 
 - Transacción de volumen dentro de la base de datos → En Soltura, la transacción de volumen corresponde al proceso de canjeo de los servicios incluidos en cada plan de suscripción. Esta operación es la más frecuente dentro del sistema, ya que los usuarios pueden realizar canjes de forma diaria y en múltiples ocasiones, lo que genera una alta cantidad de solicitudes concurrentes a la base de datos. Por tanto, este proceso debe estar optimizado para manejar grandes volúmenes de transacciones sin afectar el rendimiento del sistema.
 
+El sisguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación). Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). Está diseñado para ejecutarse en un entorno transaccional controlado y manejar adecuadamente errores con registros claros.
+
+El nivel de insolacion READ COMMITTED se utiliza para evitar la lectura de datos no confirmados ("dirty reads") durante la transacción. Esto significa que cualquier dato leído durante la ejecución del procedimiento ya ha sido confirmado por otras transacciones, garantizando así que los valores utilizados para verificar límites o condiciones son válidos y estables durante toda la operación. Esto es esencial en este procedimiento, ya que trabaja con condiciones sensibles de límites de redención que, si se leyeran sin confirmar, podrían permitir redenciones incorrectas o inconsistentes.
+
+
+ ```sql
+-----------------------------------------------------------
+-- Autor: Carol Araya
+-- Fecha: 05/03/2025
+-- Descripcion: genera las rendenciones de los servicios ofrecidos por los planes de soltura
+	/*
+	@numberTag INT- Número identificador del tag o usuario que realiza la redención.
+	@redemptionTransactionTypeId INT - Identificador del tipo de transacción de redención (por ejemplo: puntos, efectivo, regalo).
+	@idModule INT  - Identificador del módulo o sistema donde ocurre la transacción (app, kiosko, etc.).
+	@idSupplierBranch INT - Identificador de la sucursal o proveedor donde se realiza la redención.
+	@quantity INT = NULL  - Cantidad de artículos o servicios redimidos. Puede ser NULL si no aplica.
+	@amount DECIMAL(5,2) = NULL  - Monto involucrado en la transacción. Puede ser NULL si no aplica.
+	@validation BIT = NULL  - Indicador de validación (1 = validado, 0 = no validado). Puede ser NULL si no se requiere validación.
+
+	*/
+-----------------------------------------------------------
+CREATE OR ALTER PROCEDURE [dbo].[CaipiSP_InsertRedemptionTransaction]
+	--PARAMETROS
+	@numberTag VARCHAR(100),
+    @redemptionTransactionTypeId INT,
+    @idModule INT,
+    @idSupplierBranch INT,
+    @quantity INT = NULL,
+    @amount DECIMAL(18,4) = NULL,
+    @validation BIT = NULL,
+	@agreementTermId INT = NULL,
+	@userACanjearId  INT = NULL, --En caso de que sea un servicio o un proveedor saber quien lo esta canjeando este id fue obtenido anteriormente
+	@idPerson  INT = NULL
+AS 
+BEGIN
+	
+	SET NOCOUNT ON
+	
+	DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+	DECLARE @Message VARCHAR(200)
+	DECLARE @InicieTransaccion BIT
+
+	--variables locales para el insert
+	DECLARE @idPlan INT
+	DECLARE @idRedemptionSubType INT
+	DECLARE @idBenefit INT
+	DECLARE @idUser INT = NULL
+	DECLARE @idSupplier INT = NULL
+	DECLARE @idService INT = NULL
+	DECLARE @idRedemption INT = NULL
+	DECLARE @redemptionSubTypeName VARCHAR(50) --Guarda si es una redencion del usuario, proveedor o del servicio, para saber que valor leer
+	DECLARE @agreementType VARCHAR(50) = NULL
+	DECLARE @agreementPerPlan INT
+	DECLARE @checkSum VARBINARY(500)
+	DECLARE @agreementDescription VARCHAR(100)
+	DECLARE @limit VARCHAR(100)
+	DECLARE @idPlanLimit INT
+	DECLARE @unitMeasure INT
+
+	IF @numberTag IS NULL OR @idModule IS NULL OR @redemptionTransactionTypeId IS NULL
+	RETURN 99
+
+	--Obtener el conjunto de caracteristicas asociadas al number tag elegido
+	SELECT @idPlan = idPlan, @idRedemptionSubType = idRedemptionSubType, @idBenefit = idBenefit,@idRedemption = idRedemptions,
+	@idUser = idUser, @idSupplier = idSupplier FROM caipi_redemptions WHERE enable = 1 and numberTag = @numberTag;
+
+	IF @idRedemption IS NULL --El number tag no es valido
+		return 10
+	ELSE
+		SELECT @redemptionSubTypeName = name FROM caipi_redemptionSubType where idRedemptionSubType = @idRedemptionSubType;
+
+
+		IF @redemptionSubTypeName = 'Usuario' --Me interesa revisar el plan del usuario y saber si existe el agreement canjeado
+			SELECT @agreementType = tp.name, @agreementPerPlan = ap.benefitPerPlanId, @agreementDescription = at.description
+			FROM caipi_AgreementsPerPlan AS ap
+			INNER JOIN caipi_agreementTerms AS at
+				ON at.idagreementTerm = ap.idAgreementTerm
+			INNER JOIN caipi_AgreementType AS tp
+				ON tp.idAgreementType = at.idAgreementType
+			WHERE ap.idAgreementTerm = @agreementTermId AND ap.idPlans = @idPlan;
+			
+		ELSE IF @redemptionSubTypeName = 'Proveedor' OR @redemptionSubTypeName = 'Servicio'
+			--Extraigo el plan del usuario y el servicio que voy a canjear ya que el redemption no posee un plan
+			SELECT @idPlan = subs.idPlan, @agreementType = tp.name, @agreementPerPlan = ap.benefitPerPlanId
+			FROM caipi_subscriptions AS subs 
+			INNER JOIN caipi_AgreementsPerPlan AS ap
+				ON subs.idPlan = ap.idPlans
+			INNER JOIN caipi_agreementTerms AS at
+				ON at.idagreementTerm = ap.idAgreementTerm
+			INNER JOIN caipi_AgreementType AS tp
+				ON tp.idAgreementType = at.idAgreementType
+			WHERE subs.enable = 1 and subs.userid = @userACanjearId
+
+--Check Sum que se registra en la transaccion
+	SET @checkSum = HASHBYTES('SHA2_256', 
+		CONCAT(
+			CAST(@idRedemption AS VARCHAR),
+			CAST(@idUser AS VARCHAR),
+			CAST(@idSupplierBranch AS VARCHAR),
+			CAST(@idModule AS VARCHAR),
+			CAST(@idPerson AS VARCHAR),
+			CAST(@redemptionTransactionTypeId AS VARCHAR),
+			CAST(@quantity AS VARCHAR),
+			CAST(@amount AS VARCHAR),
+			CAST(@validation AS VARCHAR),
+			CAST(@agreementTermId AS VARCHAR),
+			CONVERT(VARCHAR, GETDATE(), 121)
+		)
+	);
+
+	SET @InicieTransaccion = 0
+	IF @@TRANCOUNT=0 BEGIN
+		SET @InicieTransaccion = 1
+		SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRANSACTION		
+	END
+	
+	BEGIN TRY
+		SET @CustomError = 2001
+
+		IF @agreementType IS NULL
+			return 2 --No existe un agreement relacionado con el usuario que quieren canjear
+		ELSE
+			--Busco el limite que tiene el usuario con la finalidad de saber sin aun puede realizar un canjeo
+			SELECT @idPlanLimit = idPlansLimits, @unitMeasure = idMeasureUnit,@limit = [limit]
+				FROM caipi_plansLimits
+				WHERE benefitPerPlanId = @agreementPerPlan
+				  AND idMember = @idUser
+				  AND [current] = 1
+				  AND (
+					(@agreementType = 'Quantity' AND TRY_CAST([limit] AS INT) IS NOT NULL AND TRY_CAST([limit] AS INT) >= @quantity)
+					OR (@agreementType = 'Amount' AND TRY_CAST([limit] AS DECIMAL(18,4)) IS NOT NULL AND TRY_CAST([limit] AS DECIMAL(18,4)) >= @amount)
+					OR (@agreementType = 'Validation' AND [limit] IS NOT NULL AND [limit] NOT IN ('False', 'false', '0', 'No', 'no'))
+				)
+
+			
+			IF @idPlanLimit IS NOT NULL
+			BEGIN
+				
+				-- Se encontró un limite con el plan y disponible para canjear
+				INSERT INTO [dbo].[caipi_redemptionTransactions]
+				([idRedemption] ,[idUser],[idSupplierBranch],[checkSum],[creationDate],[idModule] ,[description],[idPerson]
+			   ,[idRedemptionTransactionTypes],[quantity],[amount],[validation],[idAgreementTerm])
+
+			   VALUES(@idRedemption, @idUser,@idSupplierBranch,@checkSum,GETDATE(),@idModule,'Canjeo de un servicio de' + @agreementDescription,
+			   @idPerson,@redemptionTransactionTypeId, @quantity, @amount, @validation, @agreementTermId
+			   )
+				--Actualizacion del limite
+				IF @agreementType = 'Validation'
+					SET @limit = 0;
+				ELSE IF @agreementType = 'Quantity'
+					SET @limit = ISNULL(CAST(@limit as INT), 0) - ISNULL(@quantity, 0);
+				ELSE IF @agreementType = 'Amount'
+					SET @limit = ISNULL(CAST(@limit as decimal(18,4)), 0.0) - ISNULL(@amount, 0.0);
+				
+			   --Actualizo el limite
+				INSERT INTO [dbo].[caipi_plansLimits] 
+				([limit],[dateUsed],[current],[checkSum],[idPlans],[benefitPerPlanId],[idMeasureUnit],[idMember])
+
+				VALUES (@limit,GETDATE(),1,
+				HASHBYTES(
+					'SHA2_256',
+					CONCAT(
+						@limit, '|',
+						CONVERT(varchar, GETDATE(), 126), '|',
+						@idPlan, '|',
+						@agreementPerPlan, '|',
+						@unitMeasure, '|',
+						@idUser
+					)
+					),@idPlan,@agreementPerPlan,	@unitMeasure,@idUser)
+
+				--Al ser plan limits de insert actualiza el current del limite pasado a false
+				UPDATE [dbo].[caipi_plansLimits]
+				   SET [current] = 0
+				 WHERE idPlansLimits = @idPlanLimit
+
+
+			END
+			ELSE
+				return 7
+
+					
+		IF @InicieTransaccion=1 BEGIN
+			COMMIT;
+		END
+	END TRY
+	BEGIN CATCH
+		-- en esencia, lo que hay  que hacer es registrar el error real, y enviar para arriba un error custom 
+		SET @ErrorNumber = ERROR_NUMBER()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState = ERROR_STATE()
+		SET @Message = ERROR_MESSAGE()
+		
+		IF @InicieTransaccion=1 BEGIN
+			ROLLBACK
+		END
+		-- el error original lo inserte en la tabla de logs, pero retorno a la capa superior un error en "bonito"
+		RAISERROR('%s - Error Number: %i', 
+			@ErrorSeverity, @ErrorState, @Message, @CustomError) -- hay que sustituir el @message por un error personalizado bonito, lo ideal es sacarlo de sys.messages 
+		-- en la tabla de sys.messages se pueden insertar mensajes personalizados de error, los cuales se les hace match con el numero en @CustomError
+	END CATCH	
+END
+RETURN 1
+GO
+
+
+``` 
+
 Determine cuántas transacciones por segundo máximo es capaz de procesar su base de datos, valide el método con el profesor
 
 # 📈 Informe de Prueba de Rendimiento con JMeter
