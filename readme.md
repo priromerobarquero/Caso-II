@@ -2549,6 +2549,915 @@ EXEC DesencriptarColumna
     @NombreLlaveAsimetrica = 'CaipiClaveAsimetrica',
     @ContraseñaLlaveAsimetrica = 'CaipiCaso2';
 ```
+
+# Consultas Misceláneas
+
+#### 6. Crear un procedimiento almacenado transaccional que llame a otro SP transaccional, el cual a su vez llame a otro SP transaccional. Cada uno debe modificar al menos 2 tablas. Se debe demostrar que es posible hacer COMMIT y ROLLBACK con ejemplos exitosos y fallidos sin que haya interrumpción de la ejecución correcta de ninguno de los SP en ninguno de los niveles del llamado.
+
+<details>
+	<summary>Haz clic para expandir</summary>
+
+ ```sql
+-- NIVEL 3
+CREATE  OR ALTER PROCEDURE [dbo].[caipiSP_NIVEL3]
+	@userid INT,
+	@direccion VARCHAR(200),
+	@payMethod INT
+AS 
+BEGIN
+	
+	SET NOCOUNT ON
+	
+	DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+	DECLARE @Message VARCHAR(200)
+	DECLARE @InicieTransaccion BIT
+
+	-- declaracion de otras variables
+
+	-- operaciones de select que no tengan que ser bloqueadas
+	-- tratar de hacer todo lo posible antes de q inice la transaccion
+	
+	SET @InicieTransaccion = 0
+	IF @@TRANCOUNT=0 BEGIN
+		SET @InicieTransaccion = 1
+		SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRANSACTION		
+	END
+	
+	BEGIN TRY
+		SET @CustomError = 2001
+
+		-- put your code here
+
+		UPDATE TOP(1) a
+		SET a.line1 = @direccion
+		FROM dbo.caipi_Adresses AS a
+		JOIN dbo.caipi_AdressessPerUser AS apu ON a.adressId = apu.adressId
+		WHERE apu.userid = @userid;
+
+		UPDATE TOP(1) pm
+		SET pm.paymentMethodId = @payMethod
+		FROM dbo.caipi_AvailiablePaymentMethodsPerUser AS pm
+		WHERE pm.idUser = @userid;
+
+		-- es importante que el código que escriba aquí sea lo más corto y lo más eficiente posible
+		-- queremos durar lo menos posible para llegar al commit 
+		-- aqui asustan, hay que pasar rápido por aquí
+					
+		IF @InicieTransaccion=1 BEGIN
+			COMMIT
+		END
+	END TRY
+	BEGIN CATCH
+		-- en esencia, lo que hay  que hacer es registrar el error real, y enviar para arriba un error custom 
+		SET @ErrorNumber = ERROR_NUMBER()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState = ERROR_STATE()
+		SET @Message = ERROR_MESSAGE()
+		
+		IF @InicieTransaccion=1 BEGIN
+			ROLLBACK
+		END
+		-- el error original lo inserte en la tabla de logs, pero retorno a la capa superior un error en "bonito"
+		RAISERROR('%s - Error Number: %i', 
+			@ErrorSeverity, @ErrorState, @Message, @CustomError) -- hay que sustituir el @message por un error personalizado bonito, lo ideal es sacarlo de sys.messages 
+		-- en la tabla de sys.messages se pueden insertar mensajes personalizados de error, los cuales se les hace match con el numero en @CustomError
+	END CATCH	
+END
+RETURN 0
+GO
+
+
+
+
+-- NIVEL 2
+CREATE OR ALTER PROCEDURE [dbo].[caipiSP_NIVEL2]
+	@userid INT,
+	@membershipEnabled BIT,
+	@subscriptionEnable BIT,
+	@direccion VARCHAR(200),
+	@payMethod INT
+AS 
+BEGIN
+	
+	SET NOCOUNT ON
+	
+	DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+	DECLARE @Message VARCHAR(200)
+	DECLARE @InicieTransaccion BIT
+
+	-- declaracion de otras variables
+
+	-- operaciones de select que no tengan que ser bloqueadas
+	-- tratar de hacer todo lo posible antes de q inice la transaccion
+	
+	SET @InicieTransaccion = 0
+	IF @@TRANCOUNT=0 BEGIN
+		SET @InicieTransaccion = 1
+		SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRANSACTION		
+	END
+	
+	BEGIN TRY
+		SET @CustomError = 2001
+
+		-- put your code here
+
+		UPDATE dbo.caipi_subscriptions
+		SET enable = @subscriptionEnable
+		WHERE userid = @userid;
+
+		UPDATE dbo.caipi_members
+		SET enabled = @membershipEnabled		
+		WHERE userid = @userid;
+
+		EXEC dbo.caipiSP_NIVEL3 
+			@userid = @userid,
+			@direccion = @direccion,
+			@payMethod = @payMethod;
+
+		-- es importante que el código que escriba aquí sea lo más corto y lo más eficiente posible
+		-- queremos durar lo menos posible para llegar al commit 
+		-- aqui asustan, hay que pasar rápido por aquí
+					
+		IF @InicieTransaccion=1 BEGIN
+			COMMIT
+		END
+	END TRY
+	BEGIN CATCH
+		-- en esencia, lo que hay  que hacer es registrar el error real, y enviar para arriba un error custom 
+		SET @ErrorNumber = ERROR_NUMBER()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState = ERROR_STATE()
+		SET @Message = ERROR_MESSAGE()
+		
+		IF @InicieTransaccion=1 BEGIN
+			ROLLBACK
+		END
+		-- el error original lo inserte en la tabla de logs, pero retorno a la capa superior un error en "bonito"
+		RAISERROR('%s - Error Number: %i', 
+			@ErrorSeverity, @ErrorState, @Message, @CustomError) -- hay que sustituir el @message por un error personalizado bonito, lo ideal es sacarlo de sys.messages 
+		-- en la tabla de sys.messages se pueden insertar mensajes personalizados de error, los cuales se les hace match con el numero en @CustomError
+	END CATCH	
+END
+RETURN 0
+GO
+
+
+-- NIVEL 1
+CREATE OR ALTER PROCEDURE [dbo].[caipiSP_NIVEL1]
+	@userid INT,
+	@lastname VARCHAR(50),
+	@contact VARCHAR(100),
+	@membershipEnabled BIT,
+	@subscriptionEnable BIT,
+	@direccion VARCHAR(200),
+	@payMethod INT
+AS 
+BEGIN
+	
+	SET NOCOUNT ON
+	
+	DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+	DECLARE @Message VARCHAR(200)
+	DECLARE @InicieTransaccion BIT
+
+	-- declaracion de otras variables
+
+	-- operaciones de select que no tengan que ser bloqueadas
+	
+	-- verifico existencia
+	IF NOT EXISTS (SELECT 1 FROM dbo.caipi_users WHERE userid = @userid)
+	BEGIN
+		-- genero un error de usuario, severidad 16 (fallo), estado 1
+		RAISERROR('usuario con id %d no encontrado.', 16, 1, @userid);
+		RETURN;  -- salgo del SP
+	END
+
+	-- tratar de hacer todo lo posible antes de q inice la transaccion
+	
+	SET @InicieTransaccion = 0
+	IF @@TRANCOUNT=0 BEGIN
+		SET @InicieTransaccion = 1
+		SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRANSACTION		
+	END
+	
+	BEGIN TRY
+		SET @CustomError = 2001
+
+		-- put your code here
+
+		UPDATE dbo.caipi_users
+		SET lastname = @lastname, last_update = GETDATE()
+		WHERE userid = @userid;
+
+		UPDATE dbo.caipi_contactInfoPerUsers
+		SET value = @contact, lastUpdate = GETDATE()
+		WHERE userid = @userid AND contactInfoTypeId = 1;
+
+		EXEC dbo.caipiSP_NIVEL2
+			@userid = @userid,
+			@membershipEnabled = @membershipEnabled,
+			@subscriptionEnable = @subscriptionEnable,
+			@direccion = @direccion,
+			@payMethod = @payMethod;
+
+		-- es importante que el código que escriba aquí sea lo más corto y lo más eficiente posible
+		-- queremos durar lo menos posible para llegar al commit 
+		-- aqui asustan, hay que pasar rápido por aquí
+					
+		IF @InicieTransaccion=1 BEGIN
+			COMMIT
+		END
+	END TRY
+	BEGIN CATCH
+		-- en esencia, lo que hay  que hacer es registrar el error real, y enviar para arriba un error custom 
+		SET @ErrorNumber = ERROR_NUMBER()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState = ERROR_STATE()
+		SET @Message = ERROR_MESSAGE()
+		
+		IF @InicieTransaccion=1 BEGIN
+			ROLLBACK
+		END
+		-- el error original lo inserte en la tabla de logs, pero retorno a la capa superior un error en "bonito"
+		RAISERROR('%s - Error Number: %i', 
+			@ErrorSeverity, @ErrorState, @Message, @CustomError) -- hay que sustituir el @message por un error personalizado bonito, lo ideal es sacarlo de sys.messages 
+		-- en la tabla de sys.messages se pueden insertar mensajes personalizados de error, los cuales se les hace match con el numero en @CustomError
+	END CATCH	
+END
+RETURN 0
+GO
+
+DECLARE @userid INT = 101
+DECLARE @lastname VARCHAR(50) = 'sequeira'
+DECLARE @contact VARCHAR(100) = 'prueba@gmail.com'
+DECLARE @membershipEnabled BIT = 1
+DECLARE @subscriptionEnable BIT = 1
+DECLARE @direccion VARCHAR(200) = 'cartago'
+DECLARE @payMethod INT = 2
+
+--select * from dbo.caipi_users where userid = @userid;
+--select * from caipi_contactInfoPerUsers as c where c.userid = @userid;
+--select * from caipi_members as m where m.userid = @userid;
+--select * from caipi_subscriptions as s where s.userid = @userid;
+--select * from caipi_Adresses as a join caipi_AdressessPerUser as ap on a.adressId = ap.adressId where ap.userid = @userid;
+--select * from caipi_AvailiablePaymentMethodsPerUser as apm where apm.idUser = @userid;
+
+EXEC dbo.caipiSP_NIVEL1
+	@userid = @userid,
+	@lastname = @lastname,
+	@contact = @contact,
+	@membershipEnabled = @membershipEnabled,
+	@subscriptionEnable = @subscriptionEnable,
+	@direccion = @direccion,
+	@payMethod = @payMethod;
+
+```
+</details>
+
+#### 7. Será posible que haciendo una consulta SQL en esta base de datos se pueda obtener un JSON para ser consumido por alguna de las pantallas de la aplicación que tenga que ver con los planes, subscripciones, servicios o pagos. Justifique cuál pantalla podría requerir esta consulta.
+
+<details>
+	<summary>Mostrar script</summary>
+
+ ```sql
+CREATE PROCEDURE dbo.caipiSP_ObtenerProveedoresJSON
+	@json VARCHAR(MAX) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+	
+	-- Abrir la llave simétrica
+	OPEN SYMMETRIC KEY LlaveSimetrica
+	DECRYPTION BY ASYMMETRIC KEY LlaveAsimetrica;
+	
+	-- Hacemos el query
+	SELECT @json = (
+		SELECT 
+			s.idSupplier AS id, 
+			s.name AS nombre, 
+			m.mediaURL AS logo, 
+			CONVERT(VARCHAR(200), DecryptByKey(c.value)) AS contacto
+		FROM dbo.caipi_suppliers AS s
+		INNER JOIN dbo.caipi_supplierCategories AS sc ON s.idsupplierCategories = sc.idsupplierCategories
+		INNER JOIN dbo.caipi_mediaFiles AS m ON s.idmediaFiles = m.idmediaFiles
+		INNER JOIN dbo.caipi_contactInfoPerSupplier AS c ON s.idSupplier = c.idSupplier
+		INNER JOIN dbo.caipi_contactInfoType AS ct ON c.contactInfoTypeId = ct.conatctInfoTypeId
+		FOR JSON PATH, ROOT('proveedores')
+	);
+	
+	-- Cerrar la llave
+	CLOSE SYMMETRIC KEY LlaveSimetrica;
+END;
+
+
+DECLARE @Proveedoresjson VARCHAR(MAX);
+EXEC dbo.caipiSP_ObtenerProveedoresJSON @json = @Proveedoresjson OUTPUT;
+SELECT @Proveedoresjson AS proveedores;
+
+-- Justificacion de uso: pantalla de presentación o visualización pública de proveedores en la pagina web
+```
+
+</details>
+
+<details>
+	<summary>Mostrar resultado</summary>
+
+```json
+{
+  "proveedores": [
+    {
+      "id": 1,
+      "nombre": "The Retreat Costa Rica        ",
+      "logo": "https://media.soltura.com/plan_fitness_4_personas.mp4",
+      "contacto": "info@theretreatcr.com"
+    },
+    {
+      "id": 2,
+      "nombre": "Vida Mia Healing Center       ",
+      "logo": "https://media.soltura.com/plan_yoga_familiar.mp4",
+      "contacto": "contacto@vidamia.com"
+    },
+    {
+      "id": 4,
+      "nombre": "Paws & Co.                    ",
+      "logo": "https://media.soltura.com/plan_grooming_mascota.jpg",
+      "contacto": "pawsco@vetservices.com"
+    },
+    {
+      "id": 6,
+      "nombre": "VolAir Studio                 ",
+      "logo": "https://media.soltura.com/plan_yoga_familiar.mp4",
+      "contacto": "info@volairstudio.com"
+    },
+    {
+      "id": 7,
+      "nombre": "Smart Fit                     ",
+      "logo": "https://media.soltura.com/plan_fitness_4_personas.mp4",
+      "contacto": "smartfit@fitness.com"
+    },
+    {
+      "id": 8,
+      "nombre": "AmaSer                        ",
+      "logo": "https://media.soltura.com/plan_yoga_familiar.mp4",
+      "contacto": "amamaser@wellness.com"
+    },
+    {
+      "id": 5,
+      "nombre": "The Pets Club                 ",
+      "logo": "https://media.soltura.com/servicio_mantenimiento_mascota.jpg",
+      "contacto": "+506 6000 9000"
+    },
+    {
+      "id": 3,
+      "nombre": "Agromédica Veterinaria        ",
+      "logo": "https://media.soltura.com/plan_revision_veterinaria.jpg",
+      "contacto": "+506 2222 3333"
+    },
+    {
+      "id": 1,
+      "nombre": "The Retreat Costa Rica        ",
+      "logo": "https://media.soltura.com/plan_fitness_4_personas.mp4",
+      "contacto": "+506 4000 1234"
+    },
+    {
+      "id": 3,
+      "nombre": "Agromédica Veterinaria        ",
+      "logo": "https://media.soltura.com/plan_revision_veterinaria.jpg",
+      "contacto": "www.agromedica.cr"
+    },
+    {
+      "id": 5,
+      "nombre": "The Pets Club                 ",
+      "logo": "https://media.soltura.com/servicio_mantenimiento_mascota.jpg",
+      "contacto": "www.thepetsclub.cr"
+    },
+    {
+      "id": 7,
+      "nombre": "Smart Fit                     ",
+      "logo": "https://media.soltura.com/plan_fitness_4_personas.mp4",
+      "contacto": "www.smartfit.cr"
+    },
+    {
+      "id": 6,
+      "nombre": "VolAir Studio                 ",
+      "logo": "https://media.soltura.com/plan_yoga_familiar.mp4",
+      "contacto": "+506 7000 8000"
+    },
+    {
+      "id": 4,
+      "nombre": "Paws & Co.                    ",
+      "logo": "https://media.soltura.com/plan_grooming_mascota.jpg",
+      "contacto": "+506 8888 7777"
+    },
+    {
+      "id": 2,
+      "nombre": "Vida Mia Healing Center       ",
+      "logo": "https://media.soltura.com/plan_yoga_familiar.mp4",
+      "contacto": "+506 4000 5678"
+    }
+  ]
+}
+```
+
+</details>
+
+#### 8. Podrá su base de datos soportar un SP transaccional que actualice los contratos de servicio de un proveedor, el proveedor podría ya existir o ser nuevo, si es nuevo, solo se inserta. Las condiciones del contrato del proveedor, deben ser suministradas por un Table-Valued Parameter (TVP), si las condiciones son sobre items existentes, entonces se actualiza o inserta realizando las modificacinoes que su diseño requiera, si son condiciones nuevas, entonces se insertan.
+
+<details>
+	<summary>Mostrar script</summary>
+
+```sql
+-- 1. Crear el tipo TVP
+CREATE TYPE dbo.caipiTVP_CondicionesProveedor AS TABLE (
+	[idagreementTerm] [int] IDENTITY(1,1) NOT NULL,
+	[enable] [bit] NOT NULL,
+	[checkSum] [varbinary](255) NOT NULL,
+	[startDate] [datetime] NOT NULL,
+	[idMeasureUnit] [int] NOT NULL,
+	[idService] [int] NULL,
+	[finalDate] [datetime] NOT NULL,
+	[idSupplier] [int] NULL,
+	[signedDate] [datetime] NULL,
+	[deleted] [bit] NOT NULL,
+	[access] [bit] NULL,
+	[disccountPercentage] [decimal](5, 2) NULL,
+	[originalPrice] [decimal](5, 2) NOT NULL,
+	[agreementPrice] [decimal](5, 2) NOT NULL,
+	[salePrice] [decimal](5, 2) NOT NULL,
+	[IVA] [bit] NOT NULL,
+	[idAgreementType] [int] NOT NULL,
+	[currencyId] [int] NULL,
+	[quantity] [int] NULL,
+	[scheduleId] [int] NULL,
+	[userDisccount] [decimal](5, 2) NULL
+);
+GO
+
+CREATE OR ALTER PROCEDURE [dbo].[caipiSP_ActualizarCondiciones]
+	@supplierID INT,
+	@name VARCHAR(30),
+	@enable BIT,
+	@categoryID INT,
+	@mediafileID INT,
+	@agreementID INT,
+	@deleted BIT,
+	@condiciones dbo.caipiTVP_CondicionesProveedor READONLY
+AS 
+BEGIN
+	
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;    -- << importante
+
+	
+	DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+	DECLARE @Message VARCHAR(200)
+	DECLARE @InicieTransaccion BIT
+
+	-- declaracion de otras variables
+	DECLARE @supplier_exist BIT = 1
+
+	-- operaciones de select que no tengan que ser bloqueadas
+	IF NOT EXISTS (SELECT 1 FROM dbo.caipi_suppliers WHERE idSupplier = @supplierID)
+	BEGIN
+		SET @supplier_exist = 0;
+	END
+	-- tratar de hacer todo lo posible antes de q inice la transaccion
+	
+	SET @InicieTransaccion = 0
+	IF @@TRANCOUNT=0 BEGIN
+		SET @InicieTransaccion = 1
+		SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+		BEGIN TRANSACTION		
+	END
+	
+	BEGIN TRY
+		SET @CustomError = 2001
+
+		-- put your code here
+
+		IF @supplier_exist = 0
+		BEGIN
+			INSERT INTO dbo.caipi_suppliers
+				(name, enable, idsupplierCategories, idmediaFiles, idagreementTerms, deleted)
+			VALUES
+				(@name, @enable, @categoryID, @mediafileID, @agreementID, @deleted);
+			SET @supplierID = SCOPE_IDENTITY();
+		END
+		
+		MERGE dbo.caipi_agreementTerms AS destino
+        USING @condiciones AS origen
+        ON destino.idSupplier = @supplierID AND destino.idSupplier = origen.idSupplier AND destino.checkSum = origen.checkSum
+        WHEN MATCHED THEN 
+			UPDATE SET
+				enable = origen.enable,
+				checkSum = origen.checkSum,
+				startDate = origen.startDate,
+				idMeasureUnit = origen.idMeasureUnit,
+				idService = origen.idService,
+				finalDate = origen.finalDate,
+				idSupplier = @supplierID,
+				signedDate = origen.signedDate,
+				deleted = origen.deleted,
+				access = origen.access,
+				disccountPercentage = origen.disccountPercentage,
+				originalPrice = origen.originalPrice,
+				agreementPrice = origen.agreementPrice,
+				salePrice = origen.salePrice,
+				IVA = origen.IVA,
+				idAgreementType = origen.idAgreementType,
+				currencyId = origen.currencyId,
+				quantity = origen.quantity,
+				scheduleId = origen.scheduleId,
+				userDisccount = origen.userDisccount
+        WHEN NOT MATCHED THEN
+            INSERT
+				(
+					enable, checkSum, startDate, idMeasureUnit, idService, finalDate, 
+					idSupplier, signedDate, deleted, access, disccountPercentage, originalPrice, 
+					agreementPrice, salePrice, IVA, idAgreementType, currencyId, quantity, scheduleId, userDisccount
+				)
+			VALUES
+				(
+					origen.enable, origen.checkSum, origen.startDate, origen.idMeasureUnit, origen.idService, origen.finalDate, 
+					@SupplierID, origen.signedDate, origen.deleted, origen.access, origen.disccountPercentage, origen.originalPrice, 
+					origen.agreementPrice, origen.salePrice, origen.IVA, origen.idAgreementType, origen.currencyId, origen.quantity, origen.scheduleId, origen.userDisccount
+				);
+
+
+
+		-- es importante que el código que escriba aquí sea lo más corto y lo más eficiente posible
+		-- queremos durar lo menos posible para llegar al commit 
+		-- aqui asustan, hay que pasar rápido por aquí
+					
+		IF @InicieTransaccion=1 BEGIN
+			COMMIT
+		END
+	END TRY
+	BEGIN CATCH
+		-- en esencia, lo que hay  que hacer es registrar el error real, y enviar para arriba un error custom 
+		SET @ErrorNumber = ERROR_NUMBER()
+		SET @ErrorSeverity = ERROR_SEVERITY()
+		SET @ErrorState = ERROR_STATE()
+		SET @Message = ERROR_MESSAGE()
+		
+		IF @InicieTransaccion=1 BEGIN
+			ROLLBACK
+		END
+		-- el error original lo inserte en la tabla de logs, pero retorno a la capa superior un error en "bonito"
+		RAISERROR('%s - Error Number: %i', 
+			@ErrorSeverity, @ErrorState, @Message, @CustomError) -- hay que sustituir el @message por un error personalizado bonito, lo ideal es sacarlo de sys.messages 
+		-- en la tabla de sys.messages se pueden insertar mensajes personalizados de error, los cuales se les hace match con el numero en @CustomError
+	END CATCH	
+END
+RETURN 0
+GO
+
+
+
+
+-- 1) preparar TVP con dos condiciones: 
+DECLARE @tvp dbo.caipiTVP_CondicionesProveedor;
+
+INSERT INTO @tvp
+  (enable, checkSum, startDate, idMeasureUnit, idService, finalDate,
+   idSupplier, signedDate, deleted, access, disccountPercentage, originalPrice,
+   agreementPrice, salePrice, IVA, idAgreementType, currencyId, quantity, scheduleId, userDisccount)
+VALUES
+  (1, 0xABCDEF, '2025-05-01', 1, 10, '2025-12-31', 16, '2025-05-01', 0, 1, 5.00, 100.00, 95.00, 890.00, 1, 2, 1, 10, 1, 0.00),
+  (1, 0x123456, '2025-06-01', 2, 20, '2025-12-31', 16, '2025-06-01', 0, 1, 0.00,  200.00,180.00, 230.00, 1, 3, 2,  5, 2, 10.00);
+
+-- 2) ejecutar SP
+EXEC dbo.caipiSP_ActualizarCondiciones
+  @supplierID   = 16,
+  @name         = 'Proveedor X',
+  @enable       = 1,
+  @categoryID   = 5,
+  @mediafileID  = 3,
+  @agreementID  = 0,
+  @deleted      = 0,
+  @condiciones  = @tvp;
+
+-- 3) verificar
+SELECT * FROM dbo.caipi_suppliers    WHERE name = 'Proveedor X';
+SELECT * FROM dbo.caipi_agreementTerms WHERE idSupplier = 16;
+```
+ </details>
+
+ #### 9. Crear un SELECT que genere un archivo CSV de datos basado en un JOIN entre dos tablas
+
+<details>
+	<summary>Mostrar script</summary>
+
+```sql
+GO
+CREATE OR ALTER PROCEDURE dbo.caipiSP_ObtenerUserPlanStardateCSV
+AS
+BEGIN
+    SET NOCOUNT ON;
+	
+	-- Hacemos el query
+	SELECT 'username,plan,stardate' AS csv
+	UNION ALL
+	SELECT 
+		u.username + ',' +
+		p.name + ',' +
+		CONVERT(VARCHAR(30), s.startdate) AS startdate
+	FROM dbo.caipi_users AS u
+	INNER JOIN dbo.caipi_subscriptions AS s ON u.userid = s.userid
+	INNER JOIN dbo.caipi_plans AS p ON s.idPlan = p.idPlan
+	WHERE
+		u.active = 1
+		AND s.enable = 1
+		AND p.enable = 1;
+END;
+GO
+
+EXEC dbo.caipiSP_ObtenerUserPlanStardateCSV;
+```
+
+</details>
+
+<details>
+	<summary>Mostrar resultado</summary>
+
+```csv
+username,plan,stardate
+lgarcia002,Combo Soltura,2025-02-24
+mgarcia003,Creativo Freelance,2024-06-14
+mtorres004,Combo Soltura,2025-04-14
+mmartinez005,Viajero Frecuente,2024-05-09
+agarcia006,EcoVida,2024-07-03
+cramirez007,Estudiante Proactivo,2024-08-04
+jperez008,Fit & Chill,2024-12-24
+mmartinez009,Viajero Frecuente,2024-10-08
+alopez010,Viajero Frecuente,2024-10-14
+mgarcia011,Tiempo en Familia,2024-05-04
+clopez012,Combo Soltura,2025-02-23
+cmartinez013,Joven Deportista,2024-09-09
+cperez014,Familia de Verano,2024-05-14
+llopez015,Estudiante Proactivo,2025-04-11
+mramirez016,Viajero Frecuente,2024-09-17
+ctorres017,Estudiante Proactivo,2024-11-09
+jlopez018,Viajero Frecuente,2024-12-21
+cgonzalez019,Nómada Digital,2024-08-14
+jhernandez020,Creativo Freelance,2025-01-30
+mramirez021,Familia de Verano,2024-12-27
+agonzalez022,Profesional en Movimiento,2024-09-02
+cmartinez023,Explorador Urbano,2024-11-27
+mhernandez024,Estudiante Proactivo,2024-11-17
+mramirez025,Hogar Equilibrado,2025-02-12
+cgonzalez026,EcoVida,2025-03-28
+ltorres027,Full Wellness,2025-03-16
+ahernandez028,Hogar Equilibrado,2024-10-17
+jgarcia029,Fit & Chill,2024-04-21
+cgarcia030,Creativo Freelance,2024-11-12
+lramirez031,Hogar Equilibrado,2024-05-27
+cgarcia032,Profesional en Movimiento,2024-11-29
+mgarcia033,Full Wellness,2025-03-10
+aramirez034,Full Wellness,2024-06-28
+jmartinez035,Profesional en Movimiento,2024-07-14
+mgonzalez036,Estudiante Proactivo,2024-12-17
+mperez037,Hogar Equilibrado,2024-04-30
+ltorres038,Estudiante Proactivo,2024-11-29
+lhernandez039,Estudiante Proactivo,2025-01-06
+agonzalez040,Full Wellness,2025-01-29
+jperez041,Tiempo en Familia,2024-09-23
+jsanchez042,Creativo Freelance,2024-08-02
+chernandez043,Familia de Verano,2025-02-03
+amartinez044,Combo Soltura,2024-06-04
+jlopez045,Combo Soltura,2024-08-31
+ltorres046,EcoVida,2025-02-08
+ltorres047,Hogar Equilibrado,2024-09-13
+jlopez048,Familia de Verano,2024-11-10
+mramirez049,Joven Deportista,2024-09-07
+jrodriguez050,EcoVida,2024-06-03
+cgarcia051,Combo Soltura,2024-10-08
+cmartinez052,Viajero Frecuente,2024-12-08
+aramirez053,Joven Deportista,2024-09-24
+lsanchez054,Familia de Verano,2024-07-29
+mramirez055,Profesional en Movimiento,2024-09-05
+lsanchez056,Familia de Verano,2024-10-22
+cgarcia057,EcoVida,2024-06-17
+ahernandez058,Nómada Digital,2025-03-01
+lramirez059,Familia de Verano,2024-05-18
+jgarcia060,Zen Diario,2024-12-16
+aperez061,EcoVida,2025-02-09
+cgarcia062,Nómada Digital,2024-09-04
+cmartinez063,Combo Soltura,2024-11-11
+mtorres064,Joven Deportista,2024-07-06
+ctorres065,Full Wellness,2024-06-06
+jramirez066,Hogar Equilibrado,2024-07-21
+```
+
+ </details>
+
+#### 10. Configurar una tabla de bitácora en otro servidor SQL Server accesible vía Linked Servers con impersonación segura desde los SP del sistema. Ahora haga un SP genérico para que cualquier SP en el servidor principal, pueda dejar bitácora en la nueva tabla que se hizo en el Linked Server.
+
+<details>
+	<summary>Mostrar script creacion segunda base de datos</summary>
+
+```sql
+USE [caipiLogs]
+
+/****** Object:  Table [dbo].[caipi_logs]    Script Date: 21/4/2025 12:40:06 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[caipi_logs](
+	[logId] [int] IDENTITY(1,1) NOT NULL,
+	[description] [varchar](80) NULL,
+	[postime] [timestamp] NOT NULL,
+	[computer] [varchar](100) NOT NULL,
+	[username] [varchar](70) NOT NULL,
+	[trace] [varchar](300) NULL,
+	[referenceId1] [bigint] NULL,
+	[referenceId2] [bigint] NULL,
+	[value1] [varchar](300) NULL,
+	[value2] [varchar](300) NULL,
+	[chechsum] [varbinary](256) NOT NULL,
+	[logSeverityId] [int] NOT NULL,
+	[logSourceId] [int] NOT NULL,
+	[logTypeId] [int] NOT NULL,
+ CONSTRAINT [PK_caipi_qrLogs] PRIMARY KEY CLUSTERED 
+(
+	[logId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[caipi_logSeverity]    Script Date: 21/4/2025 12:40:06 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[caipi_logSeverity](
+	[logSeverityId] [int] IDENTITY(1,1) NOT NULL,
+	[name] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_caipi_logSeverity] PRIMARY KEY CLUSTERED 
+(
+	[logSeverityId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[caipi_logsSources]    Script Date: 21/4/2025 12:40:06 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[caipi_logsSources](
+	[logSourceId] [int] IDENTITY(1,1) NOT NULL,
+	[name] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_caipi_logsSources] PRIMARY KEY CLUSTERED 
+(
+	[logSourceId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[caipi_logTypes]    Script Date: 21/4/2025 12:40:06 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[caipi_logTypes](
+	[logTypeId] [int] IDENTITY(1,1) NOT NULL,
+	[name] [varchar](50) NOT NULL,
+ CONSTRAINT [PK_caipi_logTypes] PRIMARY KEY CLUSTERED 
+(
+	[logTypeId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+```
+
+ </details>
+
+<details>
+	<summary>Mostrar script de llenado de segunda base de datos</summary>
+
+```sql
+USE [caipiLogs];
+
+-- Log severity
+INSERT INTO [dbo].[caipi_logSeverity] ([name])
+VALUES
+	('Low'),
+	('Medium'),
+	('High'),
+	('Critical'),
+	('Informational');
+
+--Log Sources
+INSERT INTO [dbo].[caipi_logsSources] ([name])
+VALUES
+	('System'),
+	('Application'),
+	('Database'),
+	('Security'),
+	('User Activity'),
+	('Network'),
+	('API'),
+	('Payment Gateway'),
+	('Error Handler'),
+	('Authentication'),
+	('File System');
+
+--Log Types
+INSERT INTO [dbo].[caipi_logTypes] ([name])
+VALUES
+	('Error'),
+	('Warning'),
+	('Info'),
+	('Debug'),
+	('Critical'),
+	('Audit'),
+	('Security'),
+	('Transaction'),
+	('Performance'),
+	('Access');
+```
+
+</details>
+
+<details>
+	<summary>Mostrar script</summary>
+
+```sql
+EXEC sp_addlinkedserver 
+    @server = 'SQLBITACORA',
+    @srvproduct = '',
+    @provider = 'SQLNCLI',
+    @datasrc = 'localhost\SQLBITACORA';
+GO
+
+EXEC sp_addlinkedsrvlogin 
+    @rmtsrvname = 'SQLBITACORA',
+    @useself = 'TRUE'; -- Usa el contexto del usuario que ejecuta el SP
+GO
+
+IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'caipiSP_LogToBackupBitacora')
+BEGIN
+    DROP PROCEDURE dbo.caipiSP_LogToBackupBitacora;
+END
+GO
+
+CREATE PROCEDURE dbo.caipiSP_LogToBackupBitacora
+	@description VARCHAR(80),
+	@computer VARCHAR(100),
+	@username VARCHAR(70),
+	@trace VARCHAR(300),
+	@referenceId1 BIGINT,
+	@referenceId2 BIGINT,
+	@value1 VARCHAR(300),
+	@value2 VARCHAR(300),
+	@chechsum VARBINARY(256),
+	@logSeverityId INT,
+	@logSourceId INT,
+	@logTypeId INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SET XACT_ABORT ON;
+
+	BEGIN TRAN;
+	BEGIN TRY
+
+	INSERT INTO SQLBITACORA.caipiLogs.dbo.caipi_logs 
+		(description, postime, computer, username, trace, referenceId1, referenceId2, value1, value2, chechsum, logSeverityId, logSourceId, logTypeId)
+	VALUES
+		(@description, GETDATE(), @computer, @username, @trace, @referenceId1, @referenceId2, @value1, @value2, @chechsum, @logSeverityId, @logSourceId, @logTypeId);
+
+    COMMIT;  -- si todo OK
+	END TRY
+	BEGIN CATCH
+		ROLLBACK;
+	-- relanzo el error real
+	THROW;
+	END CATCH
+END;
+GO
+
+EXEC dbo.caipiSP_LogToBackupBitacora
+    @description     = 'Error en proceso de carga',
+    @computer        = 'Prueba',
+    @username        = 'Preuba',
+    @trace           = 'StackTrace o detalle del error',
+    @referenceId1    = 12345,
+    @referenceId2    = 67890,
+    @value1          = 'valor1',
+    @value2          = 'valor2',
+    @chechsum        = 0xDEADBEEF, -- ejemplo binario
+    @logSeverityId   = 2,
+    @logSourceId     = 1,
+    @logTypeId       = 3;
+
+```
+
+ </details>
+
+
 # Concurrencia
 
 Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, en uber la transacción es buscar un driver, en paypal es procesar un pago, en amazon es buscar artículos, y así sucesivamente, es la operación que más solicitudes recibe el sistema, dicho esto:
