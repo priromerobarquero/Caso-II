@@ -2549,7 +2549,7 @@ EXEC DesencriptarColumna
     @NombreLlaveAsimetrica = 'CaipiClaveAsimetrica',
     @ContraseñaLlaveAsimetrica = 'CaipiCaso2';
 ```
-#Concurrencia
+# Concurrencia
 
 Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, en uber la transacción es buscar un driver, en paypal es procesar un pago, en amazon es buscar artículos, y así sucesivamente, es la operación que más solicitudes recibe el sistema, dicho esto:
 
