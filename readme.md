@@ -11,7 +11,7 @@
 ---
 
 ## 👨‍🏫 Curso: Bases de Datos I  
-**Ciclo:** I Ciclo, 2025  
+**Ciclo:** I Semestre, 2025  
 **Profesor:** Rodrigo Núñez  
 
 ---
@@ -3624,11 +3624,194 @@ EXEC dbo.caipiSP_LogToBackupBitacora
 
 # Concurrencia
 
+## Cursor de Update
+
+Crear un cursor de update que bloquee los registros que recorre uno a uno, demuestre en que casos dicho cursor los bloquea y en que casos no, para que el equipo de desarrollo sepa para que escenarios usar cursos y cuando no. 
+
+A continuacion se presenta un caso de bloqueo entre dos sesiones de ejecucion. En el cual se demuestra por medio de dos sesiones el bloqueo por parte del fetch.
+
+Actualmente por defecto un cursor no bloquea un registro, no obstante, esto ahora se debe indicar por medio del operador `SCROLL_LOCKS`
+
+```sql
+
+--Con la finalidad de realizar pruebas se recomienda ejecutar la siguiente actualizacion
+UPDATE caipi_agreementTerms
+SET finalDate = GETDATE(), enable = 1
+
+
+DECLARE @idAgreementTerm INT
+DECLARE @finalDate DATETIME
+DECLARE @enable BIT
+
+
+
+-- Declara el cursor con bloqueo UPDLOCK y ROWLOCK para garantizar la actualización sin bloqueos globales
+DECLARE agreement_terms_cursor CURSOR SCROLL_LOCKS FOR
+SELECT idagreementTerm, finalDate, enable
+FROM dbo.caipi_agreementTerms WITH (ROWLOCK, UPDLOCK) --SE BLOQUEA TODA LA FILA QUE EL CURSOR ESTA RECORRIENDO
+WHERE deleted = 0  -- Solo acuerdos no eliminados
+
+-- Abre el cursor
+OPEN agreement_terms_cursor
+
+-- Recupera el primer registro
+FETCH NEXT FROM agreement_terms_cursor INTO @idAgreementTerm, @finalDate, @enable
+
+-- Recorre los registros
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Ejemplo de operación: Deshabilitar el acuerdo si la fecha final ha pasado
+    IF @finalDate < GETDATE() AND @enable = 1
+    BEGIN
+        -- Actualiza el valor de 'enable' a 0 sin necesidad de UPDLOCK adicional pq el cursor lo esta realizando
+        UPDATE dbo.caipi_agreementTerms
+        SET enable = 0
+        WHERE idagreementTerm = @idAgreementTerm
+    END
+
+	--PRINT 'Procesado el Agreement ID: ' + CAST(@idAgreementTerm AS VARCHAR) +  ', Final Date: ' + CAST(@finalDate AS VARCHAR) +  ', Enabled: ' + CAST(@enable AS VARCHAR)
+	WAITFOR DELAY '00:00:012'
+    -- Recupera el siguiente registro
+    FETCH NEXT FROM agreement_terms_cursor INTO @idAgreementTerm, @finalDate, @enable
+END
+
+-- Cierra y desasocia el cursor
+CLOSE agreement_terms_cursor
+DEALLOCATE agreement_terms_cursor
+
+```
+
+El cursor de UPDATE en SQL Server recorre los registros de una tabla y realiza actualizaciones en ellos mientras mantiene bloqueos para evitar que otros procesos modifiquen esos registros simultáneamente. Al declarar el cursor con la opción SCROLL_LOCKS, se garantiza que el cursor pueda moverse tanto hacia adelante como hacia atrás en los registros, y que los bloqueos sobre las filas que se están procesando se mantengan durante todo el recorrido.
+
+Se utiliza WITH (ROWLOCK, UPDLOCK) para aplicar los bloqueos. El ROWLOCK asegura que solo se bloquea la fila específica que se está procesando, no toda la tabla, lo que permite que otras filas puedan ser modificadas por otros procesos. El UPDLOCK, por su parte, aplica un bloqueo de actualización en la fila, lo que significa que, mientras el cursor está procesando ese registro, nadie más podrá modificarlo. Si otro proceso intenta actualizar la misma fila, tendrá que esperar hasta que el cursor termine de procesarla y libere el bloqueo. Este mecanismo garantiza que los registros no sean modificados concurrentemente, evitando conflictos y asegurando la integridad de los datos mientras se realizan las actualizaciones.
+
+Las siguientes instrucciones se deben ejecutar en otras esion
+
+```sql
+
+DECLARE @agreementId INT
+SET @agreementId = 16
+
+UPDATE caipi_agreementTerms
+SET finalDate = GETDATE()
+WAITFOR DELAY '00:00:01'
+
+```
+El UPDATE en otra sesión anterior debe esperar a que el cursor termine de ejecutarse debido al bloqueo UPDLOCK aplicado por el cursor sobre los registros que está procesando. En el caso que mencionas, el cursor adquiere un bloqueo de actualización (UPDLOCK) sobre cada fila mientras la recorre. Este tipo de bloqueo impide que otras transacciones modifiquen los registros bloqueados hasta que el cursor termine su operación y libere el bloqueo.
+
+Cuando otra sesión intenta ejecutar un UPDATE sobre la tabla, como en el caso de actualizar el finalDate, se encuentra con que las filas que el cursor está procesando están bloqueadas con el UPDLOCK. Debido a esto, la sesión que intenta ejecutar el UPDATE no puede modificar esas filas hasta que el cursor haya terminado de procesarlas, ya que el bloqueo de actualización mantiene a otras transacciones a la espera.
+
+El UPDLOCK evita que otros procesos realicen actualizaciones en las filas bloqueadas, lo que asegura que no haya cambios concurrentes en los registros mientras el cursor está en ejecución. Una vez que el cursor termina y se cierra, los bloqueos se liberan, y las sesiones que estaban esperando pueden continuar con sus transacciones y modificar las filas si es necesario.
+
+---
+### Casos en los que un cursor no bloquearia una fila
+
+Como fue mencionado anteriormente, uun cursor al no poseer un operador de bloqueo este no bloquea la fila a la que se le este realizando fetch por lo que se muestra un ejemplo en el que al declarar un cursor sencillo no realiza bloqueos si yo ejecuto una transaccion sobre el mismo dato en otra sesion
+
+```sql
+
+--Con la finalidad de realizar pruebas se recomienda ejecutar la siguiente actualizacion
+UPDATE caipi_agreementTerms
+SET finalDate = GETDATE(), enable = 1
+
+
+DECLARE @idAgreementTerm INT
+DECLARE @finalDate DATETIME
+DECLARE @enable BIT
+
+
+
+-- Declara el cursor con bloqueo UPDLOCK y ROWLOCK para garantizar la actualización sin bloqueos globales
+DECLARE agreement_terms_cursor CURSOR FOR
+SELECT idagreementTerm, finalDate, enable
+FROM dbo.caipi_agreementTerms  --NO SE BLOQUEA TODA LA FILA QUE EL CURSOR ESTA RECORRIENDO PQ NO SE INDICA NINGUN OPERADOR
+WHERE deleted = 0  -- Solo acuerdos no eliminados
+
+-- Abre el cursor
+OPEN agreement_terms_cursor
+
+-- Recupera el primer registro
+FETCH NEXT FROM agreement_terms_cursor INTO @idAgreementTerm, @finalDate, @enable
+
+-- Recorre los registros
+WHILE @@FETCH_STATUS = 0
+BEGIN
+    -- Ejemplo de operación: Deshabilitar el acuerdo si la fecha final ha pasado
+    IF @finalDate < GETDATE() AND @enable = 1
+    BEGIN
+        -- Actualiza el valor de 'enable' a 0 sin necesidad de UPDLOCK adicional pq el cursor lo esta realizando
+        UPDATE dbo.caipi_agreementTerms
+        SET enable = 0
+        WHERE idagreementTerm = @idAgreementTerm
+    END
+
+	--PRINT 'Procesado el Agreement ID: ' + CAST(@idAgreementTerm AS VARCHAR) +  ', Final Date: ' + CAST(@finalDate AS VARCHAR) +  ', Enabled: ' + CAST(@enable AS VARCHAR)
+	WAITFOR DELAY '00:00:012'
+    -- Recupera el siguiente registro
+    FETCH NEXT FROM agreement_terms_cursor INTO @idAgreementTerm, @finalDate, @enable
+END
+
+-- Cierra y desasocia el cursor
+CLOSE agreement_terms_cursor
+DEALLOCATE agreement_terms_cursor
+
+
+```
+
+La siguiente transaccion se ejecuta en otra sesion, y a diferencia de un bloqueo, esta se realiza casi de forma inmediata con un tiempo menor
+
+```sql
+
+DECLARE @agreementId INT
+SET @agreementId = 16
+
+UPDATE caipi_agreementTerms
+SET finalDate = GETDATE()
+WAITFOR DELAY '00:00:01'
+
+```
+
+### Casos en los que se recomienda utilizar un cursor dentro de SOLTURA
+
+En el sistema de Soltura, donde se manejan contratos, paquetes de servicios y beneficios mensuales para los clientes, el uso de cursores en SQL Server puede tener sentido en ciertos casos teniendo en cuenta el asilamiento que ellos generan cuando se le indica y tambien casos cuando no bloqueen, pero es importante saber cuándo conviene realmente usarlos debido a los bloqueos por fila que generan.
+
+- **Renovar beneficios uno por uno dependiendo del historial del usuario :** Por ejemplo, si tengo que revisar cliente por cliente su historial de uso y pagos antes de renovar su contrato, un cursor me permite aplicar lógica condicional específica por cada fila sin afectar a otros usuarios al mismo tiempo.
+  
+- Se necesita procesar fila por fila y aplicar lógica compleja que no se puede resolver fácilmente con una sola consulta UPDATE o MERGE. Por ejemplo, si Soltura requiere revisar la fecha de vencimiento de cada contrato individualmente y tomar decisiones distintas para cada cliente según varios criterios, un cursor puede ser útil.
+  
+- **Actualizar servicios activos con lógica extensa :** Si un cliente tiene servicios distintos como gimnasio, spa o dieta, y cada uno tiene reglas diferentes de renovación, el cursor me permite aplicar condiciones específicas para cada caso sin hacer todo en un solo UPDATE genérico.
+
+- Enviar notificaciones personalizadas al vencer contratosSi quiero enviar mensajes distintos dependiendo del tipo de paquete, cliente o historial, puedo recorrer uno a uno los registros y preparar notificaciones personalizadas.
+
+- Si el proceso implica tomar decisiones basadas en valores específicos de cada fila y estas decisiones no se pueden hacer en una sola consulta masiva. Por ejemplo, si cada fila necesita cálculos complejos o múltiples pasos de validación antes de realizar una acción.
+
+- Si el proceso implica varias tablas y es complicado hacerlo en una sola transacción o consulta, el cursor te permite manejar la lógica de manera secuencial y paso a pas
+
+### Casos en los que se NO recomienda utilizar un cursor dentro de SOLTURA
+
+- **Deshabilitar contratos vencidos en masa: ** Si todos los contratos con fecha vencida deben ser deshabilitados, se puede hacer con una sola sentencia. Esto como fue demostrado, no es tan util y dismunuye la eficiencia de la transacción. Con ello, este ejemplo es un paso para tomarlo en otros casos de los cuales se pueda simplificar una transaccion sin recorrer uno por uno.
+
+- **Cuando el volumen de datos es muy alto **, no se recomienda porque los cursores consumen muchos recursos y pueden causar bloqueos prolongados que afecten a otras transacciones si no se manejan bien e incluso llegar a deadlocks y por consecuencia transacciones canceladas.
+
+- **Registrar renovaciones automáticas del mes**   Si la lógica de renovación es simple y se aplica igual a todos los contratos activos, no hace falta recorrer uno por uno. Un `UPDATE` masivo es más rápido y eficiente.
+
+- **Asignar beneficios estándar al contratar un nuevo paquete**   Cuando un nuevo cliente contrata un paquete, todos los beneficios asociados se pueden insertar directamente con una sentencia `INSERT INTO ... SELECT`, sin cursor.
+
+- **Descontar saldo mensual a todos los clientes activos**
+  	Si todos los clientes activos deben tener un descuento de su saldo por la mensualidad, hacerlo en lote es mucho más eficiente que recorrer cada cliente con un cursor.
+
+- **Cuando el sistema debe escalar o trabajar con muchos datos**  
+   En sistemas donde el volumen de datos puede crecer rápidamente, como Soltura, los cursores tienden a volverse lentos y bloquear recursos por más tiempo, lo que afecta el rendimiento general.
+
+
+## Transaccion de volumen
 Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, en uber la transacción es buscar un driver, en paypal es procesar un pago, en amazon es buscar artículos, y así sucesivamente, es la operación que más solicitudes recibe el sistema, dicho esto:
 
 - Transacción de volumen dentro de la base de datos → En Soltura, la transacción de volumen corresponde al proceso de canjeo de los servicios incluidos en cada plan de suscripción. Esta operación es la más frecuente dentro del sistema, ya que los usuarios pueden realizar canjes de forma diaria y en múltiples ocasiones, lo que genera una alta cantidad de solicitudes concurrentes a la base de datos. Por tanto, este proceso debe estar optimizado para manejar grandes volúmenes de transacciones sin afectar el rendimiento del sistema.
 
-El sisguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación). Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). Está diseñado para ejecutarse en un entorno transaccional controlado y manejar adecuadamente errores con registros claros.
+---
+
+El siguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación). Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). Está diseñado para ejecutarse en un entorno transaccional controlado y manejar adecuadamente errores con registros claros.
 
 El nivel de insolacion READ COMMITTED se utiliza para evitar la lectura de datos no confirmados ("dirty reads") durante la transacción. Esto significa que cualquier dato leído durante la ejecución del procedimiento ya ha sido confirmado por otras transacciones, garantizando así que los valores utilizados para verificar límites o condiciones son válidos y estables durante toda la operación. Esto es esencial en este procedimiento, ya que trabaja con condiciones sensibles de límites de redención que, si se leyeran sin confirmar, podrían permitir redenciones incorrectas o inconsistentes.
 
