@@ -33,7 +33,7 @@
 
 🧩 3. [Ir a Demostraciones T-SQL](#-demostraciones-t-sql-uso-de-instrucciones-específicas)
 
-🧩 4. [Ir al Mantenimiento de Seguridad](#Mantenimiento-de-la-Seguridad)
+🧩 4. [Ir al Mantenimiento de Seguridad](#mantenimiento-de-la-Seguridad)
 
 🧩 5. [Ir a Concurrencia](#concurrencia)
 
@@ -3670,50 +3670,294 @@ END;
 
 Determine cuántas transacciones por segundo máximo es capaz de procesar su base de datos, valide el método con el profesor
 
-# 📈 Informe de Prueba de Rendimiento con JMeter
+# 🧪 Configuración de JMeter para Pruebas de Rendimiento de la API
 
-### ⚙️ Parámetros de la Prueba
+Este documento explica cómo se configuró Apache JMeter para evaluar el rendimiento de una API Node.js que se conecta a una base de datos SQL Server.
 
-- **Usuarios (Threads):** 5000
-- **Ramp-up Period:** 60 segundos  
-  → Se agregaron aproximadamente 83 usuarios por segundo.
-- **Duración Total:** 100 segundos  
-  → El sistema fue sometido a carga durante un periodo sostenido.
+---
 
-### Resultados
+## 🎯 Objetivo de la Prueba
 
--Transacciones por segundo -> 56.38615 /sec
+Simular múltiples usuarios accediendo simultáneamente al endpoint `/insert-redemption` para evaluar:
 
--→ Se ejecutaron 528,446 solicitudes en total (cada una simula un usuario accediendo al sistema).
+- El tiempo de respuesta promedio.
+- La capacidad de la base de datos para manejar carga.
+- La estabilidad del backend bajo estrés.
 
-→ Average : 7587 ms. Tiempo promedio de respuesta por solicitud fue de 7.6 segundos.
+---
 
-→ Median : 1090 ms. El 50% de las solicitudes fueron respondidas en menos de 1.09 segundos (esto indica que hay muchas solicitudes rápidas)
+## ⚙️ Configuración del Test Plan
 
-Durante la prueba se hicieron 528,446 solicitudes en total, lo que representa una carga bastante alta de usuarios simulados accediendo al sistema al mismo tiempo. El sistema logró procesar 56.38 transacciones por segundo, lo cual me parece un buen rendimiento considerando la cantidad de solicitudes simultáneas.
+### 🧵 Thread Group (Grupo de Hilos)
 
-El tiempo promedio de respuesta fue de 7.6 segundos, lo cual es algo elevado. Sin embargo, si vemos la mediana, que fue de 1.09 segundos, nos damos cuenta de que más del 50% de las solicitudes fueron respondidas en menos de un segundo y medio, lo que es bastante bueno. Esto indica que la mayoría de los accesos son rápidos, pero hay ciertos casos donde algunas solicitudes se demoran bastante, lo que termina subiendo el promedio general.
+Se configuró para simular un escenario realista con los siguientes parámetros:
 
-En resumen, el sistema funciona bien en la mayoría de los casos, pero hay algunos picos de lentitud que habría que se podria para  y reducir esos tiempos más altos que afectan el promedio.
+- **Number of Threads (Usuarios simulados):** `60`  
+  → Representa la cantidad de usuarios simultáneos haciendo peticiones.
 
-#### Metodo de medicion utilizado
+- **Ramp-Up Period (segundos):** `10`  
+  → Tiempo en segundos que JMeter tardará en iniciar todos los usuarios. Por ejemplo, 60 hilos en 10 segundos significa que cada segundo se inician 6 hilos.
 
-Para medir el rendimiento del sistema, se utilizó un backend desarrollado en Node.js que se conecta a una base de datos SQL Server. El backend está configurado para recibir solicitudes HTTP en el puerto 3000 mediante Express. El objetivo de la prueba es que JMeter, a través de un HTTP Request, haga llamadas al path del Node.js en este puerto. La funcionalidad del backend consiste en ejecutar una transacción de inserción en la base de datos cada vez que se recibe una solicitud, lo que implica la ejecución de un procedimiento almacenado en SQL Server.
+- **Loop Count (Repeticiones por hilo):** `10`  
+  → Cada usuario realizará la prueba 10 veces.
 
-En la configuración de JMeter, se utilizaron dos listeners:
+🔁 **Total de solicitudes simuladas**: `60 hilos * 10 repeticiones = 600 solicitudes`
 
--View Result Tree: Este listener permite ver en detalle las solicitudes y respuestas individuales durante la prueba de rendimiento. Es útil para obtener información sobre cada solicitud, como los tiempos de respuesta y las posibles fallas.
+---
 
--Aggregate Report: Este listener proporciona una visión general de los resultados de la prueba, mostrando estadísticas agregadas como el número total de solicitudes, el tiempo promedio de respuesta, la tasa de éxito, entre otros. Es particularmente útil para evaluar el rendimiento global del sistema.
+### ⏲️ Temporizador: Uniform Random Timer
 
-Además, para evitar que las solicitudes se realicen con una frecuencia constante y simular un comportamiento más realista de los usuarios, se configuró un Uniform Random Timer con un retraso de 100 milisegundos. Este retraso aleatorio ayuda a distribuir las solicitudes de manera más natural, evitando picos de carga que podrían no reflejar el uso real del sistema en un entorno de producción.
+Para evitar que las solicitudes se disparen de forma simultánea y poco realista, se añadió un **Uniform Random Timer** con los siguientes valores:
 
-Con esta configuración, se logró medir de manera eficiente el rendimiento del backend y la base de datos bajo carga, proporcionando datos relevantes para analizar los tiempos de respuesta y la capacidad del sistema para manejar múltiples solicitudes simultáneas.
+- **Delay Offset:** `0 ms`
+- **Random Delay Maximum:** `100 ms`
 
-#### Monitor durante la prueba de ejecución
-![WhatsApp Image 2025-05-04 at 21 05 19_ef0475e7](https://github.com/user-attachments/assets/736cb0bd-9ee5-4839-b929-e6fd4ce0f186)
+🔄 Esto introduce una variación aleatoria entre cada solicitud, simulando un comportamiento más natural y evitando picos de carga artificiales.
+
+---
+
+## 📈 Listeners Utilizados
+
+### 1. View Results Tree
+
+Permite inspeccionar el resultado de cada solicitud de forma individual. Es útil para:
+
+- Ver el cuerpo de la respuesta.
+- Comprobar errores HTTP.
+- Medir tiempos de respuesta puntuales.
+
+### 2. Aggregate Report
+
+Proporciona estadísticas globales del test, incluyendo:
+
+- **# Samples**: Cantidad total de peticiones realizadas.
+- **Average**: Tiempo promedio de respuesta.
+- **Min / Max**: Tiempos mínimos y máximos de respuesta.
+- **Error %**: Porcentaje de fallos.
+- **Throughput**: Número de peticiones procesadas por segundo.
+
+---
+
+## ✅ Resultados Esperados
+
+Con esta configuración, se puede:
+
+- Evaluar cómo responde la API bajo carga.
+- Identificar posibles cuellos de botella.
+- Comparar diferentes versiones del backend.
+
+## 📊 Resultados de la Prueba
+
+Tras ejecutar el test con la configuración descrita, se obtuvieron los siguientes resultados:
+
+- **Throughput (TPS - Transactions per Second):** `59.1 TPS`  
+  → Esto indica que el sistema pudo manejar aproximadamente 59 solicitudes por segundo, lo cual es un buen rendimiento para una carga de 60 usuarios concurrentes.
+
+- **Average Response Time (Promedio):** `89 ms`  
+  → El tiempo promedio que tardó el servidor en responder a cada solicitud. Un tiempo por debajo de 100 ms indica una respuesta rápida bajo carga.
+
+- **Median Response Time (Mediana):** `34 ms`  
+  → El 50% de las solicitudes se resolvieron en menos de 34 ms, lo que muestra que la mayoría de las respuestas fueron muy rápidas.
+
+- **Samples (Muestras Totales):** `600`  
+  → Equivale a las 600 solicitudes totales generadas por los 60 usuarios con 10 repeticiones cada uno.
+
+---
+
+## 🧠 Interpretación
+
+- El sistema mostró **alta capacidad de respuesta** y **estabilidad** con 60 usuarios concurrentes.
+- La mediana baja frente al promedio sugiere que unas pocas solicitudes más lentas elevaron el promedio, pero en general, la mayoría fueron muy rápidas.
+- Un Throughput de casi 60 TPS es adecuado para aplicaciones de backend que atienden transacciones individuales.
+
+# 📡 API de Inserción de Transacciones de Redención
+
+Este proyecto contiene una API construida con **Node.js** y **Express** que se conecta a una base de datos **SQL Server** para ejecutar un procedimiento almacenado (`dbo.CaipiSP_InsertRedemptionTransaction`).
+
+---
+
+## 🚀 Cómo ejecutar la API con `node index.js`
+
+### 📦 Requisitos previos
+
+Antes de ejecutar la API, se debe tener instalado lo siguiente:
+
+- **Node.js** (versión 14 o superior)
+- **npm** (el gestor de paquetes de Node)
+- **SQL Server** (en funcionamiento localmente o accesible desde tu equipo)
+- El procedimiento almacenado `CaipiSP_InsertRedemptionTransaction` creado en la base de datos `caipiIAdb`
+
+---
+
+### 📁 Archivos importantes
+
+El archivo principal del servidor es:
+
+```
+index.js
+```
+
+---
+
+### 📥 Instalación de dependencias
+
+Desde la carpeta del proyecto, ejecuta en la terminal:
+
+```
+npm install express mssql
+```
+
+Esto instalará las dependencias necesarias para ejecutar el servidor.
+
+---
+
+### ⚙️ Configuración de la conexión a la base de datos
+
+Abre `index.js` y verifica que la sección de configuración de la base de datos tenga tus credenciales reales:
+
+```js
+const config = {
+  user: 'UsuarioSQL',
+  password: 'password2410',
+  server: 'localhost',
+  database: 'caipiIAdb',
+  options: {
+    encrypt: true,
+    trustServerCertificate: true
+  }
+};
+```
+
+Reemplace `UsuarioSQL`, `password2410` y otros valores según su configuracion de servidore en la base de datos.
+
+---
+
+### ▶️ Ejecutar la API
+
+Para iniciar el servidor, ejecute el siguiente comando:
+
+```
+node index.js
+```
+
+Si todo está correctamente configurado, debería ver en la terminal:
+
+```
+Servidor corriendo en http://localhost:3000
+```
+
+---
+
+### 📬 ¿Qué hace esta API?
+
+Esta API expone un endpoint `POST` en:
+
+```
+http://localhost:3000/insert-redemption
+```
+
+Al hacer una solicitud a este endpoint:
+
+1. Se conecta a la base de datos `caipiIAdb`.
+2. Ejecuta el procedimiento almacenado `CaipiSP_InsertRedemptionTransaction` con valores de prueba.
+3. Devuelve una respuesta en formato JSON con los datos resultantes.
+
+---
+```js
+// Importa las dependencias
+const express = require('express');
+const sql = require('mssql');  // Paquete para la conexión con SQL Server
+
+const app = express();
+const port = 3000;
+app.use(express.json());
+
+// Configuración de la conexión a SQL Server
+const config = {
+  user: 'UsuarioSQL',  // Reemplaza con tu usuario de SQL Server
+  password: 'password2410',  // Reemplaza con tu contraseña
+  server: 'localhost',  // Dirección del servidor (localhost si es local)
+  database: 'caipiIAdb',  // Nombre de tu base de datos
+  options: {
+    encrypt: true,  // Habilita la encriptación de la conexión (si es necesario)
+    trustServerCertificate: true  // Si no confías en el certificado, ponlo en true
+  }
+};
+
+// Middleware para parsear el cuerpo de las solicitudes
+app.use(express.json());
+
+app.post('/insert-redemption', async (req, res) => {
+  console.log('entro')
+  try {
+    const numberTag = '1234';
+    const redemptionTransactionTypeId = 1;
+    const idModule = 1;
+    const idSupplierBranch = 0;
+    const quantity = null; // O undefined si prefieres omitirlo del query
+    const amount = 13;
+    const validation = null;
+    const agreementTermId = 10;
+    const userACanjearId = 15;
+    const idPerson = 10;
+    // Mostrar todo
+    console.log({
+      numberTag,
+      redemptionTransactionTypeId,
+      idModule,
+      idSupplierBranch,
+      quantity,
+      amount,
+      validation,
+      agreementTermId,
+      userACanjearId,
+      idPerson
+    });
+
+    // Conectarse a la base de datos
+    await sql.connect(config);
+
+    // Preparar la consulta con parámetros
+    const request = new sql.Request();
+    request.input('numberTag', sql.VarChar, numberTag);
+    request.input('redemptionTransactionTypeId', sql.Int, redemptionTransactionTypeId);
+    request.input('idModule', sql.Int, idModule);
+    request.input('idSupplierBranch', sql.Int, idSupplierBranch);
+    request.input('quantity', sql.Int, quantity);
+    request.input('amount', sql.Decimal, amount);
+    request.input('validation', sql.Bit, validation);
+    request.input('agreementTermId', sql.Int, agreementTermId);
+    request.input('userACanjearId', sql.Int, userACanjearId);
+    request.input('idPerson', sql.Int, idPerson);
+
+    // Ejecutar el SP
+    const result = await request.execute('dbo.CaipiSP_InsertRedemptionTransaction');
+    res.status(200).json({ success: true, data: result.recordset });
+    
+  } catch (err) {
+    console.error('Error al insertar datos:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 
+// Inicia el servidor
+app.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
+});
+```
+
+## 🧪 Pruebas de rendimiento con JMeter
+
+
+#### Monitoreo del CPU durante la prueba de ejecución
+
+![WhatsApp Image 2025-05-05 at 12 09 04_f5574b54](https://github.com/user-attachments/assets/9b351a55-1b5b-490d-8882-8b08f47427eb)
+
+
+#### Resultados del listener al ejecutar la prueba
+
+![WhatsApp Image 2025-05-05 at 12 33 09_c097ccb5](https://github.com/user-attachments/assets/3eb92172-9c7b-44d1-8640-3213444c79c5)
 
 
 # Migracion de los usuarios de Payment Assistant
