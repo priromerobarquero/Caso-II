@@ -2550,6 +2550,7 @@ EXEC DesencriptarColumna
     @ContraseñaLlaveAsimetrica = 'CaipiCaso2';
 ```
 #Concurrencia
+
 Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, en uber la transacción es buscar un driver, en paypal es procesar un pago, en amazon es buscar artículos, y así sucesivamente, es la operación que más solicitudes recibe el sistema, dicho esto:
 
 - Transacción de volumen dentro de la base de datos → En Soltura, la transacción de volumen corresponde al proceso de canjeo de los servicios incluidos en cada plan de suscripción. Esta operación es la más frecuente dentro del sistema, ya que los usuarios pueden realizar canjes de forma diaria y en múltiples ocasiones, lo que genera una alta cantidad de solicitudes concurrentes a la base de datos. Por tanto, este proceso debe estar optimizado para manejar grandes volúmenes de transacciones sin afectar el rendimiento del sistema.
