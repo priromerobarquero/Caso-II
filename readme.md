@@ -35,7 +35,9 @@
 
 🧩 4. [Ir al Mantenimiento de Seguridad](#Mantenimiento-de-la-Seguridad)
 
-🧩 5. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
+🧩 5. [Ir a Concurrencia](#concurrencia)
+
+🧩 6. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
 
 
 
@@ -2547,6 +2549,34 @@ EXEC DesencriptarColumna
     @NombreLlaveAsimetrica = 'CaipiClaveAsimetrica',
     @ContraseñaLlaveAsimetrica = 'CaipiCaso2';
 ```
+#Concurrencia
+Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, en uber la transacción es buscar un driver, en paypal es procesar un pago, en amazon es buscar artículos, y así sucesivamente, es la operación que más solicitudes recibe el sistema, dicho esto:
+
+- Transacción de volumen dentro de la base de datos → En Soltura, la transacción de volumen corresponde al proceso de canjeo de los servicios incluidos en cada plan de suscripción. Esta operación es la más frecuente dentro del sistema, ya que los usuarios pueden realizar canjes de forma diaria y en múltiples ocasiones, lo que genera una alta cantidad de solicitudes concurrentes a la base de datos. Por tanto, este proceso debe estar optimizado para manejar grandes volúmenes de transacciones sin afectar el rendimiento del sistema.
+
+Determine cuántas transacciones por segundo máximo es capaz de procesar su base de datos, valide el método con el profesor
+
+# 📈 Informe de Prueba de Rendimiento con JMeter
+
+### ⚙️ Parámetros de la Prueba
+
+- **Usuarios (Threads):** 5000
+- **Ramp-up Period:** 60 segundos  
+  → Se agregaron aproximadamente 83 usuarios por segundo.
+- **Duración Total:** 100 segundos  
+  → El sistema fue sometido a carga durante un periodo sostenido.
+
+### Resultados
+-Transacciones por segundo -> 56.38615 /sec
+-→ Se ejecutaron 528,446 solicitudes en total (cada una simula un usuario accediendo al sistema).
+→ Average : 7587 ms. Tiempo promedio de respuesta por solicitud fue de 7.6 segundos, que es bastante alto si la meta es < 1 segundo.
+→ Median : 1090 ms. El 50% de las solicitudes fueron respondidas en menos de 1.09 segundos (esto indica que hay muchas solicitudes rápidas)
+
+#### Monitor durante la prueba de ejecución
+![WhatsApp Image 2025-05-04 at 21 05 19_ef0475e7](https://github.com/user-attachments/assets/736cb0bd-9ee5-4839-b929-e6fd4ce0f186)
+
+
+
 
 # Migracion de los usuarios de Payment Assistant
 Previo a la semana santa, la empresa Soltura estuvo en conversaciones con los dueños e inversionistas de varias empresas ya establecidas en el país, entre ellas "payment assistant" y "app assistant" (como grupo de trabajo escogen solo una del entregable del caso #1), esas empresas ya han logrado cierta tracción y público en Costa Rica y han decidido que dichas aplicaciones podrían ser dadas como parte de los planes de subscripción de Soltura.
