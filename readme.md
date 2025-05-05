@@ -2568,9 +2568,13 @@ Determine cuántas transacciones por segundo máximo es capaz de procesar su bas
   → El sistema fue sometido a carga durante un periodo sostenido.
 
 ### Resultados
+
 -Transacciones por segundo -> 56.38615 /sec
+
 -→ Se ejecutaron 528,446 solicitudes en total (cada una simula un usuario accediendo al sistema).
+
 → Average : 7587 ms. Tiempo promedio de respuesta por solicitud fue de 7.6 segundos, que es bastante alto si la meta es < 1 segundo.
+
 → Median : 1090 ms. El 50% de las solicitudes fueron respondidas en menos de 1.09 segundos (esto indica que hay muchas solicitudes rápidas)
 
 #### Monitor durante la prueba de ejecución
