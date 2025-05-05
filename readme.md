@@ -3789,9 +3789,9 @@ En el sistema de Soltura, donde se manejan contratos, paquetes de servicios y be
 
 ### Casos en los que se NO recomienda utilizar un cursor dentro de SOLTURA
 
-- **Deshabilitar contratos vencidos en masa: ** Si todos los contratos con fecha vencida deben ser deshabilitados, se puede hacer con una sola sentencia. Esto como fue demostrado, no es tan util y dismunuye la eficiencia de la transacción. Con ello, este ejemplo es un paso para tomarlo en otros casos de los cuales se pueda simplificar una transaccion sin recorrer uno por uno.
+- **Deshabilitar contratos vencidos en masa:** Si todos los contratos con fecha vencida deben ser deshabilitados, se puede hacer con una sola sentencia. Esto como fue demostrado, no es tan util y dismunuye la eficiencia de la transacción. Con ello, este ejemplo es un paso para tomarlo en otros casos de los cuales se pueda simplificar una transaccion sin recorrer uno por uno.
 
-- **Cuando el volumen de datos es muy alto **, no se recomienda porque los cursores consumen muchos recursos y pueden causar bloqueos prolongados que afecten a otras transacciones si no se manejan bien e incluso llegar a deadlocks y por consecuencia transacciones canceladas.
+- **Cuando el volumen de datos es muy alto**, no se recomienda porque los cursores consumen muchos recursos y pueden causar bloqueos prolongados que afecten a otras transacciones si no se manejan bien e incluso llegar a deadlocks y por consecuencia transacciones canceladas.
 
 - **Registrar renovaciones automáticas del mes**   Si la lógica de renovación es simple y se aplica igual a todos los contratos activos, no hace falta recorrer uno por uno. Un `UPDATE` masivo es más rápido y eficiente.
 
@@ -4109,7 +4109,7 @@ Proporciona estadísticas globales del test, incluyendo:
 
 ---
 
-** LISTO **  JMeter comenzará a enviar las solicitudes **POST** al endpoint `/insert-redemption`. 
+**LISTO**  JMeter comenzará a enviar las solicitudes **POST** al endpoint `/insert-redemption`. 
 
 ## ✅ Resultados Esperados
 
