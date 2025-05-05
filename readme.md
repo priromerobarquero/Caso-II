@@ -4035,6 +4035,30 @@ Simular múltiples usuarios accediendo simultáneamente al endpoint `/insert-red
 
 ## ⚙️ Configuración del Test Plan
 
+## 1. Configuración de JMeter:
+
+### 1.1. Crear un Test Plan
+1. Abre JMeter y selecciona **File > New** para crear un nuevo plan de prueba.
+2. Se creará un **Test Plan** vacío.
+
+### 1.2. Agregar un Thread Group
+1. Haz clic derecho sobre el **Test Plan** en el árbol de componentes.
+2. Selecciona **Add > Threads (Users) > Thread Group**.
+3. Configura los parámetros del **Thread Group**:
+   - **Number of Threads (Usuarios):** 60 (o el número de usuarios concurrentes que desees simular).
+   - **Ramp-Up Period (Segundos):** 10 (el tiempo para que todos los hilos se inicien).
+   - **Loop Count (Repeticiones):** 10 (cada usuario ejecutará la prueba 10 veces).
+
+### 1.3. Agregar un HTTP Request
+1. Haz clic derecho sobre el **Thread Group**.
+2. Selecciona **Add > Sampler > HTTP Request**.
+3. Configura los siguientes parámetros:
+   - **Server Name or IP:** `localhost` (o el nombre de tu servidor de API si no es local).
+   - **Port Number:** `3000` (el puerto donde corre la API).
+   - **Protocol:** `http` (o `https` si tu API usa encriptación).
+   - **Method:** `POST`.
+   - **Path:** `/insert-redemption` (el endpoint de la API).
+
 ### 🧵 Thread Group (Grupo de Hilos)
 
 Se configuró para simular un escenario realista con los siguientes parámetros:
@@ -4085,6 +4109,8 @@ Proporciona estadísticas globales del test, incluyendo:
 
 ---
 
+** LISTO **  JMeter comenzará a enviar las solicitudes **POST** al endpoint `/insert-redemption`. 
+
 ## ✅ Resultados Esperados
 
 Con esta configuración, se puede:
@@ -4111,7 +4137,7 @@ Tras ejecutar el test con la configuración descrita, se obtuvieron los siguient
 
 ---
 
-## 🧠 Interpretación
+## Interpretación
 
 - El sistema mostró **alta capacidad de respuesta** y **estabilidad** con 60 usuarios concurrentes.
 - La mediana baja frente al promedio sugiere que unas pocas solicitudes más lentas elevaron el promedio, pero en general, la mayoría fueron muy rápidas.
