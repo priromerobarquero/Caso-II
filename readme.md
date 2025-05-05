@@ -2793,7 +2793,8 @@ El tiempo promedio de respuesta fue de 7.6 segundos, lo cual es algo elevado. Si
 En resumen, el sistema funciona bien en la mayoría de los casos, pero hay algunos picos de lentitud que habría que se podria para  y reducir esos tiempos más altos que afectan el promedio.
 
 #### Metodo de medicion utilizado
-ara medir el rendimiento del sistema, se utilizó un backend desarrollado en Node.js que se conecta a una base de datos SQL Server. El backend está configurado para recibir solicitudes HTTP en el puerto 3000 mediante Express. El objetivo de la prueba es que JMeter, a través de un HTTP Request, haga llamadas al path del Node.js en este puerto. La funcionalidad del backend consiste en ejecutar una transacción de inserción en la base de datos cada vez que se recibe una solicitud, lo que implica la ejecución de un procedimiento almacenado en SQL Server.
+
+Para medir el rendimiento del sistema, se utilizó un backend desarrollado en Node.js que se conecta a una base de datos SQL Server. El backend está configurado para recibir solicitudes HTTP en el puerto 3000 mediante Express. El objetivo de la prueba es que JMeter, a través de un HTTP Request, haga llamadas al path del Node.js en este puerto. La funcionalidad del backend consiste en ejecutar una transacción de inserción en la base de datos cada vez que se recibe una solicitud, lo que implica la ejecución de un procedimiento almacenado en SQL Server.
 
 En la configuración de JMeter, se utilizaron dos listeners:
 
