@@ -2782,9 +2782,15 @@ Determine cuántas transacciones por segundo máximo es capaz de procesar su bas
 
 -→ Se ejecutaron 528,446 solicitudes en total (cada una simula un usuario accediendo al sistema).
 
-→ Average : 7587 ms. Tiempo promedio de respuesta por solicitud fue de 7.6 segundos, que es bastante alto si la meta es < 1 segundo.
+→ Average : 7587 ms. Tiempo promedio de respuesta por solicitud fue de 7.6 segundos.
 
 → Median : 1090 ms. El 50% de las solicitudes fueron respondidas en menos de 1.09 segundos (esto indica que hay muchas solicitudes rápidas)
+
+Durante la prueba se hicieron 528,446 solicitudes en total, lo que representa una carga bastante alta de usuarios simulados accediendo al sistema al mismo tiempo. El sistema logró procesar 56.38 transacciones por segundo, lo cual me parece un buen rendimiento considerando la cantidad de solicitudes simultáneas.
+
+El tiempo promedio de respuesta fue de 7.6 segundos, lo cual es algo elevado. Sin embargo, si vemos la mediana, que fue de 1.09 segundos, nos damos cuenta de que más del 50% de las solicitudes fueron respondidas en menos de un segundo y medio, lo que es bastante bueno. Esto indica que la mayoría de los accesos son rápidos, pero hay ciertos casos donde algunas solicitudes se demoran bastante, lo que termina subiendo el promedio general.
+
+En resumen, el sistema funciona bien en la mayoría de los casos, pero hay algunos picos de lentitud que habría que se podria para  y reducir esos tiempos más altos que afectan el promedio.
 
 #### Monitor durante la prueba de ejecución
 ![WhatsApp Image 2025-05-04 at 21 05 19_ef0475e7](https://github.com/user-attachments/assets/736cb0bd-9ee5-4839-b929-e6fd4ce0f186)
