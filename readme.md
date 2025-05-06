@@ -1389,7 +1389,7 @@ begin
         declare @lon float = -85 + @rand * 3;    -- entre -85 y -82 grados
         declare @location geometry = geometry::Point(@lon, @lat, 4326);
 
-        -- habilitado aleatorio
+        -- habilitado aleatori
         declare @enable bit = cast((abs(checksum(newid())) % 2) as bit);
 
         -- id de direccion secuencial
