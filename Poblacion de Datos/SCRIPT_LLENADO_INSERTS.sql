@@ -14,22 +14,22 @@
 		('https://media.soltura.com/plan_fitness_4_personas.mp4', 'Plan de Gimnasio 4 Personas', GETDATE(), 2),
 		('https://media.soltura.com/plan_yoga_familiar.mp4', 'Plan Yoga Familiar', GETDATE(), 2),
 		( 'https://media.soltura.com/plan_grooming_mascota.jpg', 'Plan Grooming para Mascota', GETDATE(), 1),
-		( 'https://media.soltura.com/plan_revision_veterinaria.jpg', 'Plan RevisiÛn Veterinaria', GETDATE(), 1),
-		( 'https://media.soltura.com/plan_clases_natacion_futbol.jpg', 'Plan Clases de NataciÛn y F˙tbol NiÒos', GETDATE(), 1),
-		( 'https://media.soltura.com/servicio_combustible_gas_diesel.jpg', 'Servicio de Combustible Gas o DiÈsel', GETDATE(), 1),
+		( 'https://media.soltura.com/plan_revision_veterinaria.jpg', 'Plan Revisi√≥n Veterinaria', GETDATE(), 1),
+		( 'https://media.soltura.com/plan_clases_natacion_futbol.jpg', 'Plan Clases de Nataci√≥n y F√∫tbol Ni√±os', GETDATE(), 1),
+		( 'https://media.soltura.com/servicio_combustible_gas_diesel.jpg', 'Servicio de Combustible Gas o Di√©sel', GETDATE(), 1),
 		( 'https://media.soltura.com/servicio_uber_eats.jpg', 'Servicio Uber Eats', GETDATE(), 1),
 		( 'https://media.soltura.com/servicio_uber_rides.jpg', 'Servicio Uber Rides', GETDATE(), 1),
 		( 'https://media.soltura.com/servicio_mantenimiento_mascota.jpg', 'Servicio de Mantenimiento de Mascotas', GETDATE(), 1),
-		( 'https://media.soltura.com/servicio_plan_clases_futbol.jpg', 'Plan de Clases de F˙tbol', GETDATE(), 1),
+		( 'https://media.soltura.com/servicio_plan_clases_futbol.jpg', 'Plan de Clases de F√∫tbol', GETDATE(), 1),
 		( 'https://media.soltura.com/servicio_grooming_mascota.jpg', 'Grooming para Mascotas', GETDATE(), 1),
-		( 'https://media.soltura.com/servicio_revision_salud.jpg', 'RevisiÛn de Salud', GETDATE(), 1),
-		( 'https://media.soltura.com/servicio_activacion_plan.jpg', 'ActivaciÛn de Plan', GETDATE(), 1),
-		( 'https://media.soltura.com/servicio_subscripcion_plan.jpg', 'SuscripciÛn a Planes', GETDATE(), 1),
-		('https://media.soltura.com/servicio_pagos_suscripcion.jpg', 'Pagos de SuscripciÛn', GETDATE(), 1);
+		( 'https://media.soltura.com/servicio_revision_salud.jpg', 'Revisi√≥n de Salud', GETDATE(), 1),
+		( 'https://media.soltura.com/servicio_activacion_plan.jpg', 'Activaci√≥n de Plan', GETDATE(), 1),
+		( 'https://media.soltura.com/servicio_subscripcion_plan.jpg', 'Suscripci√≥n a Planes', GETDATE(), 1),
+		('https://media.soltura.com/servicio_pagos_suscripcion.jpg', 'Pagos de Suscripci√≥n', GETDATE(), 1);
 
 	-- insertar moneda CRC y USD
 	INSERT INTO dbo.caipi_currencies (name, acronym, symbol)
-	VALUES ('ColÛn Costa Rica', 'CRC', '¢'),('DÛlar Estados Unidos', 'USD', '$');
+	VALUES ('Col√≥n Costa Rica', 'CRC', '¬¢'),('D√≥lar Estados Unidos', 'USD', '$');
 
 
 
@@ -58,10 +58,10 @@
 	--Reminder Types 
 	INSERT INTO [dbo].[caipi_remindertypes] ([name], [description])
 	VALUES
-		('SMS', 'EnvÌo de notificaciones por mensaje de texto'),
-		('Email', 'EnvÌo de notificaciones por correo electrÛnico'),
-		('Push', 'NotificaciÛn dentro de la aplicaciÛn mÛvil'),
-		('WhatsApp', 'NotificaciÛn enviada por WhatsApp'),
+		('SMS', 'Env√≠o de notificaciones por mensaje de texto'),
+		('Email', 'Env√≠o de notificaciones por correo electr√≥nico'),
+		('Push', 'Notificaci√≥n dentro de la aplicaci√≥n m√≥vil'),
+		('WhatsApp', 'Notificaci√≥n enviada por WhatsApp'),
 		('Popup', 'Ventana emergente dentro del sistema');
 
 
@@ -69,11 +69,11 @@
 
 	INSERT INTO [dbo].[caipi_subscription_status] ([name], [description], [enable])
 	VALUES
-		('Activa', 'La suscripciÛn est· activa y operativa', 1),
-		('Pendiente', 'La suscripciÛn est· en proceso de activaciÛn o aprobaciÛn', 1),
-		('Suspendida', 'La suscripciÛn ha sido pausada temporalmente', 1),
-		('Cancelada', 'La suscripciÛn fue cancelada por el usuario o el sistema', 1),
-		('Expirada', 'La suscripciÛn ha llegado a su fecha de expiraciÛn', 1);
+		('Activa', 'La suscripci√≥n est√° activa y operativa', 1),
+		('Pendiente', 'La suscripci√≥n est√° en proceso de activaci√≥n o aprobaci√≥n', 1),
+		('Suspendida', 'La suscripci√≥n ha sido pausada temporalmente', 1),
+		('Cancelada', 'La suscripci√≥n fue cancelada por el usuario o el sistema', 1),
+		('Expirada', 'La suscripci√≥n ha llegado a su fecha de expiraci√≥n', 1);
 
 		select * from caipi_schedules
 	-- Subscription Types 
@@ -91,16 +91,16 @@
 	--Sucription Settings Types
 	INSERT INTO [dbo].[caipi_suscriptionSettingTypes] ([sucriptionSettingTypeId], [name], [description], [enable])
 	VALUES
-		(1,'Cantidad de beneficiarios', 'N˙mero m·ximo de personas que pueden usar la suscripciÛn', 1),
+		(1,'Cantidad de beneficiarios', 'N√∫mero m√°ximo de personas que pueden usar la suscripci√≥n', 1),
 		(2, 'Acceso a servicios adicionales', 'Permite acceso a beneficios o servicios complementarios', 1),
 		(3, 'Frecuencia de uso', 'Cantidad de veces que se puede utilizar el servicio en un periodo', 1),
-		(4, 'Periodo de validez', 'DuraciÛn total del plan o suscripciÛn', 1),
-		(5, 'Cobertura geogr·fica', 'Zonas o ubicaciones donde es v·lido el plan', 1),
+		(4, 'Periodo de validez', 'Duraci√≥n total del plan o suscripci√≥n', 1),
+		(5, 'Cobertura geogr√°fica', 'Zonas o ubicaciones donde es v√°lido el plan', 1),
 		(6, 'Soporte incluido', 'Tipo de asistencia disponible dentro del plan', 1),
-		(7, 'Capacidad de uso', 'LÌmite en volumen, cantidad o tiempo de uso permitido', 1),
-		(8, 'Acceso a contenido exclusivo', 'Permite acceso a beneficios especiales no est·ndar', 1),
-		(9, 'RenovaciÛn autom·tica', 'Indica si la suscripciÛn se renueva sin intervenciÛn del usuario', 1),
-		(10, 'Nivel de personalizaciÛn', 'Grado en el que el usuario puede modificar los beneficios del plan', 1);
+		(7, 'Capacidad de uso', 'L√≠mite en volumen, cantidad o tiempo de uso permitido', 1),
+		(8, 'Acceso a contenido exclusivo', 'Permite acceso a beneficios especiales no est√°ndar', 1),
+		(9, 'Renovaci√≥n autom√°tica', 'Indica si la suscripci√≥n se renueva sin intervenci√≥n del usuario', 1),
+		(10, 'Nivel de personalizaci√≥n', 'Grado en el que el usuario puede modificar los beneficios del plan', 1);
 
 	--Payment Methods
 	INSERT INTO [dbo].[caipi_paymentMethods] ([name], [apiURL], [secretKey], [key], [enable])
@@ -195,34 +195,34 @@
 	-- Services Types
 	INSERT INTO [dbo].[caipi_serviceTypes] ([idServiceType], [name], [description], [enable])
 	VALUES
-		(1, 'Gimnasios', 'Servicios de entrenamiento fÌsico y bienestar', 1),
-		(2, 'Salud', 'Centros mÈdicos, clÌnicas y servicios de salud', 1),
-		(3, 'Parqueos', 'Zonas de estacionamiento para vehÌculos', 1),
-		(4, 'Comedores', 'Servicios de alimentaciÛn y comedores comunitarios', 1),
-		(5, 'EducaciÛn', 'Escuelas, guarderÌas y centros de aprendizaje', 1),
-		(6, 'Transporte', 'Servicios de transporte p˙blico o privado', 1),
+		(1, 'Gimnasios', 'Servicios de entrenamiento f√≠sico y bienestar', 1),
+		(2, 'Salud', 'Centros m√©dicos, cl√≠nicas y servicios de salud', 1),
+		(3, 'Parqueos', 'Zonas de estacionamiento para veh√≠culos', 1),
+		(4, 'Comedores', 'Servicios de alimentaci√≥n y comedores comunitarios', 1),
+		(5, 'Educaci√≥n', 'Escuelas, guarder√≠as y centros de aprendizaje', 1),
+		(6, 'Transporte', 'Servicios de transporte p√∫blico o privado', 1),
 		(7, 'Cultura', 'Centros culturales, bibliotecas y museos', 1),
-		(8, 'RecreaciÛn', '¡reas recreativas y de esparcimiento', 1),
-		(9, 'Deporte', 'Instalaciones deportivas y clubes atlÈticos', 1),
-		(10, 'TecnologÌa', 'Acceso a servicios tecnolÛgicos y digitales', 1);
+		(8, 'Recreaci√≥n', '√Åreas recreativas y de esparcimiento', 1),
+		(9, 'Deporte', 'Instalaciones deportivas y clubes atl√©ticos', 1),
+		(10, 'Tecnolog√≠a', 'Acceso a servicios tecnol√≥gicos y digitales', 1);
 
 	-- Services
 	INSERT INTO [dbo].[caipi_services] ([name], [description], [enable], [image], [idServiceType])
 	VALUES
-		('MembresÌa de Gimnasio', 'Acceso a instalaciones de gimnasio', 1, 1, 1),
+		('Membres√≠a de Gimnasio', 'Acceso a instalaciones de gimnasio', 1, 1, 1),
 		('Clases de Yoga', 'Sesiones de yoga para principiantes y avanzados, con enfoque en bienestar y flexibilidad', 1, 2, 1),
 		('Corte y Cuidado de Mascotas', 'Servicio profesional de grooming', 1, 3, 2),
-		('Consultas Veterinarias', 'Consultas mÈdicas para mascotas', 1, 4, 2),
-		('Clases de NataciÛn', 'Clases de nataciÛn para personas de todas las edades, desde principiantes hasta avanzados', 1, 5, 9),
+		('Consultas Veterinarias', 'Consultas m√©dicas para mascotas', 1, 4, 2),
+		('Clases de Nataci√≥n', 'Clases de nataci√≥n para personas de todas las edades, desde principiantes hasta avanzados', 1, 5, 9),
 		('Descuento en Combustible', 'Descuento mensual en combustible, aplicable en estaciones de servicio seleccionadas', 1, 6, 6),
-		('Pedidos de Comida a Domicilio', 'Descuento y promociones en pedidos de comida a travÈs de plataformas de entrega', 1, 7, 4),
+		('Pedidos de Comida a Domicilio', 'Descuento y promociones en pedidos de comida a trav√©s de plataformas de entrega', 1, 7, 4),
 		('Descuentos en Viajes', 'Descuentos en viajes realizados', 1, 8, 6),
 		('Mantenimiento para Mascotas', 'Paquete completo de salud preventiva y cuidado para mascotas', 1, 9, 2),
-		('Entrenamiento Deportivo', 'Clases de f˙tbol', 1, 10, 9),
+		('Entrenamiento Deportivo', 'Clases de f√∫tbol', 1, 10, 9),
 		('Servicios de Belleza', 'Corte de cabello, tratamientos faciales y corporales, manicura y pedicura', 1, 11, 2),
-		('AsesorÌa Nutricional', 'Consultas con nutricionistas para mejorar la dieta y el estilo de vida saludable', 1, 12, 2),
-		('Estacionamiento Privado', 'Acceso a espacios de estacionamiento privado en zonas estratÈgicas', 1, 13, 3),
-		('Entrenamiento Personalizado', 'Entrenamiento fÌsico y nutricional a medida, con seguimiento personalizado', 1, 14, 1);
+		('Asesor√≠a Nutricional', 'Consultas con nutricionistas para mejorar la dieta y el estilo de vida saludable', 1, 12, 2),
+		('Estacionamiento Privado', 'Acceso a espacios de estacionamiento privado en zonas estrat√©gicas', 1, 13, 3),
+		('Entrenamiento Personalizado', 'Entrenamiento f√≠sico y nutricional a medida, con seguimiento personalizado', 1, 14, 1);
 
 	-- --------------- Proveedores ----------------------
 
@@ -232,14 +232,14 @@
 		('Gimnasios y Fitness', 1, 0),
 		('Estudios de Yoga', 1, 0),
 		('Grooming para Mascotas', 1, 0),
-		('ClÌnicas Veterinarias', 1, 0),
-		('Escuelas de NataciÛn', 1, 0),
+		('Cl√≠nicas Veterinarias', 1, 0),
+		('Escuelas de Nataci√≥n', 1, 0),
 		('Estaciones de Combustible', 1, 0),
-		('Restaurantes y Comida R·pida', 1, 0),
+		('Restaurantes y Comida R√°pida', 1, 0),
 		('Agencias de Viajes', 1, 0),
 		('Centros de Cuidado Animal', 1, 0),
 		('Clubes Deportivos', 1, 0),
-		('Centros de EstÈtica', 1, 0),
+		('Centros de Est√©tica', 1, 0),
 		('Consultorios Nutricionales', 1, 0),
 		('Parqueos Privados', 1, 0),
 		('Entrenadores Personales', 1, 0),
@@ -251,7 +251,7 @@
 	VALUES
 		('The Retreat Costa Rica', 1, 1, 1, 1, 0), 
 		('Vida Mia Healing Center', 1, 2, 2, 2, 0),
-		('AgromÈdica Veterinaria', 1, 4, 4, 4, 0), 
+		('Agrom√©dica Veterinaria', 1, 4, 4, 4, 0), 
 		('Paws & Co.', 1, 3, 3, 3, 0), 
 		('The Pets Club', 1, 9, 9, 9, 0), 
 		('VolAir Studio', 1, 2, 2, 2, 0), 
@@ -271,16 +271,16 @@
 			   ,[enable]
 			   ,[deleted])
 		 VALUES
-			   ('GestiÛn de Planes', 1, 0),
-			   ('MÛdulo de MembresÌas', 1, 0),
-			   ('MÛdulo de Pagos y FacturaciÛn', 1, 0),
-			   ('MÛdulo de Notificaciones', 1, 0),
-			   ('MÛdulo de Servicios', 1, 0),
-			   ('MÛdulo de Proveedores', 1, 0),
-			   ('MÛdulo de Suscripciones', 1, 0),
-			   ('MÛdulo de Reportes', 1, 0),
-			   ('MÛdulo de Usuarios', 1, 0),
-			   ('MÛdulo de Seguridad', 1, 0);
+			   ('Gesti√≥n de Planes', 1, 0),
+			   ('M√≥dulo de Membres√≠as', 1, 0),
+			   ('M√≥dulo de Pagos y Facturaci√≥n', 1, 0),
+			   ('M√≥dulo de Notificaciones', 1, 0),
+			   ('M√≥dulo de Servicios', 1, 0),
+			   ('M√≥dulo de Proveedores', 1, 0),
+			   ('M√≥dulo de Suscripciones', 1, 0),
+			   ('M√≥dulo de Reportes', 1, 0),
+			   ('M√≥dulo de Usuarios', 1, 0),
+			   ('M√≥dulo de Seguridad', 1, 0);
 	--RedemptionTransactionType
 	INSERT INTO [dbo].[caipi_RedemptionTransactionTypes]
 			   ([name]
@@ -356,11 +356,11 @@
 			   ,[phoneCode])
 		 VALUES
 			   (1, 'Costa Rica', '+506'),
-			   (3, 'MÈxico', '+52'),
+			   (3, 'M√©xico', '+52'),
 			   (5, 'Colombia', '+57'),
 			   (6, 'Argentina', '+54'),
 			   (7, 'Chile', '+56'),
-			   (8, 'Per˙', '+51'),
+			   (8, 'Per√∫', '+51'),
 			   (9, 'Brasil', '+55');
 
 	--States
@@ -370,7 +370,7 @@
 			   ,[countryId])
 		 VALUES
 			   ('Cartago', 1, 1),
-			   ('San JosÈ', 1, 1),
+			   ('San Jos√©', 1, 1),
 			   ('Puntarenas', 1, 1), 
 			   ('Guerrero', 1, 3), 
 			   ('Jalisco', 1, 3),
@@ -395,9 +395,9 @@
 			   ('Guadalajara', 1, 5), 
 			   ('Tlaquepaque', 1, 5), 
 			   ('Zapopan', 1, 7), 
-			   ('MedellÌn', 1, 7), 
+			   ('Medell√≠n', 1, 7), 
 			   ('Envigado', 1, 7), 
-			   ('Itag¸Ì', 1, 5), 
+			   ('Itag√º√≠', 1, 5), 
 			   ('Buenos Aires', 1, 9),
 			   ('La Plata', 1, 9), 
 			   ('Mar del Plata', 1, 9), 
@@ -416,36 +416,36 @@
 		 VALUES
 			   ('Fisica', 1, 0),
 			   ('Ecommerce', 1, 0),
-			   ('DistribuciÛn', 1, 0),
-			   ('MÛvil', 1, 0),
-			   ('AtenciÛn al Cliente', 1, 0),
+			   ('Distribuci√≥n', 1, 0),
+			   ('M√≥vil', 1, 0),
+			   ('Atenci√≥n al Cliente', 1, 0),
 			   ('Corporativa', 1, 0),
-			   ('AtenciÛn Especializada', 1, 0),
-			   ('Soporte TÈcnico', 1, 0);
+			   ('Atenci√≥n Especializada', 1, 0),
+			   ('Soporte T√©cnico', 1, 0);
 
 	-- LLenado de Planes 
 
 	INSERT INTO caipi_planTypes (name, enable, deleted)
 	VALUES 
-	('B·sico', 1, 0),
+	('B√°sico', 1, 0),
 	('Personalizado', 1, 0),
 	('Familiar', 1, 0),
 	('Corporativo', 1, 0),
 	('Estudiantil', 1, 0),
 	('Salud y Bienestar', 1, 0);
 
-	-- INSERCI”N DE LOS TIPOS DE CONTRATOS
+	-- INSERCI√ìN DE LOS TIPOS DE CONTRATOS
 
 	INSERT INTO caipi_AgreementType (name, description, dataType)
 	VALUES
 	('Descuento Porcentaje', 'Aplica un porcentaje de descuento sobre el precio original.', 'porcentaje'),
 	('Precio Fijo', 'Precio acordado fijo sin descuento adicional.', 'decimal'),
-	('MembresÌa Mensual', 'Acceso a un servicio durante un mes.', 'tiempo'),
-	('Acceso Ilimitado', 'Servicio disponible sin restricciÛn durante el periodo contratado.', 'bool'),
-	('PromociÛn Especial', 'Descuento o beneficio temporal sobre el precio de lista.', 'porcentaje');
+	('Membres√≠a Mensual', 'Acceso a un servicio durante un mes.', 'tiempo'),
+	('Acceso Ilimitado', 'Servicio disponible sin restricci√≥n durante el periodo contratado.', 'bool'),
+	('Promoci√≥n Especial', 'Descuento o beneficio temporal sobre el precio de lista.', 'porcentaje');
 
 -- Sucursales
--- InserciÛn por proveedor, un solo tipo de sucursal por proveedor
+-- Inserci√≥n por proveedor, un solo tipo de sucursal por proveedor
 
 -- The Retreat Costa Rica (supplierId = 1)
 INSERT INTO [dbo].[caipi_supplierBranches] ([name], [enable], [deleted], [supplierId], [idTypesBranch])
@@ -455,9 +455,9 @@ VALUES ('Sucursal Principal - The Retreat Costa Rica', 1, 0, 1, 1);
 INSERT INTO [dbo].[caipi_supplierBranches] ([name], [enable], [deleted], [supplierId], [idTypesBranch])
 VALUES ('Sucursal Principal - Vida Mia Healing Center', 1, 0, 2, 2);
 
--- AgromÈdica Veterinaria (supplierId = 3)
+-- Agrom√©dica Veterinaria (supplierId = 3)
 INSERT INTO [dbo].[caipi_supplierBranches] ([name], [enable], [deleted], [supplierId], [idTypesBranch])
-VALUES ('Sucursal Principal - AgromÈdica Veterinaria', 1, 0, 3, 4);
+VALUES ('Sucursal Principal - Agrom√©dica Veterinaria', 1, 0, 3, 4);
 
 -- Paws & Co. (supplierId = 4)
 INSERT INTO [dbo].[caipi_supplierBranches] ([name], [enable], [deleted], [supplierId], [idTypesBranch])
@@ -510,7 +510,7 @@ VALUES ('Sucursal Principal - KOKi Beach', 1, 0, 15, 7);
 SELECT * FROM caipi_agreementTerms
 
 
---INSERCI”N DE LOS CONTRATOS
+--INSERCI√ìN DE LOS CONTRATOS
 INSERT INTO caipi_agreementTerms (
  enable, checkSum, startDate, idMeasureUnit, idService, finalDate, idSupplier,
  signedDate, deleted, access, disccountPercentage, originalPrice, agreementPrice,
@@ -522,12 +522,12 @@ INSERT INTO caipi_agreementTerms (
 
 -- AMASER (idSupplier = 8)
 (1, HASHBYTES('SHA2_256', 'AmaSer-Yoga'), '2025-05-01', 1, 3, '2025-12-31', 8, GETDATE(), 0, 1, 20.00, 600.00, 480.00, 480.00, 1, 3, 1, 4, NULL, NULL),
-(1, HASHBYTES('SHA2_256', 'AmaSer-NutriciÛn'), '2025-05-01', 1, 13, '2025-12-31', 8, GETDATE(), 0, 1, 25.00, 800.00, 600.00, 600.00, 1, 1, 1, 2, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'AmaSer-Nutrici√≥n'), '2025-05-01', 1, 13, '2025-12-31', 8, GETDATE(), 0, 1, 25.00, 800.00, 600.00, 600.00, 1, 1, 1, 2, NULL, NULL),
 (1, HASHBYTES('SHA2_256', 'AmaSer-Personal'), '2025-05-01', 1, 14, '2025-12-31', 8, GETDATE(), 0, 1, 15.00, 750.00, 637.50, 637.50, 1, 5, 1, 2, NULL, NULL),
 
 -- SPOON (idSupplier = 13)
 (1, HASHBYTES('SHA2_256', 'Spoon-Comida'), '2025-05-01', 1, 8, '2025-12-31', 13, GETDATE(), 0, 1, 10.00, 500.00, 450.00, 450.00, 1, 2, 1, 5, NULL, NULL),
-(1, HASHBYTES('SHA2_256', 'Spoon-NutriciÛn'), '2025-05-01', 1, 13, '2025-12-31', 13, GETDATE(), 0, 1, 5.00, 600.00, 570.00, 570.00, 1, 1, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'Spoon-Nutrici√≥n'), '2025-05-01', 1, 13, '2025-12-31', 13, GETDATE(), 0, 1, 5.00, 600.00, 570.00, 570.00, 1, 1, 1, 1, NULL, NULL),
 
 -- CENTRAL DE MASCOTAS (idSupplier = 11)
 (1, HASHBYTES('SHA2_256', 'Central-Grooming'), '2025-05-01', 1, 4, '2025-12-31', 11, GETDATE(), 0, 1, 20.00, 400.00, 320.00, 320.00, 1, 5, 1, 1, NULL, NULL),
@@ -544,12 +544,12 @@ INSERT INTO caipi_agreementTerms (
 
 -- VOLAIR STUDIO (idSupplier = 6)
 (1, HASHBYTES('SHA2_256', 'VolAir-Yoga'), '2025-05-01', 1, 3, '2025-12-31', 6, GETDATE(), 0, 1, 10.00, 600.00, 540.00, 540.00, 1, 3, 1, 2, NULL, NULL),
-(1, HASHBYTES('SHA2_256', 'VolAir-NutriciÛn'), '2025-05-01', 1, 13, '2025-12-31', 6, GETDATE(), 0, 1, 15.00, 700.00, 595.00, 595.00, 1, 5, 1, 1, NULL, NULL),
+(1, HASHBYTES('SHA2_256', 'VolAir-Nutrici√≥n'), '2025-05-01', 1, 13, '2025-12-31', 6, GETDATE(), 0, 1, 15.00, 700.00, 595.00, 595.00, 1, 5, 1, 1, NULL, NULL),
 (1, HASHBYTES('SHA2_256', 'VolAir-Entrenamiento'), '2025-05-01', 1, 14, '2025-12-31', 6, GETDATE(), 0, 1, 12.00, 750.00, 660.00, 660.00, 1, 1, 1, 1, NULL, NULL);
 
 
 
--- INSERCI”N DE AGREEMENTSPERPLAN
+-- INSERCI√ìN DE AGREEMENTSPERPLAN
 
 INSERT INTO caipi_AgreementsPerPlan (
     enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount
@@ -581,7 +581,7 @@ INSERT INTO caipi_AgreementsPerPlan VALUES
 (1, 0, 8, 13, '1 mes', 1, 450.00, 50.00),
 (1, 0, 8, 14, '1 mes', 1, 570.00, 30.00);
 
--- Plan 19: NÛmada Digital
+-- Plan 19: N√≥mada Digital
 INSERT INTO caipi_AgreementsPerPlan VALUES
 (1, 0, 9, 8, '1 mes', 1, 375.00, 125.00),
 (1, 0, 9, 9, '1 mes', 1, 560.00, 140.00);
@@ -616,7 +616,7 @@ INSERT INTO caipi_AgreementsPerPlan VALUES
 (1, 0, 4, 16, '1 mes', 1, 425.00, 75.00),
 (1, 0, 4, 11, '1 mes', 1, 600.00, 200.00);
 
--- INSERCI”N DE SUSCRIPCIONES A CADA USUARIO
+-- INSERCI√ìN DE SUSCRIPCIONES A CADA USUARIO
 -- Plan 16
 INSERT INTO caipi_subscriptions (suscription_typeid, userid, social, enable, startdate, deleted, statusid, scheduleId, auto_renew, created_at, idPlan) VALUES
 (1, 1, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15),
@@ -677,8 +677,8 @@ INSERT INTO [dbo].[caipi_AgreementType] (
     [dataType]
 )
 VALUES 
-    ('Amount', 'Contrato basado en monto econÛmico, porcentaje, tiempo', 'DECIMAL(5,2)'),
-    ('Validation', 'Contrato que requiere validaciÛn previa', 'BIT'),
+    ('Amount', 'Contrato basado en monto econ√≥mico, porcentaje, tiempo', 'DECIMAL(5,2)'),
+    ('Validation', 'Contrato que requiere validaci√≥n previa', 'BIT'),
     ('Quantity', 'Contrato basado en cantidad de unidades', 'INT');
 GO
 
@@ -746,3 +746,10 @@ where idagreementTerm = 10
 UPDATE caipi_plansLimits 
 SET [limit] = 10000
 where idPlansLimits = 1
+
+INSERT INTO caipi_plans (name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount)
+VALUES ('Plan B√°sico Extra', 'appAssistant', 1, 0, HASHBYTES('SHA2_512', CONCAT(NEWID(), '723489ansdjflq723')), 1, 2020-05-01, 3.99);
+
+-- Plan 2: Personalizado
+INSERT INTO caipi_plans (name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount)
+VALUES ('Plan Personalizado Extra', 'appAssistant', 1, 0, HASHBYTES('SHA2_512', CONCAT(NEWID(), '723489ansdjflq723')), 2, 2020-05-01,¬†9.99);
