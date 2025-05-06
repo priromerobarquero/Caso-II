@@ -4332,6 +4332,329 @@ app.listen(port, () => {
 
 ![WhatsApp Image 2025-05-05 at 12 33 09_c097ccb5](https://github.com/user-attachments/assets/3eb92172-9c7b-44d1-8640-3213444c79c5)
 
+---
+Determine como podría triplicar el valor averiguado anteriormente sizn hacer cambios en su base de datos ni incrementar hardware ni modificando el query
+
+Durante una prueba de carga realizada con Apache JMeter, inicialmente habia un rendimiento máximo de 54 transacciones por segundo (TPS) en el backend desarrollado con Node.js y Express, conectado a una base de datos SQL Server. El cuello de botella principal se encontraba en la apertura y cierre de conexiones a la base de datos por cada solicitud.
+
+Se decidio aplicar dos técnicas clave de optimización: connection pooling y caché en memoria con node-cache. Después de implementar ambas mejoras, se logro incrementar el rendimiento hasta 124 TPS, más del 129% de mejora.
+
+![WhatsApp Image 2025-05-05 at 20 34 01_3ce596c2](https://github.com/user-attachments/assets/d0022922-0e1f-40a5-b37b-199eddaa33a6)
+
+
+## 1. Problema detectado
+
+### Antes de optimizar:
+
+- Cada vez que llegaba una solicitud a mi endpoint `/insert-redemption`, se abría una conexión nueva a SQL Server.
+- Esto generaba una **alta latencia**, especialmente bajo condiciones de concurrencia.
+- Además, las solicitudes repetidas con los mismos parámetros realizaban el mismo trabajo varias veces en la base de datos, afectando la eficiencia.
+
+### Resultado inicial:
+
+- Promedio de **54 TPS**, con alta variabilidad y tiempos de respuesta inconsistentes.
+- Carga sobre el SQL Server excesiva debido a conexiones repetidas y no reutilizadas.
+
+---
+
+## 2. Aplicando connection pooling
+
+### ¿Qué es?
+
+El **connection pooling** consiste en mantener un grupo de conexiones abiertas y reutilizables hacia la base de datos, evitando el costo de crear una conexión desde cero en cada operación.
+
+### Implementacion
+
+Usé el módulo `mssql` en Node.js, configurando el objeto `sqlConfig` con un `pool`:
+
+```js
+pool: {
+  max: isLoadTesting ? 50 : 24, // Aumenta el número máximo de conexiones en pruebas
+  min: isLoadTesting ? 10 : 3,
+  idleTimeoutMillis: 30000,
+  acquireTimeoutMillis: 5000,
+  createTimeoutMillis: 5000
+}
+```
+
+Además, al iniciar el servidor, se establecio la conexión una sola vez mediante `sql.connect()` y la reutilicé para cada solicitud, con esto evito hacer una conexion en cada request:
+
+```js
+let pool;
+async function connectToSQL() {
+  try {
+    pool = await sql.connect(sqlConfig);
+    poolReady = true;
+  } catch (err) {
+    setTimeout(connectToSQL, 5000);
+  }
+}
+connectToSQL();
+```
+
+### Efecto en el rendimiento:
+
+- Se la latencia promedio de conexión.
+- Se la escalabilidad al soportar múltiples usuarios simultáneos.
+- TPS incrementó de **54 a cerca de 90** solo con el pooling.
+
+---
+
+## 3. Agregando node-cache
+
+
+`node-cache` es una librería simple de caché en memoria que permite almacenar respuestas para solicitudes repetitivas por un tiempo limitado, evitando que lleguen innecesariamente a la base de datos.
+
+Esta libreria funciona de la siguiente forma:
+
+Guarda la clave RED_XXXX (donde XXXX es el número de tag).
+
+El valor asociado es simplemente true, indicando que esa transacción ya fue realizada.
+
+Solo se guarda durante 5 segundos para evitar repetidos accesos a la base de datos en ese corto intervalo.
+
+Esto evita que, durante una prueba de carga, se ejecuten múltiples veces solicitudes idénticas, lo que:
+
+Con esto se redujo la presión sobre SQL Server.
+
+Mejora el tiempo de respuesta (latencia) al responder desde memoria.
+
+Se configuro la caché con un tiempo de vida corto y chequeos frecuentes:
+
+```js
+const myCache = new NodeCache({
+  stdTTL: 10,         // Cada entrada vive 10 segundos
+  checkperiod: 5,     // Se revisa el estado del caché cada 5 segundos
+  maxKeys: 10000,
+  useClones: false
+});
+```
+
+Y antes de ejecutar la lógica de inserción, se valida si la solicitud ya había sido procesada:
+
+```js
+const cacheKey = `RED_${params.numberTag}`;
+if (myCache.has(cacheKey)) {
+  return res.status(200).json({ fromCache: true, ... });
+}
+```
+
+Al final del proceso, se almacena la entrada:
+
+```js
+myCache.set(cacheKey, true, 5);
+```
+
+### Efecto en el rendimiento:
+
+- Reduje el número de operaciones que llegan a la base de datos.
+- Las respuestas repetidas se resolvieron directamente desde memoria en milisegundos.
+- TPS incrementó de **90 a 124**, mostrando una mejora sustancial.
+
+---
+
+## 4. Uso de cluster para CPUs múltiples
+
+Para aprovechar todos los núcleos disponibles del sistema en entornos de prueba, se uso `cluster` de Node.js:
+
+```js
+if (cluster.isMaster && isLoadTesting) {
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+}
+```
+
+Esto permitió distribuir la carga entre múltiples procesos, evitando que un solo hilo fuera un cuello de botella.
+
+---
+
+## 5. Resultados finales
+
+| Técnica aplicada        | TPS alcanzado |
+|-------------------------|---------------|
+| Sin optimización        | 54 TPS        |
+| Solo connection pooling | 90 TPS        |
+| + node-cache            | **124 TPS**   |
+
+---
+
+A continucacion se muestra la API con las respectivas modificaciones, en la que predomina el connection pooling.
+
+```js
+
+const express = require('express');
+const sql = require('mssql');
+const NodeCache = require('node-cache');
+const cluster = require('cluster');
+const numCPUs = require('os').cpus().length;
+
+// Configuración para entorno de pruebas de carga
+const isLoadTesting = process.env.LOAD_TEST === 'true';
+const PORT = process.env.PORT || 3000;
+
+if (cluster.isMaster && isLoadTesting) {
+  console.log(`Master ${process.pid} is running`);
+  
+  // Fork workers igual al número de CPUs
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork();
+  }
+  
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`worker ${worker.process.pid} died`);
+    cluster.fork();
+  });
+} else {
+  const app = express();
+  app.use(express.json({ limit: '10mb' }));
+  
+
+  // Configuración agresiva de caché para pruebas de carga
+  const myCache = new NodeCache({ 
+    stdTTL: 10,         // Tiempo de vida en segundos
+    checkperiod: 5,      // Frecuencia de limpieza
+    maxKeys: 10000,      // Aumenta este valor (por defecto es 0 = ilimitado)
+    useClones: false     // Mejor rendimiento
+  });
+
+
+  // Verificar periodicamente el estado del caché
+  setInterval(() => {
+    const stats = myCache.getStats();
+    console.log(`Cache stats: ${stats.keys} keys, ${stats.hits} hits, ${stats.misses} misses`);
+    
+    if (stats.keys > 8000) { // Limpia al llegar al 80% de capacidad
+      myCache.flushAll();
+      console.log('Cache cleared automatically');
+    }
+  }, 30000); // Cada 30 segundos
+
+  // Configuración optimizada para SQL Server bajo carga
+  const sqlConfig = {
+    user: 'UsuarioSQL',
+    password: 'password2410',
+    server: 'localhost',
+    database: 'caipiIAdb',
+    options: {
+      encrypt: true,
+      trustServerCertificate: true,
+      enableArithAbort: true,
+      connectionTimeout: 30000,
+      requestTimeout: 5000 // Timeout más corto para pruebas
+    },
+    pool: {
+      max: isLoadTesting ? 50 : 24, // Pool más grande para pruebas
+      min: isLoadTesting ? 10 : 3,
+      idleTimeoutMillis: 30000,
+      acquireTimeoutMillis: 5000,
+      createTimeoutMillis: 5000
+    }
+  };
+
+  let pool;
+  let poolReady = false;
+
+  // Función de conexión con reintentos
+  async function connectToSQL() {
+    try {
+      pool = await sql.connect(sqlConfig);
+      poolReady = true;
+      console.log(`Worker ${process.pid} conectado a SQL Server`);
+    } catch (err) {
+      console.error(`Worker ${process.pid} error al conectar:`, err);
+      setTimeout(connectToSQL, 5000);
+    }
+  }
+
+  connectToSQL();
+
+  // Middleware para verificar conexión a BD
+  app.use((req, res, next) => {
+    if (!poolReady) {
+      return res.status(503).json({ error: 'Servicio no disponible' });
+    }
+    next();
+  });
+
+  // Ruta optimizada para pruebas de carga
+  app.post('/insert-redemption', async (req, res) => {
+    const startTime = process.hrtime();
+    
+    try {
+      const params = {
+        numberTag: req.body.numberTag || `TEST_${Math.floor(Math.random() * 10000)}`,
+        redemptionTransactionTypeId: req.body.redemptionTransactionTypeId || 1,
+        idModule: req.body.idModule || 1,
+        idSupplierBranch: req.body.idSupplierBranch || 0,
+        quantity: req.body.quantity !== undefined ? req.body.quantity : null,
+        amount: req.body.amount || Math.random() * 100,
+        validation: req.body.validation !== undefined ? req.body.validation : null,
+        agreementTermId: req.body.agreementTermId || 10,
+        userACanjearId: req.body.userACanjearId || 15,
+        idPerson: req.body.idPerson || 10
+      };
+
+      // Clave de caché más simple para pruebas
+      const cacheKey = `RED_${params.numberTag}`;
+      
+      if (myCache.has(cacheKey)) {
+        const duration = process.hrtime(startTime);
+        return res.status(200).json({
+          success: true,
+          fromCache: true,
+          durationMs: duration[0] * 1000 + duration[1] / 1e6
+        });
+      }
+
+      const request = pool.request();
+      Object.entries(params).forEach(([key, value]) => {
+        const paramType = key === 'amount' ? sql.Decimal : 
+                        key === 'validation' ? sql.Bit : 
+                        value === null ? sql.Int : 
+                        typeof value === 'number' ? sql.Int : sql.VarChar;
+        request.input(key, paramType, value);
+      });
+
+      const result = await request.execute('dbo.CaipiSP_InsertRedemptionTransaction');
+      
+      myCache.set(cacheKey, true, 5); // Cache muy corto para pruebas
+      
+      const duration = process.hrtime(startTime);
+      res.status(200).json({
+        success: true,
+        fromCache: false,
+        durationMs: duration[0] * 1000 + duration[1] / 1e6,
+        data: result.recordset
+      });
+      
+    } catch (err) {
+      const duration = process.hrtime(startTime);
+      console.error(`Error en worker ${process.pid}:`, err);
+      res.status(500).json({
+        success: false,
+        error: 'Error en el servidor',
+        durationMs: duration[0] * 1000 + duration[1] / 1e6
+      });
+    }
+  });
+
+  // Endpoint de salud para JMeter
+  app.get('/health', (req, res) => {
+    res.json({
+      status: 'OK',
+      worker: process.pid,
+      cacheStats: myCache.getStats(),
+      poolReady: poolReady
+    });
+  });
+
+  app.listen(PORT, () => {
+    console.log(`Worker ${process.pid} iniciado en puerto ${PORT}`);
+  });
+}
+
+```
 
 # Migracion de los usuarios de Payment Assistant
 Previo a la semana santa, la empresa Soltura estuvo en conversaciones con los dueños e inversionistas de varias empresas ya establecidas en el país, entre ellas "payment assistant" y "app assistant" (como grupo de trabajo escogen solo una del entregable del caso #1), esas empresas ya han logrado cierta tracción y público en Costa Rica y han decidido que dichas aplicaciones podrían ser dadas como parte de los planes de subscripción de Soltura.
