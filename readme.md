@@ -4333,7 +4333,7 @@ app.listen(port, () => {
 ![WhatsApp Image 2025-05-05 at 12 33 09_c097ccb5](https://github.com/user-attachments/assets/3eb92172-9c7b-44d1-8640-3213444c79c5)
 
 ---
-Determine como podría triplicar el valor averiguado anteriormente sizn hacer cambios en su base de datos ni incrementar hardware ni modificando el query
+### Determine como podría triplicar el valor averiguado anteriormente sizn hacer cambios en su base de datos ni incrementar hardware ni modificando el query
 
 Durante una prueba de carga realizada con Apache JMeter, inicialmente habia un rendimiento máximo de 54 transacciones por segundo (TPS) en el backend desarrollado con Node.js y Express, conectado a una base de datos SQL Server. El cuello de botella principal se encontraba en la apertura y cierre de conexiones a la base de datos por cada solicitud.
 
