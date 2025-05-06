@@ -2717,9 +2717,6 @@ EXEC DesencriptarColumna
 # Consultas Misceláneas
 #### 1. Crear una vista indexada con al menos 4 tablas (ej. usuarios, suscripciones, pagos, servicios). La vista debe ser dinámica, no una vista materializada con datos estáticos. Demuestre que si es dinámica.
 
-<details>
-	<summary>Haz clic para expandir</summary>
-
  ```sql
 ALTER VIEW VistaIndexadaSoltura -- Sin SCHEMABINDING
 WITH SCHEMABINDING
@@ -2792,12 +2789,8 @@ WHERE username = 'cgonzalez015' AND description = 'Propina'
 
 -- El resultado terminó siendo 8.00
  ```
-</details>
 
 #### 2. Crear un procedimiento almacenado transaccional que realice una operación del sistema, relacionado a subscripciones, pagos, servicios, transacciones o planes, y que dicha operación requiera insertar y/o actualizar al menos 3 tablas.
-
-<details>
-	<summary>Haz clic para expandir</summary>
 
  ```sql
  -----------------------------------------------------------
@@ -2910,12 +2903,8 @@ EXEC [dbo].[SP_RegistrarSubscripcionConPagoYTransaccion]
     @Fecha = '2025-05-05',
 	@ScheduleID = 1
  ```
-<details>
 
 #### 3. Escribir un SELECT que use CASE para crear una columna calculada que agrupe dinámicamente datos (por ejemplo, agrupar cantidades de usuarios por plan en rangos de monto, no use este ejemplo).
-
-<details>
-	<summary>Haz clic para expandir</summary>
 	
  ```sql
 -- Escribir un SELECT que use CASE para crear una columna calculada que agrupe dinámicamente datos.
@@ -2932,13 +2921,9 @@ SELECT
     END AS nivel_riesgo
 FROM caipi_payments;
  ```
-<details>
 
 #### 4. Imagine una cosulta que el sistema va a necesitar para mostrar cierta información, o reporte o pantalla, y que esa consulta vaya a requerir:
 
- <details>
-	<summary>Haz clic para expandir</summary>
-	 
 ```sql
 USE caipiIAdb;
 GO
@@ -3013,12 +2998,8 @@ WHERE
     )
 ORDER BY ps.totalPaid DESC;
 ```
- <details>
 
 #### 5. Crear una consulta con al menos 3 JOINs que analice información donde podría ser importante obtener un SET DIFFERENCE y un INTERSECTION
-
-<details>
-	<summary>Haz clic para expandir</summary>
 
  ```sql
 -----------------------------------------------------------
@@ -3094,7 +3075,6 @@ WHERE
     t.date >= DATEADD(DAY, -30, GETDATE());
 GO
  ```
-<details>
 	
 #### 6. Crear un procedimiento almacenado transaccional que llame a otro SP transaccional, el cual a su vez llame a otro SP transaccional. Cada uno debe modificar al menos 2 tablas. Se debe demostrar que es posible hacer COMMIT y ROLLBACK con ejemplos exitosos y fallidos sin que haya interrumpción de la ejecución correcta de ninguno de los SP en ninguno de los niveles del llamado.
 
