@@ -4041,6 +4041,74 @@ COMMIT;
 </details>
 
 
+## Deadlocks en Cascada
+<details>
+   <summary>Haz clic para expandir</summary>
+
+```sql
+
+-- Transaccion A
+-- Objetivo: Bloquear a B
+-- Se intenta bloquear el primer recurso que usará B
+
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+BEGIN TRANSACTION
+	--Utilizo el ultimo recurso utilizado en C
+	UPDATE caipi_suppliers SET name = 'Condovac la Costa' WHERE idSupplier = 3 
+
+	WAITFOR DELAY '00:00:10'
+
+	--Bloque el primer recurso que utilizará Tran B
+	UPDATE caipi_suppliers SET name = 'Gym Kyros' WHERE idSupplier = 9 
+
+COMMIT
+
+```
+
+```sql
+
+-- Transaccion B
+-- Objetivo: Bloquear a C
+-- -- Se intenta bloquear el primer recurso que usará C
+
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+BEGIN TRANSACTION
+	-- Utiloza el ultimo recurso utilizado en A
+	UPDATE caipi_suppliers SET name = 'U-Wellness Center' WHERE idSupplier = 9 
+
+	WAITFOR DELAY '00:00:010'
+
+	--Bloque el primer recurso que utilizará Tran C
+	UPDATE caipi_suppliers SET name = 'RIU Hotel' WHERE idSupplier = 5 
+
+COMMIT
+
+```
+
+
+```sql
+
+-- Transaccion C
+-- Objetivo: Bloquear a A
+-- Se intenta bloquear el primer recurso que usará C
+
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+BEGIN TRANSACTION
+	-- Utilizo el ultimo recurso utilizado en B
+	UPDATE caipi_suppliers SET name = 'La Granjita Vet' WHERE idSupplier = 5 
+
+	WAITFOR DELAY '00:00:10'
+
+	--Bloque el primer recurso que utilizará Tran A
+	UPDATE caipi_suppliers SET name = 'Sonrisas Vet' WHERE idSupplier = 3 
+
+COMMIT
+
+```
+</details>
+
+
+
 ## Cursor de Update
 
 Crear un cursor de update que bloquee los registros que recorre uno a uno, demuestre en que casos dicho cursor los bloquea y en que casos no, para que el equipo de desarrollo sepa para que escenarios usar cursos y cuando no. 
