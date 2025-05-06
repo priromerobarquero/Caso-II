@@ -237,7 +237,7 @@ GO
 /*
  procedimiento almacenado: dbo.FillSubscriptionsAndMembers
  descripcion: asigna suscripciones a un tercio de usuarios (101-300) y miembros a cada suscripcion
- hay mas usuarios como miembros que como dueÒos
+ hay mas usuarios como miembros que como due√±os
  cada suscripcion tendra de 3 a 6 miembros
 */
 GO
@@ -249,10 +249,10 @@ BEGIN
     -- definimos rango de usuarios
     DECLARE @minUser INT = 1, @maxUser INT = 100;
     DECLARE @totalUsers INT = @maxUser - @minUser + 1;
-    -- elegimos un tercio de usuarios como dueÒos
+    -- elegimos un tercio de usuarios como due√±os
     DECLARE @ownersCount INT = @totalUsers / 3;
 
-    -- tabla temporal de dueÒos de suscripcion
+    -- tabla temporal de due√±os de suscripcion
     DECLARE @owners TABLE (userid INT PRIMARY KEY);
     DECLARE @idx INT = 0;
     WHILE @idx < @ownersCount
@@ -262,7 +262,7 @@ BEGIN
         VALUES (@minUser + @idx - 1);
     END;
 
-    -- cursor para recorrer cada dueÒo
+    -- cursor para recorrer cada due√±o
     DECLARE owner_cursor CURSOR FOR
         SELECT userid FROM @owners;
     OPEN owner_cursor;
@@ -290,10 +290,10 @@ BEGIN
             (@subscription_typeid, @ownerId, @social, @enable, @startdate, @deleted, @statusid, @scheduleId, @auto_renew, @created_at, @idPlan);
         DECLARE @subscriptionId INT = SCOPE_IDENTITY();
 
-        -- determinamos cu·ntos miembros (3 a 6)
+        -- determinamos cu√°ntos miembros (3 a 6)
         DECLARE @membersCount INT = CAST(RAND(CHECKSUM(NEWID())) * 4 + 3 AS INT);
 
-        -- insertamos al dueÒo como miembro
+        -- insertamos al due√±o como miembro
         INSERT INTO dbo.caipi_members
             (subscriptionid, userid, startdate, leftdate, enabled, deleted)
         VALUES
@@ -336,7 +336,7 @@ CREATE OR ALTER PROCEDURE InsertarPaymentMethods
 	--no hay parametros
 AS
 BEGIN
-    -- DeclaraciÛn de variables
+    -- Declaraci√≥n de variables
     DECLARE @i INT = 1;
     DECLARE @name NVARCHAR(50);
     DECLARE @methodId INT;
@@ -347,7 +347,7 @@ BEGIN
     DECLARE @configurationDetails NVARCHAR(MAX);
     DECLARE @refreshToken VARBINARY(MAX);
 
-    -- Cursor para recorrer los mÈtodos de pago existentes, recibiendo loda daros de la consulta select de la tabla que contiene los metodos de pago
+    -- Cursor para recorrer los m√©todos de pago existentes, recibiendo loda daros de la consulta select de la tabla que contiene los metodos de pago
     DECLARE method_cursor CURSOR FOR
         SELECT [name],[methodId]
         FROM [dbo].[caipi_paymentMethods];
@@ -355,29 +355,29 @@ BEGIN
     OPEN method_cursor;
     FETCH NEXT FROM method_cursor INTO @name, @methodId; --Recorre el primerregistro, almacena el nombre y el id del metodo que sera utilizado en la insercion
 
-    -- Ciclo para insertar datos en la tabla de mÈtodos de pago
+    -- Ciclo para insertar datos en la tabla de m√©todos de pago
     WHILE @i <= 15
     BEGIN
-		-- Asignar valores din·micos a las variables
+		-- Asignar valores din√°micos a las variables
         SET @token = CONVERT(NVARCHAR(100), NEWID());
-        SET @expTokenDate = DATEADD(DAY, @i * 30, GETDATE());  -- AsignaciÛn de fechas, incrementa cada 30 dÌas
+        SET @expTokenDate = DATEADD(DAY, @i * 30, GETDATE());  -- Asignaci√≥n de fechas, incrementa cada 30 d√≠as
         SET @maskAccount = CONCAT('****', RIGHT('000' + CAST((1000 + @i * 7) AS VARCHAR), 4));  -- Cuenta enmascarada con incremento
         SET @callbackURL = CONCAT('https://example.com/callback/method', @i);
         SET @configurationDetails = CONCAT('{"currency":"USD", "method":"', @name, '"}');
-        SET @refreshToken = CAST(HASHBYTES('SHA2_256', @token) AS VARBINARY(MAX));  -- EncriptaciÛn del token
+        SET @refreshToken = CAST(HASHBYTES('SHA2_256', @token) AS VARBINARY(MAX));  -- Encriptaci√≥n del token
 
         -- Insertar el registro en la tabla
         INSERT INTO [dbo].[caipi_availablePaymentMethods]
            ([name], [token], [expTokenDate], [maskAccount], [callbackURL], [configurationDetails], [refreshToken], [methodId])
         VALUES
-           (@name, @token, @expTokenDate, @maskAccount, @callbackURL, @configurationDetails, @refreshToken, @methodId);  -- Usa @methodId como ID del mÈtodo QUE ES APUNTADO POR EL CURSOR
+           (@name, @token, @expTokenDate, @maskAccount, @callbackURL, @configurationDetails, @refreshToken, @methodId);  -- Usa @methodId como ID del m√©todo QUE ES APUNTADO POR EL CURSOR
 
         SET @i += 1;  -- Incrementar el contador para el siguiente ciclo
-        -- Obtener el siguiente mÈtodo de pago
+        -- Obtener el siguiente m√©todo de pago
         FETCH NEXT FROM method_cursor INTO @name, @methodId;
 
-		-- Si ya se recorrio hasta ˙ltimo registro, vuelve al inicio para volver a recorrer la consulta
-		IF @@FETCH_STATUS <> 0 -- Ya no hay m·s registros
+		-- Si ya se recorrio hasta √∫ltimo registro, vuelve al inicio para volver a recorrer la consulta
+		IF @@FETCH_STATUS <> 0 -- Ya no hay m√°s registros
 		BEGIN
 			-- Reinicia el cursor a la primera fila
 			CLOSE method_cursor;
@@ -449,7 +449,7 @@ BEGIN
     -- Insertamos los 15 nombres
     INSERT INTO @nombres(nombre)
     VALUES 
-        ('Joven Deportista'), ('Familia de Verano'), ('Viajero Frecuente'), ('NÛmada Digital'),
+        ('Joven Deportista'), ('Familia de Verano'), ('Viajero Frecuente'), ('N√≥mada Digital'),
         ('Profesional en Movimiento'), ('Estudiante Proactivo'), ('Creativo Freelance'), ('Full Wellness'),
         ('Tiempo en Familia'), ('Explorador Urbano'), ('Hogar Equilibrado'), ('Fit & Chill'),
         ('EcoVida'), ('Combo Soltura'), ('Zen Diario');
@@ -482,7 +482,7 @@ BEGIN
         -- Insertamos en la tabla
         INSERT INTO caipi_plans(name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount)
         VALUES (
-            @Name, 'Esta es la descripciÛn', 1, 0, @checkSum, @planType, @fecha, @total
+            @Name, 'Esta es la descripci√≥n', 1, 0, @checkSum, @planType, @fecha, @total
         );
 
         SET @i += 1;
@@ -507,7 +507,7 @@ BEGIN
     VALUES 
         ('Cada semana', 'semanal', 1),
         ('Cada mes', 'mensual', 1),
-        ('Cada 15 dÌas', 'semanal', 2);
+        ('1 vez al a√±o', 'anual', 2);
 
     DECLARE @i INT = 1;
     DECLARE @mes INT;
