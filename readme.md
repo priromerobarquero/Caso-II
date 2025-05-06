@@ -3984,6 +3984,63 @@ EXEC dbo.caipiSP_LogToBackupBitacora
 
 # Concurrencia
 
+## Deadlock
+<details>
+   <summary>Haz clic para expandir</summary>
+
+T1 - Generacion de Deadlocks
+
+En esta transacccion se plantea el caso en el que el ususario haya hecho n canjeo sin embargo se dio mal el monto canjeado, entonces se procede a hacer la correccion del monto del redemption, y despues generar algun mensaje indicando que se ha canjeado x monto en cierto proveedor usando el SELECT
+Sin embargo las cosas no salen porque cuando se actualiza la redemption dura un tiempo en cargar y sigue con el select de ese proveedor, pero no puede hacerse porque la T1 tiene bloqueado al proveedor y despues T2 está esperando que T1 deje de bloquear al user.
+Esto hace que las dos transacciones se necesiten entre ellas y ninguna llega a termino y alguna tendrá que ser victima y ser eliminada por SQL Server.
+
+```sql
+
+BEGIN TRANSACTION;
+
+    -- bloquea el 
+    UPDATE dbo.caipi_redemptionTransactions 
+    SET amount = 300.00 
+    WHERE idUser = 4;
+
+    -- Simulacion 
+    WAITFOR DELAY '00:00:07';
+
+    -- Se bloque el primer recurso de T2
+    SELECT name FROM dbo.caipi_suppliers 
+    WHERE idSupplier = 4;
+
+COMMIT;
+
+```
+
+-T2 - Generando deadlocks
+
+En esta transacción se plantea el caso que se quiera hacer algun mantenimiento de supplliers en el que ese proveedor se establece como eliminado o temporalmente inactivo y también se corrige el monto de una redemption mal ejecutada
+Cuando T2 bloquea el usuario para poder cambiarlo ya T1 no puede terminar pero T2 tampoco porque está esperando que T1 desbloquee al usuario. 
+Esto hace que las dos transacciones se necesiten entre ellas y ninguna llega a termino y alguna tendrá que ser victima y ser eliminada por SQL Server.
+
+
+```sql
+BEGIN TRANSACTION;
+
+    -- Bloquear para T2
+    UPDATE dbo.caipi_suppliers 
+    SET deleted = 1 
+    WHERE idSupplier = 4;
+    
+
+    -- Se bloquea el primer recurso de T1
+    UPDATE dbo.caipi_redemptionTransactions 
+    SET amount = 200.00 
+    WHERE idUser = 4;
+
+COMMIT;
+
+```
+</details>
+
+
 ## Cursor de Update
 
 Crear un cursor de update que bloquee los registros que recorre uno a uno, demuestre en que casos dicho cursor los bloquea y en que casos no, para que el equipo de desarrollo sepa para que escenarios usar cursos y cuando no. 
