@@ -2715,7 +2715,387 @@ EXEC DesencriptarColumna
 ```
 
 # Consultas Misceláneas
+#### 1. Crear una vista indexada con al menos 4 tablas (ej. usuarios, suscripciones, pagos, servicios). La vista debe ser dinámica, no una vista materializada con datos estáticos. Demuestre que si es dinámica.
 
+<details>
+	<summary>Haz clic para expandir</summary>
+
+ ```sql
+ALTER VIEW VistaIndexadaSoltura -- Sin SCHEMABINDING
+WITH SCHEMABINDING
+AS
+SELECT
+    u.username,
+    u.name,
+    u.lastname,
+    u.registerdate,
+    s.social,
+    s.enable,
+    s.auto_renew,
+    s.created_at,
+    p.amount,
+    p.result,
+    p.error,
+    p.description,
+    p.date,
+    e.name AS Servicio,
+	COUNT_BIG(*) AS CountBig
+FROM
+    dbo.caipi_users u
+INNER JOIN
+    dbo.caipi_subscriptions s ON u.userid = s.userid
+INNER JOIN
+    dbo.caipi_payments p ON s.subscriptionid = s.userid
+INNER JOIN
+    dbo.caipi_redemptions e1 ON u.userid = e1.idUser
+INNER JOIN
+    dbo.caipi_services e ON e1.idService = e.serviceId
+GROUP BY
+    u.username,
+    u.name,
+    u.lastname,
+    u.registerdate,
+    s.social,
+    s.enable,
+    s.auto_renew,
+    s.created_at,
+    p.amount,
+    p.result,
+    p.error,
+    p.description,
+    p.date,
+    e.name;
+GO
+
+CREATE UNIQUE CLUSTERED INDEX IX_VistaIndexadaSoltura
+ON VistaIndexadaSoltura (username, created_at, amount, description, Servicio);
+GO
+
+--=======================================================
+-- Prueba de que es dinámica 
+-- Ejecutamos la lista de persona con nombre 'cgonzalez015' y aparece un monto con 2.00 con descripción propina
+--=======================================================
+
+SELECT name, amount, description
+FROM VistaIndexadaSoltura
+WHERE username = 'cgonzalez015' AND description = 'Propina'
+
+-- Ahora actualizamos el monto
+UPDATE dbo.caipi_payments
+SET amount = 8.00
+WHERE userId = 29 AND description = 'Propina'
+
+-- Llamamos otra la lista
+SELECT name, amount, description
+FROM VistaIndexadaSoltura
+WHERE username = 'cgonzalez015' AND description = 'Propina'
+
+-- El resultado terminó siendo 8.00
+ ```
+</details>
+
+#### 2. Crear un procedimiento almacenado transaccional que realice una operación del sistema, relacionado a subscripciones, pagos, servicios, transacciones o planes, y que dicha operación requiera insertar y/o actualizar al menos 3 tablas.
+
+<details>
+	<summary>Haz clic para expandir</summary>
+
+ ```sql
+ -----------------------------------------------------------
+-- Autor: Rnunez
+-- Fecha: 04/25/2025
+-- Descripcion: Registrar una nueva suscripción, pago y transacción
+-- Otros detalles de los parametros
+-----------------------------------------------------------
+CREATE PROCEDURE [dbo].[SP_RegistrarSubscripcionConPagoYTransaccion]
+    @UserId INT,
+	@SubsTypeID INT,
+    @PlanId INT,
+	@Social INT,
+    @Monto DECIMAL(10, 2),
+    @MetodoPago VARCHAR(50),
+    @Descripcion VARCHAR(100),
+    @Error VARCHAR(100),
+    @Fecha DATE,
+	@ScheduleID INT,
+	@ExchangeId INT,
+	@Currency INT,
+	@TransType INT,
+	@TransSubType INT
+AS 
+BEGIN
+    SET NOCOUNT ON
+
+    DECLARE @ErrorNumber INT, @ErrorSeverity INT, @ErrorState INT, @CustomError INT
+    DECLARE @Message VARCHAR(200)
+    DECLARE @InicieTransaccion BIT
+
+    DECLARE @SubscriptionId INT
+    DECLARE @PaymentId INT
+    DECLARE @TransactionId INT
+    DECLARE @Checksum VARCHAR(100)
+
+    SET @InicieTransaccion = 0
+    IF @@TRANCOUNT = 0 
+    BEGIN
+        SET @InicieTransaccion = 1
+        SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+        BEGIN TRANSACTION
+    END
+
+    BEGIN TRY
+        SET @CustomError = 2001
+
+        -- 1. Insertar en la tabla de pagos (con CAST a VARCHAR(36))
+        INSERT INTO caipi_payments (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum, date, paymentMethodId, methodId, scheduleId, userId, personId)
+        VALUES
+            (@Monto, @Monto, 'OK', 
+            'AUTH-' + CAST(NEWID() AS VARCHAR(36)),  -- Longitud adecuada
+            'REF' + CAST(NEWID() AS VARCHAR(36)),     -- Longitud adecuada
+            CONVERT(varbinary(100), 'token'), 
+            @Descripcion, @Error, 
+            CONVERT(varbinary(100), 'checksum'), 
+            @Fecha, 1, 1, 1, @UserId, @UserId);
+
+        SET @PaymentId = SCOPE_IDENTITY()
+
+        -- 2. Insertar en suscripciones
+        INSERT INTO caipi_subscriptions (userid, suscription_typeid, scheduleId, social, idPlan, startdate, enable, statusid, created_at)
+        VALUES (@UserId, @SubsTypeID, @ScheduleID, @Social, @PlanId, @Fecha, 1, 1, GETDATE());
+
+        SET @SubscriptionId = SCOPE_IDENTITY()
+
+        -- 3. Insertar transacción
+        SET @Checksum = CONCAT('TX-', CAST(NEWID() AS VARCHAR(36)))
+        INSERT INTO caipi_transactions (paymentid, userid, checksum, date, personId, amount, description, postTime, refNumber, convertedAmount, transactionSubTypeId, transTypeId, currencyId, exchangeRateId)
+        VALUES (@PaymentId, @UserId, CONVERT(VARBINARY(100), @Checksum), @Fecha, @UserId, @Monto, 'Transacción realizada', GETDATE(), 'ref-number123549', @Monto, 1, 101, 1, 10);
+
+        SET @TransactionId = SCOPE_IDENTITY()
+
+        IF @InicieTransaccion = 1 
+        BEGIN
+            COMMIT
+        END
+    END TRY
+    BEGIN CATCH
+        SET @ErrorNumber = ERROR_NUMBER()
+        SET @ErrorSeverity = ERROR_SEVERITY()
+        SET @ErrorState = ERROR_STATE()
+        SET @Message = ERROR_MESSAGE()
+
+        IF @InicieTransaccion = 1 
+        BEGIN
+            ROLLBACK
+        END
+        
+        -- Corregido: 2 placeholders, 2 parámetros
+        RAISERROR('Error: %s. Código de Error: %i', 
+            @ErrorSeverity, 
+            @ErrorState, 
+            @Message, 
+            @CustomError); 
+    END CATCH	
+END
+RETURN 0
+GO
+
+EXEC [dbo].[SP_RegistrarSubscripcionConPagoYTransaccion] 
+    @UserId = 10, 
+	@SubsTypeID = 1,
+	@Social = 1,
+    @PlanId = 3, 
+    @Monto = 500.00, 
+    @MetodoPago = 'Tarjeta',
+    @Descripcion = 'Suscripción mensual',
+    @Error = 'Exitosa',
+    @Fecha = '2025-05-05',
+	@ScheduleID = 1
+ ```
+<details>
+
+#### 3. Escribir un SELECT que use CASE para crear una columna calculada que agrupe dinámicamente datos (por ejemplo, agrupar cantidades de usuarios por plan en rangos de monto, no use este ejemplo).
+
+<details>
+	<summary>Haz clic para expandir</summary>
+	
+ ```sql
+-- Escribir un SELECT que use CASE para crear una columna calculada que agrupe dinámicamente datos.
+-- A continuación, creamos una consulta que muestre los datos por nivel de riesgo basandonos en el monto.
+SELECT
+    paymentId,
+    userid,
+    amount,
+    date,
+    CASE
+        WHEN amount <= 50 THEN 'Bajo riesgo'
+        WHEN amount BETWEEN 51 AND 250 THEN 'Medio riesgo'
+        ELSE 'Alto riesgo'
+    END AS nivel_riesgo
+FROM caipi_payments;
+ ```
+<details>
+
+#### 4. Imagine una cosulta que el sistema va a necesitar para mostrar cierta información, o reporte o pantalla, y que esa consulta vaya a requerir:
+
+ <details>
+	<summary>Haz clic para expandir</summary>
+	 
+```sql
+USE caipiIAdb;
+GO
+
+-----------------------------------------------------------
+-- 1) CTE: Usuarios con suscripción activa
+-----------------------------------------------------------
+WITH ActiveSubs AS (
+    SELECT 
+        s.userid,
+        s.idPlan,
+        s.startDate
+    FROM caipi_subscriptions s
+    WHERE s.enable = 1
+),
+
+-----------------------------------------------------------
+-- 2) CTE: Estadísticas de pagos por usuario (último mes)
+--    - SUM(amount) y AVG(amount), 
+--    - sólo aquellos con SUM(amount) > 1000
+-----------------------------------------------------------
+PaymentStats AS (
+    SELECT 
+        p.userid,
+        SUM(p.amount)  AS totalPaid,
+        AVG(p.amount)  AS avgPaid
+    FROM caipi_payments p
+    WHERE p.date >= DATEADD(MONTH, -1, GETDATE())
+    GROUP BY p.userid
+    HAVING SUM(p.amount) > 1000
+),
+
+-----------------------------------------------------------
+-- 3) CTE: Usuarios que han hecho transacción en últimos 30 días
+-----------------------------------------------------------
+RecentTx AS (
+    SELECT DISTINCT
+        t.userid
+    FROM caipi_transactions t
+    WHERE t.date >= DATEADD(DAY, -30, GETDATE())
+)
+
+-----------------------------------------------------------
+-- Consulta final: combina los 3 CTEs + tablas
+-- 4 JOINs, CASE, CONVERT, IN, NOT IN, EXISTS, ORDER BY
+-----------------------------------------------------------
+SELECT
+    u.userid,
+    u.username,
+    pl.name             AS planName,
+    CONVERT(VARCHAR(10), a.startDate, 23) AS subscriptionDate,
+    ps.totalPaid,
+    ps.avgPaid,
+    CASE 
+      WHEN ps.avgPaid > 2000 THEN 'VIP'
+      ELSE 'STANDARD'
+    END AS customerTier
+FROM caipi_users      u
+    JOIN ActiveSubs      a ON u.userid = a.userid          -- 1
+    JOIN caipi_plans     pl ON a.idPlan   = pl.idPlan       -- 2
+    JOIN PaymentStats    ps ON u.userid   = ps.userid       -- 3
+    JOIN RecentTx        r  ON u.userid   = r.userid        -- 4
+WHERE
+    -- Incluyo solo usuarios NO dados de baja (active = 1)
+    u.active = 1
+    -- Y me aseguro de que existan pagos OK
+    AND EXISTS (
+        SELECT 1 
+        FROM caipi_payments p2
+        WHERE p2.userid = u.userid 
+          AND p2.result = 'OK'
+    )
+ORDER BY ps.totalPaid DESC;
+```
+ <details>
+
+#### 5. Crear una consulta con al menos 3 JOINs que analice información donde podría ser importante obtener un SET DIFFERENCE y un INTERSECTION
+
+<details>
+	<summary>Haz clic para expandir</summary>
+
+ ```sql
+-----------------------------------------------------------
+-- 1) INTERSECT:
+-- Usuarios con suscripción activa a planes que ofrecen servicios
+-- Y que además tuvieron al menos una transacción en los últimos 30 días
+-----------------------------------------------------------
+SELECT
+    u.userid,
+    u.username,
+	s.created_at,
+	pl.totalAmount,
+	pl.name
+FROM caipi_users u
+    JOIN caipi_subscriptions s     ON u.userid = s.userid
+    JOIN caipi_plans         pl    ON pl.idPlan = s.idPlan
+    JOIN caipi_redemptions   re    ON re.idPlan = pl.idPlan
+	JOIN caipi_services      se    ON se.serviceId = re.idPlan
+
+WHERE 
+    s.enable = 1
+
+INTERSECT
+
+SELECT 
+    u.userid,
+    u.username,
+	s.created_at,
+	pl.totalAmount,
+	pl.name
+FROM caipi_users u
+    JOIN caipi_transactions t    ON u.userid = t.userid
+    JOIN caipi_payments p        ON t.paymentid = p.paymentid
+    JOIN caipi_subscriptions s   ON u.userid = s.userid
+    JOIN caipi_plans pl          ON s.idPlan = pl.idPlan
+WHERE 
+    t.date >= DATEADD(DAY, -30, GETDATE());
+GO
+
+-----------------------------------------------------------
+-- 2) EXCEPT:
+-- Usuarios con suscripción activa a planes que ofrecen servicios
+-- Que NO hayan tenido ninguna transacción en los últimos 30 días
+-----------------------------------------------------------
+SELECT 
+    u.userid,
+    u.username,
+	s.created_at,
+	pl.totalAmount,
+	pl.name
+FROM caipi_users u
+    JOIN caipi_transactions t    ON u.userid = t.userid
+    JOIN caipi_payments p        ON t.paymentid = p.paymentid
+    JOIN caipi_subscriptions s   ON u.userid = s.userid
+    JOIN caipi_plans pl          ON s.idPlan = pl.idPlan
+WHERE 
+    s.enable = 1
+
+EXCEPT
+
+SELECT 
+    u.userid,
+    u.username,
+	s.created_at,
+	pl.totalAmount,
+	pl.name
+FROM caipi_users u
+    JOIN caipi_transactions t    ON u.userid = t.userid
+    JOIN caipi_payments p        ON t.paymentid = p.paymentid
+    JOIN caipi_subscriptions s   ON u.userid = s.userid
+    JOIN caipi_plans pl          ON s.idPlan = pl.idPlan
+WHERE 
+    t.date >= DATEADD(DAY, -30, GETDATE());
+GO
+ ```
+<details>
+	
 #### 6. Crear un procedimiento almacenado transaccional que llame a otro SP transaccional, el cual a su vez llame a otro SP transaccional. Cada uno debe modificar al menos 2 tablas. Se debe demostrar que es posible hacer COMMIT y ROLLBACK con ejemplos exitosos y fallidos sin que haya interrumpción de la ejecución correcta de ninguno de los SP en ninguno de los niveles del llamado.
 
 <details>
