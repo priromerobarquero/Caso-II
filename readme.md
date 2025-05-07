@@ -4638,6 +4638,7 @@ BEGIN TRANSACTION
 	JOIN dbo.caipi_plans p ON s.idPlan = p.idPlan WHERE s.idPlan = 1;
 COMMIT
 
+
 -------------------------------------------------------------------------------------------------------------------------------------
 
 -- NUEVO INGRESO DE TIPO DE CAMBIO (PARTE A)
@@ -4658,10 +4659,13 @@ BEGIN TRANSACTION
            ([amount],[description],[date],[postTime],[refNumber],[checksum],[convertedAmount],[paymentId]
            ,[transactionSubTypeId],[transTypeId],[currencyId],[exchangeRateId])
      VALUES(100.00, 'Description', '2025-05-05', '2025-05-05', 'TRW28290', HASHBYTES('SHA2_512', 'fbsdinaldkna3193'), 100.00 * @rate, 1,
-			1,1,2, @id);
+			1,101,2, @id);
 COMMIT
 
+
+
 select transactionId, exchangeRateId, convertedAmount from caipi_transactions
+
 
 -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -4715,7 +4719,7 @@ BEGIN TRANSACTION
            ([amount],[description],[date],[postTime],[refNumber],[checksum],[convertedAmount],[paymentId]
            ,[transactionSubTypeId],[transTypeId],[currencyId],[exchangeRateId])
      VALUES(100.00, 'Description', '2025-05-05', '2025-05-05', 'TRW28290', HASHBYTES('SHA2_512', 'fbsdinaldkna3193'), 100.00 * @ratee, 1,
-			1,1,2, @idd);
+			1,101,2, @idd);
 COMMIT
 
 select transactionId, exchangeRateId, convertedAmount from caipi_transactions
@@ -4780,7 +4784,7 @@ BEGIN TRANSACTION
            ([amount],[description],[date],[postTime],[refNumber],[checksum],[convertedAmount],[paymentId]
            ,[transactionSubTypeId],[transTypeId],[currencyId],[exchangeRateId])
      VALUES(100.00, 'Description', '2025-05-05', '2025-05-05', 'TRW28290', HASHBYTES('SHA2_512', 'fbsdinaldkna3193'), 100.00 * @ratte, 1,
-			1,1,2, @iid);
+			1,101,2, @iid);
 COMMIT
 
 select transactionId, exchangeRateId, convertedAmount from caipi_transactions
@@ -4880,7 +4884,7 @@ BEGIN TRANSACTION
            ([amount],[description],[date],[postTime],[refNumber],[checksum],[convertedAmount],[paymentId]
            ,[transactionSubTypeId],[transTypeId],[currencyId],[exchangeRateId])
      VALUES(100.00, 'Description', '2025-05-05', '2025-05-05', 'TRW28290', HASHBYTES('SHA2_512', 'fbsdinaldkna3193'), 100.00 * @rate, 1,
-			1,1,2, @id);
+			1,101,2, @id);
 COMMIT
 
 select transactionId, exchangeRateId, convertedAmount from caipi_transactions
@@ -4913,6 +4917,7 @@ COMMIT
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 
+
 ```
 </details>
 
@@ -4934,7 +4939,7 @@ BEGIN TRANSACTION
 	WAITFOR DELAY '00:00:10'
 ROLLBACK
 
-
+SELECT idPlan, name, totalAmount FROM caipi_plans
 
 -----------------------------------------------------------------------------------------------------------------------------------------
 
@@ -5031,6 +5036,7 @@ BEGIN TRANSACTION
 COMMIT
 
 
+
 -------------------------------------------------------------------------------------------------------------------------
 
 -- DISMINUCION DE PRECIO (PARTE A)
@@ -5059,7 +5065,7 @@ UPDATE caipi_subscriptions
 
 COMMIT
 
-
+SELECT * FROM caipi_subscription_status
 --------------------------------------------------------------------------------------------------------------------------
 
 
