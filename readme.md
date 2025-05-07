@@ -1196,6 +1196,10 @@ INSERT INTO [dbo].[caipi_cities]
 </details>
 
 #### Types Branch
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_typesBranch]
            ([name], [enable], [deleted])
@@ -1210,7 +1214,13 @@ INSERT INTO [dbo].[caipi_typesBranch]
            ('Soporte Técnico', 1, 0);
 ```
 
+</details>
+
 #### Plan Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO caipi_planTypes (name, enable, deleted)
 VALUES 
@@ -1222,7 +1232,13 @@ VALUES
 ('Salud y Bienestar', 1, 0);
 ```
 
+</details>
+
 #### Plans
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 CREATE PROCEDURE LlenarPlanes
 AS
@@ -1285,7 +1301,13 @@ BEGIN
 END
 ```
 
+</details>
+
 #### Media File Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO caipi_mediaFileType (name, enable, deleted)
 VALUES
@@ -1293,7 +1315,13 @@ VALUES
 ('video', 1, 0);
 ```
 
+</details>
+
 #### Media Files
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO caipi_mediaFiles (idmediaFiles, mediaURL, filename, lastUpdate, idmediaFileType)
 VALUES
@@ -1314,7 +1342,13 @@ VALUES
     (15, 'https://media.soltura.com/servicio_pagos_suscripcion.jpg', 'Pagos de Suscripción', GETDATE(), 1);
 ```
 
+</details>
+
 #### Schedules
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 CREATE PROCEDURE llenadoSchedules
 AS
@@ -1356,7 +1390,13 @@ BEGIN
 END;
 ```
 
+</details>
+
 #### Supplier Categories
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO caipi_supplierCategories(name, enable, deleted)
 VALUES
@@ -1377,7 +1417,13 @@ VALUES
 ('Proveedores Varios', 1, 0);
 ```
 
+</details>
+
 #### Suppliers 
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_suppliers] ([name], [enable], [idsupplierCategories], [idmediaFiles], [idagreementTerms], [deleted])
 VALUES
@@ -1397,6 +1443,8 @@ VALUES
 ('Rostipollos', 1, 7, 7, 7, 0), 
 ('KOKi Beach', 1, 7, 7, 7, 0); 
 ```
+
+</details>
 
 #### Users
 
