@@ -585,8 +585,7 @@
 ```
 </details>
 
-- **SQL Server:**  
-  > [Diagrama](https://github.com/prosoli/Caso-II/blob/main/SQL-SERVER/DiagramaPDF.pdf)
+- **SQL Server:**  [Diagrama](https://github.com/prosoli/Caso-II/blob/main/SQL-SERVER/DiagramaPDF.pdf)
 
 ## 🧪 Test de la Base de Datos - 65 pts
 
