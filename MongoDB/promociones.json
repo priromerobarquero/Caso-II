@@ -1,0 +1,58 @@
+{
+    "promociones": [
+      {
+        "promo_id": "001",
+        "titulo": "Descuento en gimnasio con SmartFit",
+        "descripcion": "Obtén un 25% de descuento en membresías mensuales con SmartFit al adquirir el Paquete Profesional Joven.",
+        "creado_el": "2025-04-10T09:00:00Z",
+        "valido_hasta": "2025-05-10T23:59:59Z",
+        "imagenURL": "https://imgpromo.com/smartfit25.png",
+        "promoURL": "https://soltura.cr/promociones/001",
+        "codigoBarras": "1234567890123",
+        "condiciones": [
+          "Válido solo para nuevas membresías.",
+          "No acumulable con otras promociones.",
+          "Aplicable únicamente en gimnasios SmartFit participantes."
+        ],
+        "tipoPromocion": "descuento",
+        "estado": "inactivo"
+      },
+      {
+        "promo_id": "002",
+        "titulo": "10% de descuento en tu primer plan Soltura personalizado",
+        "descripcion": "Arma tu propio paquete con los servicios que más usás: gimnasio, comida, belleza, transporte y más. ¡Y obtené un 10% de descuento en tu primer mes!",
+        "creado_el": "2025-04-14T08:00:00Z",
+        "valido_hasta": "2025-05-31T23:59:59Z",
+        "imagenURL": "https://soltura.cr/media/promo-soltu-personal.png",
+        "promoURL": "https://soltura.cr/promociones/002",
+        "codigoBarras": "7894561230123",
+        "condiciones": [
+            "Válido solo para nuevos usuarios de planes personalizados.",
+            "El descuento se aplica únicamente al primer mes del plan.",
+            "No acumulable con otras promociones activas.",
+            "Promoción válida únicamente en planes creados desde la app oficial de Soltura."
+        ],
+        "tipoPromocion": "descuento",
+        "estado": "activo"
+      },
+      {
+        "promo_id": "003",
+        "titulo": "¡Invitá a un amigo y ambos obtienen 1 mes gratis!",
+        "descripcion": "Recomendá Soltura a tus amigos y por cada uno que se registre y active su primer plan, ambos recibirán un mes completamente gratis en su membresía.",
+        "creado_el": "2025-04-14T08:00:00Z",
+        "valido_hasta": "2025-06-30T23:59:59Z",
+        "imagenURL": "https://soltura.cr/media/promo-amigos.png",
+        "promoURL": "https://soltura.cr/promociones/003",
+        "codigoBarras": "998877665544",
+        "condiciones": [
+          "La persona referido debe activar un plan Soltura en los primeros 7 días tras registrarse.",
+          "La promoción aplica únicamente si ambos usuarios completan el proceso de verificación.",
+          "Solo se otorga 1 mes gratuito por cada referido.",
+          "Promoción válida hasta agotar existencias de meses gratuitos o hasta la fecha de finalización."
+        ],
+        "tipoPromocion": "referido",
+        "estado": "activo"
+      }    
+    ]
+  }
+  
