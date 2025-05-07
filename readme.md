@@ -2819,6 +2819,10 @@ GO
 
 
 #### 2. Crear un certificado y llave asimétrica.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 -- Debido a que SQL Server trabaja con una jerarquía de claves, debemos tener una clave maestra primero
 CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'ClaveMaestra';
@@ -2839,7 +2843,13 @@ WITH IDENTITY = 'CaipiSeguridad',
 SECRET = 'CaipiClaveAsimetrica'
 ```
 
+</details>
+
 #### 3. Crear una llave simétrica.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 -- Crear llave simétrica
 CREATE SYMMETRIC KEY ClaveSimetrica
@@ -2868,8 +2878,13 @@ WITH PASSWORD = 'CaipiCaso2'; -- Contraseña de la llave asimétrica
 SELECT key_name AS 'Llave Abierta' 
 FROM sys.openkeys;
 ```
+</details>
 
 #### 4. Cifrar datos sensibles usando cifrado simétrico y proteger la llave privada con las llaves asimétrica definidas en un certificado del servidor.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 -- ENCRIPTACIÓN DE DATOS 
 
@@ -2904,8 +2919,13 @@ SET quantity = ENCRYPTBYKEY(KEY_GUID('ClaveSimetrica'), quantity)
 -- Cerrar la llave
 CLOSE SYMMETRIC KEY ClaveSimetrica;
 ```
+</details>
 
 #### 5. Crear un SP que descifre los datos protegidos usando las llaves anteriores.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 -- Modificar el Stored Procedure DesencriptarColumna
 CREATE PROCEDURE DesencriptarColumna
@@ -2947,8 +2967,13 @@ EXEC DesencriptarColumna
     @ContraseñaLlaveAsimetrica = 'CaipiCaso2';
 ```
 
+</details>
+
 # Consultas Misceláneas
 #### 1. Crear una vista indexada con al menos 4 tablas (ej. usuarios, suscripciones, pagos, servicios). La vista debe ser dinámica, no una vista materializada con datos estáticos. Demuestre que si es dinámica.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
  ```sql
 ALTER VIEW VistaIndexadaSoltura -- Sin SCHEMABINDING
@@ -3022,9 +3047,14 @@ WHERE username = 'cgonzalez015' AND description = 'Propina'
 
 -- El resultado terminó siendo 8.00
  ```
+</details>
 
 #### 2. Crear un procedimiento almacenado transaccional que realice una operación del sistema, relacionado a subscripciones, pagos, servicios, transacciones o planes, y que dicha operación requiera insertar y/o actualizar al menos 3 tablas.
 
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
  ```sql
  -----------------------------------------------------------
 -- Autor: Rnunez
@@ -3136,9 +3166,13 @@ EXEC [dbo].[SP_RegistrarSubscripcionConPagoYTransaccion]
     @Fecha = '2025-05-05',
 	@ScheduleID = 1
  ```
+</details>
 
 #### 3. Escribir un SELECT que use CASE para crear una columna calculada que agrupe dinámicamente datos (por ejemplo, agrupar cantidades de usuarios por plan en rangos de monto, no use este ejemplo).
-	
+
+  <details>
+   <summary>Haz clic para expandir</summary>
+	  
  ```sql
 -- Escribir un SELECT que use CASE para crear una columna calculada que agrupe dinámicamente datos.
 -- A continuación, creamos una consulta que muestre los datos por nivel de riesgo basandonos en el monto.
@@ -3154,9 +3188,13 @@ SELECT
     END AS nivel_riesgo
 FROM caipi_payments;
  ```
+</details>
 
 #### 4. Imagine una cosulta que el sistema va a necesitar para mostrar cierta información, o reporte o pantalla, y que esa consulta vaya a requerir:
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 USE caipiIAdb;
 GO
@@ -3231,9 +3269,13 @@ WHERE
     )
 ORDER BY ps.totalPaid DESC;
 ```
+</details>
 
 #### 5. Crear una consulta con al menos 3 JOINs que analice información donde podría ser importante obtener un SET DIFFERENCE y un INTERSECTION
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
  ```sql
 -----------------------------------------------------------
 -- 1) INTERSECT:
@@ -3308,7 +3350,8 @@ WHERE
     t.date >= DATEADD(DAY, -30, GETDATE());
 GO
  ```
-	
+</details>
+ 
 #### 6. Crear un procedimiento almacenado transaccional que llame a otro SP transaccional, el cual a su vez llame a otro SP transaccional. Cada uno debe modificar al menos 2 tablas. Se debe demostrar que es posible hacer COMMIT y ROLLBACK con ejemplos exitosos y fallidos sin que haya interrumpción de la ejecución correcta de ninguno de los SP en ninguno de los niveles del llamado.
 
 <details>
