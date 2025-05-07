@@ -6491,7 +6491,7 @@ suscriptions.to_sql('caipi_subscriptions', engine_sql, if_exists='append', index
 </details>
 
 
-#### Banner Publicitario
+#### Banner Publicitario y Home Page image
 
 Soltura anuncia que los servicios pertenecientes al sistema de Payment Assistant ahora les pertenece, para esto se realica un banner publicitario dentro del modelo no relacional de mercadeo en el cual se incorpora una imagen que especifica la descripcion de esta noticia, y un link con los pasos a seguir para los clientes
 
