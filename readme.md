@@ -785,6 +785,10 @@ END
 </details>
 
 #### AddPaymentMethodsPerSupplier Procedure
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 /*
 
@@ -820,8 +824,13 @@ BEGIN
 	END
 END
 ```
+</details>
 
 #### Insert Transaction Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_transTypes] ([transactionTypeId], [name], [deleted], [transTypeId])
 VALUES
@@ -835,7 +844,13 @@ VALUES
     (8, 'Transfer', 0, 108);         
 ```
 
+</details>
+
 #### Insert Transaction Sub Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_transSubTypes] ([name], [deleted])
 VALUES
@@ -851,7 +866,13 @@ VALUES
     ('Interest Payment', 0);
 ```
 
+</details>
+
 #### Insert Log Severity Levels
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_logSeverity] ([name])
 VALUES
@@ -862,7 +883,13 @@ VALUES
     ('Informational');
 ```
 
+</details>
+
 #### Insert Log Sources
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_logsSources] ([name])
 VALUES
@@ -879,7 +906,13 @@ VALUES
     ('File System');
 ```
 
+</details>
+
 #### Insert Log Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_logTypes] ([name])
 VALUES
@@ -895,7 +928,13 @@ VALUES
     ('Access');
 ```
 
+</details>
+
 #### Insert Unit Measures
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_measureUnits] ([name], [enable], [deleted], [dataType])
 VALUES
@@ -911,7 +950,14 @@ VALUES
 	('Almuerzo', 1, 0, 'Integer'),
 	('Dias', 1, 0, 'Integer');
 ```
+
+</details>
+
 #### Services Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_serviceTypes] ([idServiceType], [name], [description], [enable])
 VALUES
@@ -926,6 +972,8 @@ VALUES
     (9, 'Deporte', 'Instalaciones deportivas y clubes atléticos', 1),
     (10, 'Tecnología', 'Acceso a servicios tecnológicos y digitales', 1);
 ```
+
+</details>
 
 #### Services
 ```sql
