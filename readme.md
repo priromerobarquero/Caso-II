@@ -4261,8 +4261,6 @@ EXEC dbo.caipiSP_LogToBackupBitacora
 # Concurrencia
 
 ## Deadlock
-<details>
-   <summary>Haz clic para expandir</summary>
 
 T1 - Generacion de Deadlocks
 
@@ -4270,6 +4268,9 @@ En esta transacccion se plantea el caso en el que el ususario haya hecho n canje
 Sin embargo las cosas no salen porque cuando se actualiza la redemption dura un tiempo en cargar y sigue con el select de ese proveedor, pero no puede hacerse porque la T1 tiene bloqueado al proveedor y despues T2 está esperando que T1 deje de bloquear al user.
 Esto hace que las dos transacciones se necesiten entre ellas y ninguna llega a termino y alguna tendrá que ser victima y ser eliminada por SQL Server.
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 
 BEGIN TRANSACTION;
@@ -4289,6 +4290,7 @@ BEGIN TRANSACTION;
 COMMIT;
 
 ```
+</details>
 
 -T2 - Generando deadlocks
 
@@ -4296,7 +4298,9 @@ En esta transacción se plantea el caso que se quiera hacer algun mantenimiento 
 Cuando T2 bloquea el usuario para poder cambiarlo ya T1 no puede terminar pero T2 tampoco porque está esperando que T1 desbloquee al usuario. 
 Esto hace que las dos transacciones se necesiten entre ellas y ninguna llega a termino y alguna tendrá que ser victima y ser eliminada por SQL Server.
 
-
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 BEGIN TRANSACTION;
 
@@ -4318,6 +4322,7 @@ COMMIT;
 
 
 ## Deadlocks en Cascada
+
 <details>
    <summary>Haz clic para expandir</summary>
 
@@ -4386,11 +4391,12 @@ COMMIT
 
 ## Niveles de isolación
 
-<details>
-   <summary>Haz clic para expandir</summary>
 
 ### Primer script para la ejecucion de los niveles de isolacion
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 
 -- ################################## READ UNCOMMITTED ############################
@@ -4681,9 +4687,13 @@ COMMIT
 -----------------------------------------------------------------------------------------------------------------------------------------
 
 ```
+</details>
 
 ### Segundo script para la ejecucion de los niveles de isolacion
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ``` sql
 
 
@@ -4900,6 +4910,9 @@ A continuacion se presenta un caso de bloqueo entre dos sesiones de ejecucion. E
 
 Actualmente por defecto un cursor no bloquea un registro, no obstante, esto ahora se debe indicar por medio del operador `SCROLL_LOCKS`
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 
 --Con la finalidad de realizar pruebas se recomienda ejecutar la siguiente actualizacion
@@ -4948,6 +4961,7 @@ CLOSE agreement_terms_cursor
 DEALLOCATE agreement_terms_cursor
 
 ```
+</details>
 
 El cursor de UPDATE en SQL Server recorre los registros de una tabla y realiza actualizaciones en ellos mientras mantiene bloqueos para evitar que otros procesos modifiquen esos registros simultáneamente. Al declarar el cursor con la opción SCROLL_LOCKS, se garantiza que el cursor pueda moverse tanto hacia adelante como hacia atrás en los registros, y que los bloqueos sobre las filas que se están procesando se mantengan durante todo el recorrido.
 
@@ -4955,6 +4969,7 @@ Se utiliza WITH (ROWLOCK, UPDLOCK) para aplicar los bloqueos. El ROWLOCK asegura
 
 Las siguientes instrucciones se deben ejecutar en otras esion
 
+	 
 ```sql
 
 DECLARE @agreementId INT
@@ -4965,6 +4980,7 @@ SET finalDate = GETDATE()
 WAITFOR DELAY '00:00:01'
 
 ```
+
 El UPDATE en otra sesión anterior debe esperar a que el cursor termine de ejecutarse debido al bloqueo UPDLOCK aplicado por el cursor sobre los registros que está procesando. En el caso que mencionas, el cursor adquiere un bloqueo de actualización (UPDLOCK) sobre cada fila mientras la recorre. Este tipo de bloqueo impide que otras transacciones modifiquen los registros bloqueados hasta que el cursor termine su operación y libere el bloqueo.
 
 Cuando otra sesión intenta ejecutar un UPDATE sobre la tabla, como en el caso de actualizar el finalDate, se encuentra con que las filas que el cursor está procesando están bloqueadas con el UPDLOCK. Debido a esto, la sesión que intenta ejecutar el UPDATE no puede modificar esas filas hasta que el cursor haya terminado de procesarlas, ya que el bloqueo de actualización mantiene a otras transacciones a la espera.
@@ -4976,6 +4992,9 @@ El UPDLOCK evita que otros procesos realicen actualizaciones en las filas bloque
 
 Como fue mencionado anteriormente, uun cursor al no poseer un operador de bloqueo este no bloquea la fila a la que se le este realizando fetch por lo que se muestra un ejemplo en el que al declarar un cursor sencillo no realiza bloqueos si yo ejecuto una transaccion sobre el mismo dato en otra sesion
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 
 --Con la finalidad de realizar pruebas se recomienda ejecutar la siguiente actualizacion
@@ -5025,6 +5044,7 @@ DEALLOCATE agreement_terms_cursor
 
 
 ```
+</details>
 
 La siguiente transaccion se ejecuta en otra sesion, y a diferencia de un bloqueo, esta se realiza casi de forma inmediata con un tiempo menor
 
@@ -5083,6 +5103,8 @@ El siguiente procedimiento almacenado permite registrar transacciones de redenci
 
 El nivel de insolacion READ COMMITTED se utiliza para evitar la lectura de datos no confirmados ("dirty reads") durante la transacción. Esto significa que cualquier dato leído durante la ejecución del procedimiento ya ha sido confirmado por otras transacciones, garantizando así que los valores utilizados para verificar límites o condiciones son válidos y estables durante toda la operación. Esto es esencial en este procedimiento, ya que trabaja con condiciones sensibles de límites de redención que, si se leyeran sin confirmar, podrían permitir redenciones incorrectas o inconsistentes.
 
+ <details>
+   <summary>Haz clic para expandir</summary>
 
  ```sql
 
@@ -5282,6 +5304,7 @@ BEGIN
 END;
 
 ``` 
+</details>
 
 Determine cuántas transacciones por segundo máximo es capaz de procesar su base de datos, valide el método con el profesor
 
@@ -5495,7 +5518,12 @@ Al hacer una solicitud a este endpoint:
 2. Ejecuta el procedimiento almacenado `CaipiSP_InsertRedemptionTransaction` con valores de prueba.
 3. Devuelve una respuesta en formato JSON con los datos resultantes.
 
+
 ---
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```js
 // Importa las dependencias
 const express = require('express');
@@ -5579,6 +5607,7 @@ app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
 });
 ```
+</details>
 
 ## 🧪 Pruebas de rendimiento con JMeter
 
@@ -5732,6 +5761,9 @@ Esto permitió distribuir la carga entre múltiples procesos, evitando que un so
 ---
 
 A continucacion se muestra la API con las respectivas modificaciones, en la que predomina el connection pooling.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```js
 
@@ -5907,8 +5939,10 @@ if (cluster.isMaster && isLoadTesting) {
 }
 
 ```
+</details>
 
 # Migracion de los usuarios de Payment Assistant
+
 Previo a la semana santa, la empresa Soltura estuvo en conversaciones con los dueños e inversionistas de varias empresas ya establecidas en el país, entre ellas "payment assistant" y "app assistant" (como grupo de trabajo escogen solo una del entregable del caso #1), esas empresas ya han logrado cierta tracción y público en Costa Rica y han decidido que dichas aplicaciones podrían ser dadas como parte de los planes de subscripción de Soltura.
 
 En lugar de negociar con los dueños para verlos como proveedores, quieren usarlas para aumentar su cartera de usuarios, haciendo que por el mismo precio que ya pagan por el servicio, obtengan un plan que obtengan mínimo lo mismo y dos servicios más adicionales. Esto para el periodo de adquisición y dejar que los mismos usuarios posteriormente se muevan a otros planes.
@@ -5933,10 +5967,11 @@ Esto ha hecho que ustedes como equipo de tecnología les toque realizar una migr
 
 #### Migrado de la base de Datos
 
- <details>
-   <summary>Haz clic para expandir</summary>
 Para poder realizar la migración de datos se ha decidido implementar la base de datos utilizada para la aplicacion de Payment Assistant
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```py
 #Librerias
 import pymysql
@@ -6118,11 +6153,11 @@ df_subs.to_sql('caipi_subscriptions', engine_sql, if_exists='append', index=Fals
 
 #### Banner Publicitario
 
- <details>
-   <summary>Haz clic para expandir</summary>
-
 Soltura anuncia que los servicios pertenecientes al sistema de Payment Assistant ahora les pertenece, para esto se realica un banner publicitario dentro del modelo no relacional de mercadeo en el cual se incorpora una imagen que especifica la descripcion de esta noticia, y un link con los pasos a seguir para los clientes
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```json
 {
         "media_id": "004",
