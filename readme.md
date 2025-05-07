@@ -976,6 +976,10 @@ VALUES
 </details>
 
 #### Services
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_services] ([name], [description], [enable], [image], [idServiceType])
 VALUES
@@ -995,7 +999,13 @@ VALUES
     ('Entrenamiento Personalizado', 'Entrenamiento físico y nutricional a medida, con seguimiento personalizado', 1, 14, 1);
 ```
 
+</details>
+
 #### Modules
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_modules]
            ([name], [enable], [deleted])
@@ -1012,7 +1022,13 @@ INSERT INTO [dbo].[caipi_modules]
            ('Módulo de Seguridad', 1, 0);
 ```
 
+</details>
+
 #### Redemption Transaction Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_RedemptionTransactionTypes]
            ([name], [enable], [deleted])
@@ -1022,7 +1038,13 @@ INSERT INTO [dbo].[caipi_RedemptionTransactionTypes]
            ('QR', 1, 0);
 ```
 
+</details>
+
 #### Redemption Sub Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+	 
 ```sql
 INSERT INTO [dbo].[caipi_redemptionSubType]
            ([name], [enable], [deleted])
@@ -1032,7 +1054,13 @@ INSERT INTO [dbo].[caipi_redemptionSubType]
            ('Servicio',1,0);
 ```
 
+</details>
+
 #### Notification Methods
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_notificationmethods]
            ([name], [lastupdate], [createddate], [enabled], [callbackurlget], [callbackurlpost], [callbackurlredirect], [messagingserviceid], [authtoken])
@@ -1042,7 +1070,13 @@ INSERT INTO [dbo].[caipi_notificationmethods]
            ('Twilio SMS', GETDATE(), GETDATE(), 1, 'https://api.twilio.com/get', 'https://api.twilio.com/post', 'https://api.twilio.com/redirect', 'SMXXXXXX', 'twilio_auth_token');
 ```
 
+</details>
+
 #### Contact Info Type
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_contactInfoType]
            ([name], [enable])
@@ -1054,7 +1088,13 @@ INSERT INTO [dbo].[caipi_contactInfoType]
            ('Numero Movil',1);
 ```
 
+</details>
+
 #### Contact Info Per Supplier
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_contactInfoPerSupplier]
            ([enable], [value], [contactInfoTypeId], [idSupplier])
@@ -1076,7 +1116,13 @@ INSERT INTO [dbo].[caipi_contactInfoPerSupplier]
            (1, 'amamaser@wellness.com', 1, 8);
 ```
 
+</details>
+
 #### Countries
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_countries]
            ([countryId], [name], [phoneCode])
@@ -1090,7 +1136,13 @@ INSERT INTO [dbo].[caipi_countries]
            (9, 'Brasil', '+55');
 ```
 
+</details>
+
 #### States
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_states]
            ([name], [enable], [countryId])
@@ -1110,7 +1162,13 @@ INSERT INTO [dbo].[caipi_states]
            ('Lima', 1, 8);
 ```
 
+</details>
+
 #### Cities
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_cities]
            ([name], [enable], [stateId])
@@ -1134,6 +1192,8 @@ INSERT INTO [dbo].[caipi_cities]
            ('Miraflores', 1, 13), 
            ('San Isidro', 1, 13);
 ```
+
+</details>
 
 #### Types Branch
 ```sql
