@@ -720,7 +720,8 @@ VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
-CREATE OR ALTER PROCEDURE InsertarPaymentMethods
+GO
+CREATE OR ALTER PROCEDURE dbo.caipiSP_InsertarPaymentMethods
 	--no hay parametros
 AS
 BEGIN
@@ -730,8 +731,8 @@ BEGIN
     DECLARE @methodId INT;
     DECLARE @token NVARCHAR(100);
     DECLARE @expTokenDate DATETIME;
-    DECLARE @maskAccount VARCHAR(10);
-    DECLARE @callbackURL NVARCHAR(100);
+    DECLARE @maskAccount NVARCHAR(MAX);
+    DECLARE @callbackURL NVARCHAR(200);
     DECLARE @configurationDetails NVARCHAR(MAX);
     DECLARE @refreshToken VARBINARY(MAX);
 
@@ -749,7 +750,7 @@ BEGIN
 		-- Asignar valores dinámicos a las variables
         SET @token = CONVERT(NVARCHAR(100), NEWID());
         SET @expTokenDate = DATEADD(DAY, @i * 30, GETDATE());  -- Asignación de fechas, incrementa cada 30 días
-        SET @maskAccount = CONCAT('****', RIGHT('000' + CAST((1000 + @i * 7) AS VARCHAR), 4));  -- Cuenta enmascarada con incremento
+        SET @maskAccount = CONCAT('****', RIGHT('000' + CAST((1000 + @i * 7) AS NVARCHAR), 4));  -- Cuenta enmascarada con incremento
         SET @callbackURL = CONCAT('https://example.com/callback/method', @i);
         SET @configurationDetails = CONCAT('{"currency":"USD", "method":"', @name, '"}');
         SET @refreshToken = CAST(HASHBYTES('SHA2_256', @token) AS VARBINARY(MAX));  -- Encriptación del token
@@ -779,7 +780,10 @@ BEGIN
     -- Cerrar y liberar el cursor
     CLOSE method_cursor;
     DEALLOCATE method_cursor;
-END
+END;
+GO
+
+EXEC dbo.caipiSP_InsertarPaymentMethods;
 ```
 
 </details>
@@ -1240,7 +1244,10 @@ VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
-CREATE PROCEDURE LlenarPlanes
+-- ##############################
+-- INSERCIÓN DE PLANES
+-- ##############################
+CREATE OR ALTER PROCEDURE dbo.caipiSP_LlenarPlanes
 AS
 BEGIN
     DECLARE @countPlanes INT = 15;
@@ -1298,7 +1305,11 @@ BEGIN
 
         SET @i += 1;
     END
-END
+END;
+GO
+
+EXEC dbo.caipiSP_LlenarPlanes;
+GO
 ```
 
 </details>
@@ -1452,12 +1463,15 @@ VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
+-- ##############################
+-- INSERCIÓN DE USERS
+-- ##############################
 /*
  procedimiento almacenado: dbo.sp_crearusuarios
  descripcion: inserta 100 usuarios de ejemplo en dbo.caipi_users
 */
 GO
-CREATE OR ALTER PROCEDURE dbo.sp_crearusuarios
+CREATE OR ALTER PROCEDURE dbo.caipiSP_CrearUsuarios
 AS
 BEGIN
     -- este bloque desactiva mensajes de conteo de filas
@@ -1499,7 +1513,7 @@ BEGIN
         );
 
         -- este bloque genera contrasena como hash sha2_256 de pass + contador
-        DECLARE @Password VARBINARY(255) = HASHBYTES('SHA2_256', 'pass' + CAST(@i AS NVARCHAR));
+        DECLARE @Password NVARCHAR(256) = 'pass' + CAST(@i AS NVARCHAR);
 
         -- este bloque define flags de estado eliminacion y activo
         DECLARE @Deleted BIT = 0;
@@ -1530,8 +1544,10 @@ BEGIN
         -- este bloque incrementa el contador
         SET @i = @i + 1;
     END
-END
+END;
 GO
+
+EXEC dbo.caipiSP_CrearUsuarios;
 
 ```
 
@@ -1977,133 +1993,341 @@ ORDER BY idagreementTerm;
    <summary>Haz clic para expandir</summary>
 
 ```sql
-INSERT INTO caipi_AgreementsPerPlan (
-    enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount
-)
-VALUES (
-    1,
-    0,
-    16,
-    7,
-    '1 mes',
-    1,
-    722.50,
-    127.50
-);
+
+-- ##############################
+-- INSERCIÓN DE AGREEMENTSPERPLAN
+-- ##############################
+INSERT INTO caipi_AgreementsPerPlan
+(enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount)
+VALUES
+(1,0,15,7,'1 mes',1,722.50,127.50);
 
 -- Plan 16: Joven Deportista
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 16, 7, '1 mes', 1, 722.50, 127.50),
-(1, 0, 16, 9, '1 mes', 1, 630.00, 70.00);
+(1, 0, 15, 7, '1 mes', 1, 722.50, 127.50),
+(1, 0, 15, 9, '1 mes', 1, 630.00, 70.00);
 
 -- Plan 17: Familia de Verano
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 17, 10, '1 mes', 1, 480.00, 120.00),
-(1, 0, 17, 11, '1 mes', 1, 600.00, 200.00),
-(1, 0, 17, 12, '1 mes', 1, 637.50, 112.50);
+(1, 0, 7, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 7, 11, '1 mes', 1, 600.00, 200.00),
+(1, 0, 7, 12, '1 mes', 1, 637.50, 112.50);
 
 -- Plan 18: Viajero Frecuente
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 18, 13, '1 mes', 1, 450.00, 50.00),
-(1, 0, 18, 14, '1 mes', 1, 570.00, 30.00);
+(1, 0, 8, 13, '1 mes', 1, 450.00, 50.00),
+(1, 0, 8, 14, '1 mes', 1, 570.00, 30.00);
 
 -- Plan 19: Nómada Digital
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 19, 18, '1 mes', 1, 375.00, 125.00),
-(1, 0, 19, 19, '1 mes', 1, 560.00, 140.00);
+(1, 0, 9, 8, '1 mes', 1, 375.00, 125.00),
+(1, 0, 9, 9, '1 mes', 1, 560.00, 140.00);
 
 -- Plan 20: Profesional en Movimiento
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 20, 20, '1 mes', 1, 425.00, 75.00),
-(1, 0, 20, 21, '1 mes', 1, 495.00, 55.00),
-(1, 0, 20, 15, '1 mes', 1, 360.00, 90.00);
+(1, 0, 10, 2, '1 mes', 1, 425.00, 75.00),
+(1, 0, 10, 1, '1 mes', 1, 495.00, 55.00),
+(1, 0, 10, 15, '1 mes', 1, 360.00, 90.00);
 
 -- Plan 21: Estudiante Proactivo
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 21, 10, '1 mes', 1, 480.00, 120.00),
-(1, 0, 21, 19, '1 mes', 1, 560.00, 140.00);
+(1, 0, 1, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 1, 9, '1 mes', 1, 560.00, 140.00);
 
 -- Plan 22: Creativo Freelance
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 22, 7, '1 mes', 1, 722.50, 127.50),
-(1, 0, 22, 9, '1 mes', 1, 630.00, 70.00),
-(1, 0, 22, 17, '1 mes', 1, 490.00, 210.00);
+(1, 0, 2, 7, '1 mes', 1, 722.50, 127.50),
+(1, 0, 2, 9, '1 mes', 1, 630.00, 70.00),
+(1, 0, 2, 17, '1 mes', 1, 490.00, 210.00);
 
 -- Plan 23: Full Wellness
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 23, 10, '1 mes', 1, 480.00, 120.00),
-(1, 0, 23, 22, '1 mes', 1, 540.00, 60.00),
-(1, 0, 23, 24, '1 mes', 1, 660.00, 90.00);
+(1, 0, 3, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 3, 2, '1 mes', 1, 540.00, 60.00),
+(1, 0, 3, 4, '1 mes', 1, 660.00, 90.00);
 
 -- Plan 24: Tiempo en Familia
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 24, 13, '1 mes', 1, 450.00, 50.00),
-(1, 0, 24, 14, '1 mes', 1, 570.00, 30.00),
-(1, 0, 24, 16, '1 mes', 1, 425.00, 75.00),
-(1, 0, 24, 11, '1 mes', 1, 600.00, 200.00); 
+(1, 0, 4, 13, '1 mes', 1, 450.00, 50.00),
+(1, 0, 4, 14, '1 mes', 1, 570.00, 30.00),
+(1, 0, 4, 16, '1 mes', 1, 425.00, 75.00),
+(1, 0, 4, 11, '1 mes', 1, 600.00, 200.00);
 ```
 
 </details>
 
-### caipi_subscriptions
+#### caipi_subscriptions
 
  <details>
    <summary>Haz clic para expandir</summary>
 
 ```sql
+-- INSERCIÓN DE SUSCRIPCIONES A CADA USUARIO
 -- Plan 16
 INSERT INTO caipi_subscriptions (suscription_typeid, userid, social, enable, startdate, deleted, statusid, scheduleId, auto_renew, created_at, idPlan) VALUES
-(1, 1, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16),
-(1, 2, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16),
-(1, 3, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16);
-
+(1, 1, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15),
+(1, 2, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15),
+(1, 3, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15);
+	
 -- Plan 17
 INSERT INTO caipi_subscriptions VALUES
-(1, 4, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
-(1, 5, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
-(1, 6, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
-(1, 7, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17);
+(1, 4, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7),
+(1, 5, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7),
+(1, 6, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7),
+(1, 7, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7);
 
 -- Plan 18
 INSERT INTO caipi_subscriptions VALUES
-(1, 8, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 9, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 10, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 11, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 12, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18);
+(1, 8, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 9, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 10, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 11, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 12, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8);
 
 -- Plan 19
 INSERT INTO caipi_subscriptions VALUES
-(1, 13, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19),
-(1, 14, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19),
-(1, 15, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19);
+(1, 13, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 9),
+(1, 14, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 9),
+(1, 15, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 9);
 
 -- Plan 20
 INSERT INTO caipi_subscriptions VALUES
-(1, 16, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 17, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 18, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 19, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 20, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 21, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20);
+(1, 16, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 17, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 18, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 19, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 20, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 21, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10);
 
 -- Plan 21
 INSERT INTO caipi_subscriptions VALUES
-(1, 22, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
-(1, 23, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
-(1, 24, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
-(1, 25, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21);
+(1, 22, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1),
+(1, 23, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1),
+(1, 24, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1),
+(1, 25, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1);
 
 -- Plan 22
 INSERT INTO caipi_subscriptions VALUES
-(1, 26, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 27, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 28, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 29, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 30, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22);
+(1, 26, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 27, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 28, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 29, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 30, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2);
+
 ```
 
 </details>
+
+#### caipi_payments
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
+```sql
+
+-- Insertar pago 1
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (125.50, 125.50, 'OK', 'ATH-589', 'REF1001', CONVERT(varbinary(100), 'prueba'), 'Suscripción Básica', 'Exitosa', CONVERT(varbinary(100), 'pruebacheck'),
+   '2025-05-05 09:15:00',  1, 1, 1, 10, 10);
+
+-- Insertar pago 2
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (2500.00, 2400.00, 'REFUNDED', 'ATH-590', 'REF1002', CONVERT(varbinary(100), 'descuento'), 'Pago Premium con descuento', 'Error', CONVERT(varbinary(100), 'descuentoCheck'),
+   '2025-05-05 11:30:00',  2, 2, 2, 20, 20);
+
+-- Insertar pago 3
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (75.00, 75.00, 'OK', 'ATH-591', 'REF1003', CONVERT(varbinary(100), 'adicional'), 'Servicio Adicional X', 'Exitosa', CONVERT(varbinary(100), 'adicionalCheck'),
+   '2025-05-06 14:45:00',  1, 3, 3, 30, 30);
+
+-- Insertar pago 4
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (500.00, 500.00, 'ERROR', 'ATH-592', 'REF1004', CONVERT(varbinary(100), 'error'), 'Pago Plan Intermedio', 'Error', CONVERT(varbinary(100), 'errorCheck'),
+   '2025-05-07 08:00:00',  3, 1, 4, 40, 40);
+
+-- Insertar pago 5
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1500.75, 1500.75, 'OK', 'ATH-593', 'REF1005', CONVERT(varbinary(100), 'upgrade'), 'Upgrade a Plan Oro', 'Exitosa', CONVERT(varbinary(100), 'upgradeCheck'),
+   '2025-05-07 16:20:00',  2, 2, 5, 50, 50);
+
+-- Inserciones en caipi_payments
+
+-- Insertar pago 1
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (125.50, 125.50, 'OK', 'ATH-589', 'REF1001', CONVERT(varbinary(100), 'prueba'), 'Suscripción Básica', 'Exitosa', CONVERT(varbinary(100), 'pruebacheck'),
+   '2025-05-05 09:15:00',  1, 1, 1, 10, 10);
+
+-- Insertar pago 2
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (2500.00, 2400.00, 'REFUNDED', 'ATH-590', 'REF1002', CONVERT(varbinary(100), 'descuento'), 'Pago Premium con descuento', 'Error', CONVERT(varbinary(100), 'descuentoCheck'),
+   '2025-05-05 11:30:00',  2, 2, 2, 20, 20);
+
+-- Insertar pago 3
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (75.00, 75.00, 'OK', 'ATH-591', 'REF1003', CONVERT(varbinary(100), 'adicional'), 'Servicio Adicional X', 'Exitosa', CONVERT(varbinary(100), 'adicionalCheck'),
+   '2025-05-06 14:45:00',  1, 3, 3, 30, 30);
+
+-- Insertar pago 4
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (500.00, 500.00, 'ERROR', 'ATH-592', 'REF1004', CONVERT(varbinary(100), 'error'), 'Pago Plan Intermedio', 'Error', CONVERT(varbinary(100), 'errorCheck'),
+   '2025-05-07 08:00:00',  3, 1, 4, 40, 40);
+
+-- Insertar pago 5
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1500.75, 1500.75, 'OK', 'ATH-593', 'REF1005', CONVERT(varbinary(100), 'upgrade'), 'Upgrade a Plan Oro', 'Exitosa', CONVERT(varbinary(100), 'upgradeCheck'),
+   '2025-05-07 16:20:00',  2, 2, 5, 50, 50);
+
+-- Insertar pago 6
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (200.00, 200.00, 'OK', 'ATH-594', 'REF1006', CONVERT(varbinary(100), 'plan'), 'Plan Básico Anual', 'Exitosa', CONVERT(varbinary(100), 'planCheck'),
+   '2025-05-08 09:45:00',  1, 3, 6, 15, 15);
+
+-- Insertar pago 7
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (600.00, 600.00, 'OK', 'ATH-595', 'REF1007', CONVERT(varbinary(100), 'nuevoPlan'), 'Pago Plan Plus', 'Exitosa', CONVERT(varbinary(100), 'nuevoPlanCheck'),
+   '2025-05-08 13:00:00',  2, 2, 7, 12, 12);
+
+-- Insertar pago 8
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (800.00, 800.00, 'OK', 'ATH-596', 'REF1008', CONVERT(varbinary(100), 'pagoExtra'), 'Pago adicional por servicios', 'Exitosa', CONVERT(varbinary(100), 'pagoExtraCheck'),
+   '2025-05-09 10:30:00',  3, 1, 8, 60, 60);
+
+-- Insertar pago 9
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1000.00, 1000.00, 'ERROR', 'ATH-597', 'REF1009', CONVERT(varbinary(100), 'cancelado'), 'Pago Plan Cancelado', 'Error', CONVERT(varbinary(100), 'canceladoCheck'),
+   '2025-05-09 15:00:00',  1, 3, 9, 20, 20);
+
+-- Insertar pago 10
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (150.00, 150.00, 'OK', 'ATH-598', 'REF1010', CONVERT(varbinary(100), 'intermediate'), 'Pago Plan Intermedio', 'Exitosa', CONVERT(varbinary(100), 'intermediateCheck'),
+   '2025-05-10 09:00:00',  2, 2, 10, 30, 30);
+
+-- Insertar pago 11
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (180.00, 180.00, 'OK', 'ATH-599', 'REF1011', CONVERT(varbinary(100), 'addOn'), 'Pago Adicional Plan Básico', 'Exitosa', CONVERT(varbinary(100), 'addOnCheck'),
+   '2025-05-11 12:30:00',  3, 1, 11, 40, 40);
+
+-- Insertar pago 12
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (500.00, 500.00, 'ERROR', 'ATH-600', 'REF1012', CONVERT(varbinary(100), 'fallo'), 'Pago con Fallo de Transacción', 'Error', CONVERT(varbinary(100), 'falloCheck'),
+   '2025-05-12 08:00:00',  1, 3, 12, 50, 50);
+
+-- Insertar pago 13
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (2200.00, 2200.00, 'OK', 'ATH-601', 'REF1013', CONVERT(varbinary(100), 'descuentoPlan'), 'Descuento sobre Plan Oro', 'Exitosa', CONVERT(varbinary(100), 'descuentoPlanCheck'),
+   '2025-05-12 10:15:00',  2, 2, 13, 60, 60);
+
+-- Insertar pago 14
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (350.00, 350.00, 'OK', 'ATH-602', 'REF1014', CONVERT(varbinary(100), 'pagoExtra'), 'Pago Extra por Extensión', 'Exitosa', CONVERT(varbinary(100), 'pagoExtraCheck'),
+   '2025-05-13 11:30:00',  3, 1, 14, 70, 70);
+
+-- Insertar pago 15
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (999.99, 999.99, 'OK', 'ATH-603', 'REF1015', CONVERT(varbinary(100), 'premium'), 'Pago Premium Anual', 'Exitosa', CONVERT(varbinary(100), 'premiumCheck'),
+   '2025-05-13 13:45:00',  2, 3, 15, 80, 80);
+
+-- Insertar pago 16
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (999.00, 999.00, 'ERROR', 'ATH-604', 'REF1016', CONVERT(varbinary(100), 'falloPlan'), 'Error en pago de Plan', 'Error', CONVERT(varbinary(100), 'falloPlanCheck'),
+   '2025-05-14 08:30:00',  1, 1, 16, 90, 90);
+
+-- Insertar pago 17
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1200.00, 1200.00, 'OK', 'ATH-605', 'REF1017', CONVERT(varbinary(100), 'intermedio'), 'Pago Plan Intermedio Anual', 'Exitosa', CONVERT(varbinary(100), 'intermedioCheck'),
+   '2025-05-14 10:00:00',  2, 3, 17, 100, 100);
+
+```
+  
+ </details>
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
@@ -2778,7 +3002,7 @@ GO
  
 </details>
 
-##### 1.4 Habrá alguna forma de implementar RLS, row level security
+#### 2. Habrá alguna forma de implementar RLS, row level security
 
 <details>
 	<summary>Mostrar script</summary>
@@ -2818,7 +3042,7 @@ GO
 </details>
 
 
-#### 2. Crear un certificado y llave asimétrica.
+#### 3. Crear un certificado y llave asimétrica.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2845,7 +3069,7 @@ SECRET = 'CaipiClaveAsimetrica'
 
 </details>
 
-#### 3. Crear una llave simétrica.
+#### 4. Crear una llave simétrica.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2880,7 +3104,7 @@ FROM sys.openkeys;
 ```
 </details>
 
-#### 4. Cifrar datos sensibles usando cifrado simétrico y proteger la llave privada con las llaves asimétrica definidas en un certificado del servidor.
+#### 5. Cifrar datos sensibles usando cifrado simétrico y proteger la llave privada con las llaves asimétrica definidas en un certificado del servidor.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2921,7 +3145,7 @@ CLOSE SYMMETRIC KEY ClaveSimetrica;
 ```
 </details>
 
-#### 5. Crear un SP que descifre los datos protegidos usando las llaves anteriores.
+#### 6. Crear un SP que descifre los datos protegidos usando las llaves anteriores.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -4981,11 +5205,11 @@ WAITFOR DELAY '00:00:01'
 
 ```
 
-El UPDATE en otra sesión anterior debe esperar a que el cursor termine de ejecutarse debido al bloqueo UPDLOCK aplicado por el cursor sobre los registros que está procesando. En el caso que mencionas, el cursor adquiere un bloqueo de actualización (UPDLOCK) sobre cada fila mientras la recorre. Este tipo de bloqueo impide que otras transacciones modifiquen los registros bloqueados hasta que el cursor termine su operación y libere el bloqueo.
+El UPDATE en otra sesión anterior debe esperar a que el cursor termine de ejecutarse debido al bloqueo UPDLOCK aplicado por el cursor sobre los registros que está procesando. En el caso mostrado, el cursor adquiere un bloqueo de actualización (UPDLOCK) sobre cada fila mientras la recorre. Este tipo de bloqueo impide que otras transacciones modifiquen los registros bloqueados hasta que el cursor termine su operación y libere el bloqueo.
 
-Cuando otra sesión intenta ejecutar un UPDATE sobre la tabla, como en el caso de actualizar el finalDate, se encuentra con que las filas que el cursor está procesando están bloqueadas con el UPDLOCK. Debido a esto, la sesión que intenta ejecutar el UPDATE no puede modificar esas filas hasta que el cursor haya terminado de procesarlas, ya que el bloqueo de actualización mantiene a otras transacciones a la espera.
+Cuando otra sesión va a intentar ejecutar un UPDATE sobre la tabla, como en el caso de actualizar el finalDate, se encuentra con que las filas que el cursor está procesando están bloqueadas con el UPDLOCK. Debido a esto, la otra sesión que intenta ejecutar el UPDATE no puede modificar esas filas hasta que el cursor haya terminado de procesarlas, ya que el bloqueo de actualización mantiene a otras transacciones a la espera.
 
-El UPDLOCK evita que otros procesos realicen actualizaciones en las filas bloqueadas, lo que asegura que no haya cambios concurrentes en los registros mientras el cursor está en ejecución. Una vez que el cursor termina y se cierra, los bloqueos se liberan, y las sesiones que estaban esperando pueden continuar con sus transacciones y modificar las filas si es necesario.
+El UPDLOCK evita que otros procesos realicen actualizaciones en las filas bloqueadas, lo que asegura que no haya cambios concurrentes en los registros mientras el cursor está en ejecución. Una vez que el cursor termina y se cierra, los bloqueos se liberan, y las sesiones que estaban esperando pueden continuar con sus transacciones y modificar las filas si es necesario. Al ejecutar el ejemplo brindando cuando se termina el porceso de ejecucion del cursor las demas sesiones terminan con rapidez sus tareas.
 
 ---
 ### Casos en los que un cursor no bloquearia una fila
@@ -5061,15 +5285,13 @@ WAITFOR DELAY '00:00:01'
 
 ### Casos en los que se recomienda utilizar un cursor dentro de SOLTURA
 
-En el sistema de Soltura, donde se manejan contratos, paquetes de servicios y beneficios mensuales para los clientes, el uso de cursores en SQL Server puede tener sentido en ciertos casos teniendo en cuenta el asilamiento que ellos generan cuando se le indica y tambien casos cuando no bloqueen, pero es importante saber cuándo conviene realmente usarlos debido a los bloqueos por fila que generan.
+En la base de datos Soltura, donde se manejan contratos, paquetes de servicios y beneficios mensuales para los clientes, el uso de cursores en SQL Server puede tener sentido en ciertos casos teniendo en cuenta el asilamiento que ellos generan cuando se le indica y tambien casos cuando no bloqueen, pero es importante saber cuándo conviene realmente usarlos debido a los bloqueos por fila que generan.
 
 - **Renovar beneficios uno por uno dependiendo del historial del usuario :** Por ejemplo, si tengo que revisar cliente por cliente su historial de uso y pagos antes de renovar su contrato, un cursor me permite aplicar lógica condicional específica por cada fila sin afectar a otros usuarios al mismo tiempo.
   
 - Se necesita procesar fila por fila y aplicar lógica compleja que no se puede resolver fácilmente con una sola consulta UPDATE o MERGE. Por ejemplo, si Soltura requiere revisar la fecha de vencimiento de cada contrato individualmente y tomar decisiones distintas para cada cliente según varios criterios, un cursor puede ser útil.
   
 - **Actualizar servicios activos con lógica extensa :** Si un cliente tiene servicios distintos como gimnasio, spa o dieta, y cada uno tiene reglas diferentes de renovación, el cursor me permite aplicar condiciones específicas para cada caso sin hacer todo en un solo UPDATE genérico.
-
-- Enviar notificaciones personalizadas al vencer contratosSi quiero enviar mensajes distintos dependiendo del tipo de paquete, cliente o historial, puedo recorrer uno a uno los registros y preparar notificaciones personalizadas.
 
 - Si el proceso implica tomar decisiones basadas en valores específicos de cada fila y estas decisiones no se pueden hacer en una sola consulta masiva. Por ejemplo, si cada fila necesita cálculos complejos o múltiples pasos de validación antes de realizar una acción.
 
@@ -5099,7 +5321,7 @@ Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, 
 
 ---
 
-El siguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación). Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). Está diseñado para ejecutarse en un entorno transaccional controlado y manejar adecuadamente errores con registros claros.
+El siguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación), asi como la asociacion al agreement que quiere canjear. Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). 
 
 El nivel de insolacion READ COMMITTED se utiliza para evitar la lectura de datos no confirmados ("dirty reads") durante la transacción. Esto significa que cualquier dato leído durante la ejecución del procedimiento ya ha sido confirmado por otras transacciones, garantizando así que los valores utilizados para verificar límites o condiciones son válidos y estables durante toda la operación. Esto es esencial en este procedimiento, ya que trabaja con condiciones sensibles de límites de redención que, si se leyeran sin confirmar, podrían permitir redenciones incorrectas o inconsistentes.
 
@@ -5320,7 +5542,6 @@ Simular múltiples usuarios accediendo simultáneamente al endpoint `/insert-red
 
 - El tiempo de respuesta promedio.
 - La capacidad de la base de datos para manejar carga.
-- La estabilidad del backend bajo estrés.
 
 ---
 
@@ -5352,7 +5573,7 @@ Simular múltiples usuarios accediendo simultáneamente al endpoint `/insert-red
 
 ### 🧵 Thread Group (Grupo de Hilos)
 
-Se configuró para simular un escenario realista con los siguientes parámetros:
+Se configuró para simular un escenario realista a continuacion la explicacion de los parámetros:
 
 - **Number of Threads (Usuarios simulados):** `60`  
   → Representa la cantidad de usuarios simultáneos haciendo peticiones.
@@ -5363,22 +5584,22 @@ Se configuró para simular un escenario realista con los siguientes parámetros:
 - **Loop Count (Repeticiones por hilo):** `10`  
   → Cada usuario realizará la prueba 10 veces.
 
-🔁 **Total de solicitudes simuladas**: `60 hilos * 10 repeticiones = 600 solicitudes`
+**Total de solicitudes simuladas**: `60 hilos * 10 repeticiones = 600 solicitudes`
 
 ---
 
-### ⏲️ Temporizador: Uniform Random Timer
+### -> Temporizador: Uniform Random Timer
 
 Para evitar que las solicitudes se disparen de forma simultánea y poco realista, se añadió un **Uniform Random Timer** con los siguientes valores:
 
 - **Delay Offset:** `0 ms`
 - **Random Delay Maximum:** `100 ms`
 
-🔄 Esto introduce una variación aleatoria entre cada solicitud, simulando un comportamiento más natural y evitando picos de carga artificiales.
+Esto introduce una variación aleatoria entre cada solicitud, simulando un comportamiento más natural y evitando picos de carga artificiales.
 
 ---
 
-## 📈 Listeners Utilizados
+##  Listeners Utilizados
 
 ### 1. View Results Tree
 
@@ -5402,19 +5623,18 @@ Proporciona estadísticas globales del test, incluyendo:
 
 **LISTO**  JMeter comenzará a enviar las solicitudes **POST** al endpoint `/insert-redemption`. 
 
-## 📊 Resultados de la Prueba
+##  Resultados de la Prueba
 
 Tras ejecutar el test con la configuración descrita, se obtuvieron los siguientes resultados:
 
 - **Throughput (TPS - Transactions per Second):** `59.1 TPS`  
-  → Esto indica que el sistema pudo manejar aproximadamente 59 solicitudes por segundo, lo cual es un buen rendimiento para una carga de 60 usuarios concurrentes.
+  → Esto indica que el sistema pudo manejar aproximadamente 59 solicitudes por segundo.
 
 - **Average Response Time (Promedio):** `89 ms`  
-  → El tiempo promedio que tardó el servidor en responder a cada solicitud. Un tiempo por debajo de 100 ms indica una respuesta rápida bajo carga.
-
+  → El tiempo promedio que tardó el servidor en responder a cada solicitud. 
 - **Median Response Time (Mediana):** `34 ms`  
-  → El 50% de las solicitudes se resolvieron en menos de 34 ms, lo que muestra que la mayoría de las respuestas fueron muy rápidas.
-
+  → El 50% de las solicitudes se resolvieron en menos de 34 ms.
+  
 - **Samples (Muestras Totales):** `600`  
   → Equivale a las 600 solicitudes totales generadas por los 60 usuarios con 10 repeticiones cada uno.
 
@@ -5422,11 +5642,10 @@ Tras ejecutar el test con la configuración descrita, se obtuvieron los siguient
 
 ## Interpretación
 
-- El sistema mostró **alta capacidad de respuesta** y **estabilidad** con 60 usuarios concurrentes.
-- La mediana baja frente al promedio sugiere que unas pocas solicitudes más lentas elevaron el promedio, pero en general, la mayoría fueron muy rápidas.
+- El sistema mostró **alta capacidad de respuesta** y **estabilidad** con 60 usuarios concurrentes antes de llegar al 70% de uso al CPU del equipo en ejecucion.
 - Un Throughput de casi 60 TPS es adecuado para aplicaciones de backend que atienden transacciones individuales.
 
-# 📡 API de Inserción de Transacciones de Redención
+#  API de Inserción de Transacciones de Redención
 
 Este proyecto contiene una API construida con **Node.js** y **Express** que se conecta a una base de datos **SQL Server** para ejecutar un procedimiento almacenado (`dbo.CaipiSP_InsertRedemptionTransaction`).
 
@@ -5434,13 +5653,13 @@ Este proyecto contiene una API construida con **Node.js** y **Express** que se c
 
 ##  Cómo levantar la API con `node index.js`
 
-### 📦 Requisitos previos
+### Requisitos previos
 
 Antes de ejecutar la API, se debe tener instalado lo siguiente:
 
 - **Node.js** (versión 14 o superior)
 - **npm** (el gestor de paquetes de Node)
-- **SQL Server** (en funcionamiento localmente o accesible desde tu equipo)
+- **SQL Server** (para temas del caso se utiliza en funcionamiento localmente)
 - El procedimiento almacenado `CaipiSP_InsertRedemptionTransaction` creado en la base de datos `caipiIAdb`
 
 ---
@@ -5467,7 +5686,7 @@ Esto instalará las dependencias necesarias para ejecutar el servidor.
 
 ---
 
-### ⚙️ Configuración de la conexión a la base de datos
+###  Configuración de la conexión a la base de datos
 
 Abre `index.js` y verifique que la sección de configuración de la base de datos tenga tus credenciales reales:
 
@@ -5488,7 +5707,7 @@ Reemplace `UsuarioSQL`, `password2410` y otros valores según su configuracion d
 
 ---
 
-### ▶️ Ejecutar la API
+### Ejecutar la API
 
 Para iniciar el servidor, ejecute el siguiente comando:
 

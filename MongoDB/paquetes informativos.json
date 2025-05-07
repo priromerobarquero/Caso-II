@@ -1,0 +1,289 @@
+  {
+    "paquete": [
+      {
+        "paquete_id": "001",
+        "titulo": "Paquete Profesional Joven",
+        "descripcion": "Paquete dirigido a profesionales jovenes.",
+        "moneda": "CRC",
+        "precio": "₡200,000 colones",
+        "limitePersonas": 2,
+        "imagenURL": "https://img.com/1",
+        "creacion": "2025-04-02T12:30:00Z",
+        "tiempoValido": "1 mes",
+        "beneficios": [
+          { 
+            "proveedor": "01",
+            "beneficio": "Gimnasio", 
+            "cantidad": "6 horas por semana" 
+          },
+          { 
+            "proveedor": "02",
+            "beneficio": "Lavandería y aplanchado",
+            "cantidad": "1 servicio" 
+          },
+          { 
+            "proveedor": "03",
+            "beneficio": "Limpieza básica de hogar",
+            "cantidad": "2 días" 
+          },
+          { 
+            "proveedor": "Petroleos Delta",
+            "beneficio": "Combustible (gas o diésel)", 
+            "cantidad": "₡50,000 colones" 
+          },
+          { 
+            "proveedor": "05",
+            "beneficio": "Corte de pelo",
+            "cantidad": "1 corte" 
+          },
+          { 
+            "proveedor": "06",
+            "beneficio": "Cenas seleccionadas",
+            "cantidad": "2 cenas" 
+          },
+          { 
+            "proveedor": "07",
+            "beneficio": "Almuerzos seleccionados",
+            "cantidad": "4 almuerzos" 
+          },
+          { 
+            "proveedor": "08",
+            "beneficio": "Plan móvil",
+            "cantidad": "Ilimitado" 
+          },
+          { 
+            "proveedor": "09",
+            "beneficio": "Parqueo", 
+            "cantidad": "10 horas" 
+          }
+        ],
+        "estado": "activo"
+      },
+      {
+        "paquete_id": "002",
+        "titulo": "Paquete Full Modern Family",
+        "descripcion": "Paquete ideal para familias modernas.",
+        "moneda": "CRC",
+        "precio": "₡170,000 colones",
+        "limitePersonas": 4,
+        "imagenURL": "https://img.com/2",
+        "creacion": "2025-04-02T12:30:00Z",
+        "tiempoValido": "2 meses",
+        "beneficios": [
+          { 
+            "proveedor": "01",
+            "beneficio": "Gimnasio (4 personas)", 
+            "cantidad": "4 horas por semana" 
+          },
+          { "proveedor": "10",
+            "beneficio": "Yoga o Pilates (familiar)",
+            "cantidad": "4 horas" 
+          },
+          {
+            "proveedor": "11",
+            "beneficio": "Grooming para mascota", 
+            "cantidad": "1 servicio" 
+          },
+          { 
+            "proveedor": "12",
+            "beneficio": "Revisión veterinaria",
+            "cantidad": "1 consulta" 
+          },
+          { 
+            "proveedor": "13",
+            "beneficio": "Clases de natación o fútbol (niños)", 
+            "cantidad": "3 clases" 
+          },
+          { 
+            "proveedor": "04",
+            "beneficio": "Combustible (gas o diésel)", 
+            "cantidad": "₡100,000 colones" 
+          },
+          { 
+            "proveedor": "14",
+            "beneficio": "Comida en casa", 
+            "cantidad": "10 pedidos (envío gratis + 20% dto.)" 
+          },
+          { 
+            "proveedor": "15",
+            "beneficio": "Uber Rides", 
+            "cantidad": "₡7,000 colones en viajes" 
+          }
+        ],
+        "estado": "inactivo"
+      },
+      {
+        "paquete_id": "003",
+        "titulo": "Paquete Relax & Wellness",
+        "descripcion": "Paquete perfecto para relajarse y recargar energías en pareja.",
+        "moneda": "CRC",
+        "precio": "₡155,000 colones",
+        "limitePersonas": 5,
+        "imagenURL": "https://img.com/3",
+        "creacion": "2025-04-10T10:00:00Z",
+        "tiempoValido": "1 mes",
+        "beneficios": [
+          {
+            "proveedor": "16",
+            "beneficio": "Masaje relajante para 2 personas",
+            "cantidad": "1 sesión de 45 minutos"
+          },
+          {
+            "proveedor": "10",
+            "beneficio": "Clases de yoga o meditación",
+            "cantidad": "4 clases"
+          },
+          {
+            "proveedor": "17",
+            "beneficio": "Canasta saludable",
+            "cantidad": "1 canasta de snacks y jugos"
+          },
+          {
+            "proveedor": "18",
+            "beneficio": "Desayuno gourmet",
+            "cantidad": "2 desayunos"
+          },
+          {
+            "proveedor": "19",
+            "beneficio": "Entradas al cine",
+            "cantidad": "2 entradas + palomitas"
+          },
+          {
+            "proveedor": "15",
+            "beneficio": "Transporte incluido",
+            "cantidad": "₡5,000 colones en viajes"
+          },
+          {
+            "proveedor": "08",
+            "beneficio": "Plan de datos temporal",
+            "cantidad": "Internet ilimitado por 1 semana"
+          }
+        ],
+        "estado": "activo"
+      }
+      
+    ]
+  }
+
+  
+
+
+  {
+    "proveedores": [
+      {
+        "id": "01",
+        "nombre": "SmartFit",
+        "url": "https://www.smartfit.com",
+        "logo": "https://logo.clearbit.com/smartfit.com"
+      },
+      {
+        "id": "02",
+        "nombre": "Lavadería Pressto",
+        "url": "https://www.pressto.com",
+        "logo": "https://logo.clearbit.com/pressto.com"
+      },
+      {
+        "id": "03",
+        "nombre": "Broomday",
+        "url": "https://broomday.cr",
+        "logo": "https://imgur.com/broomday_logo.png"
+      },
+      {
+        "id": "04",
+        "nombre": "Petroleos Delta",
+        "url": "https://www.deltacr.com",
+        "logo": "https://logo.clearbit.com/deltacr.com"
+      },
+      {
+        "id": "05",
+        "nombre": "Vainilla beauty",
+        "url": "https://www.instagram.com/vainillabeautycr/",
+        "logo": "https://imgur.com/vainilla_logo.png"
+      },
+      {
+        "id": "06",
+        "nombre": "El novillo alegre",
+        "url": "https://www.elnovilloalegre.com",
+        "logo": "https://logo.clearbit.com/elnovilloalegre.com"
+      },
+      {
+        "id": "07",
+        "nombre": "Rostipollos",
+        "url": "https://www.rostipollos.com",
+        "logo": "https://logo.clearbit.com/rostipollos.com"
+      },
+      {
+        "id": "08",
+        "nombre": "Kolbi",
+        "url": "https://www.kolbi.cr",
+        "logo": "https://logo.clearbit.com/kolbi.cr"
+      },
+      {
+        "id": "09",
+        "nombre": "Valet Parking",
+        "url": "https://valetparking.cr",
+        "logo": "https://imgur.com/valetparking_logo.png"
+      },
+      {
+        "id": "10",
+        "nombre": "Gym Tec",
+        "url": "https://gymtec.cr",
+        "logo": "https://imgur.com/gymtec_logo.png"
+      },
+      {
+        "id": "11",
+        "nombre": "Hipermascotas",
+        "url": "https://hipermascotas.cr",
+        "logo": "https://imgur.com/hipermascotas_logo.png"
+      },
+      {
+        "id": "12",
+        "nombre": "La Vete",
+        "url": "https://lavete.cr",
+        "logo": "https://imgur.com/lavete_logo.png"
+      },
+      {
+        "id": "13",
+        "nombre": "Crol Swimming",
+        "url": "https://www.crolswimming.com",
+        "logo": "https://logo.clearbit.com/crolswimming.com"
+      },
+      {
+        "id": "14",
+        "nombre": "Uber Eats",
+        "url": "https://www.ubereats.com",
+        "logo": "https://logo.clearbit.com/ubereats.com"
+      },
+      {
+        "id": "15",
+        "nombre": "Uber",
+        "url": "https://www.uber.com",
+        "logo": "https://logo.clearbit.com/uber.com"
+      },
+      {
+        "id": "16",
+        "nombre": "Spa Vida Zen",
+        "url": "https://www.spavidazen.com",
+        "logo": "https://logo.clearbit.com/spavidazen.com"
+      },
+      {
+        "id": "17",
+        "nombre": "Fresh Market",
+        "url": "https://www.freshmarket.cr",
+        "logo": "https://logo.clearbit.com/freshmarket.cr"
+      },
+      {
+        "id": "18",
+        "nombre": "Café Arte",
+        "url": "https://cafearte.cr",
+        "logo": "https://imgur.com/cafearte_logo.png"
+      },
+      {
+        "id": "19",
+        "nombre": "Cinemark",
+        "url": "https://www.cinemarkca.com",
+        "logo": "https://logo.clearbit.com/cinemarkca.com"
+      }
+    ]
+  }
+  
