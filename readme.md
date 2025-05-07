@@ -2141,10 +2141,12 @@ Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. P
 16. `DISTINCT` para evitar duplicados en servicios asignados por ejemplo.
 ---
 #### Uso de un TRIGGER
- <details>
-   <summary>Haz clic para expandir</summary>
 	 
 El TRIGGER es un SP que se ejecuta automaticamente en respuesta de un evento en una tabla o vista desde la base de datos. En este caso, se utiliza con fines de auditoria, en caso de generarse una actualizacion de datos en un usuario, el trigger despues de la actualizacion *UPDATE* genera una incersion en la tabla `caipi_logs` en el cual el registro almacena el movimiento. Con el TRIGGER, se puede acceder los datos anteriores y los datos insertados, en el caso de T-SQL un *UPDATE* es manipulado por un DELETED (Viejos datos) y un INSERTED (Nuevos datos)
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 
 -- TRIGGER El cual dispara cuando un usuario es actualizado
@@ -2269,11 +2271,11 @@ GO
 
 #### Uso de Cursor global, accesible desde otras sesiones de la base de datos.
 
- <details>
-   <summary>Haz clic para expandir</summary>
+
 Este cursor puede ser referenciado en la conexion. Es decir, puede utilizarse en cualquier SP u otro procediminertos que se esté ejecuctando en la conexion. Por un lado, para ser declarado debe especificarse mediante la palabra reservada `GLOBAL`, en caso de no ser utilizada por defecto será *local*, por otro lado, puede declarse afuera de un procedimiento o bloque.
 
-
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 
@@ -2353,8 +2355,6 @@ GO;
 
 ##### Uso de `sp_recompile` y cursor local
 
- <details>
-   <summary>Haz clic para expandir</summary>
 La instrucción `sp_recompile` permite eliminar (hacer drop) los planes de ejecución que existen actualmente para un procedimiento almacenado (SP), trigger o función, con la finalidad de que se genere un nuevo plan la próxima vez que se ejecute.
 
 Esto es útil porque esos planes de ejecución se crean considerando la cantidad de datos que hay en ese momento. Si la cantidad de datos crece con el tiempo, ese plan ya no es tan eficiente. Al recompilar, se genera un plan optimizado para la cantidad de datos actual y así se mejora el rendimiento.
@@ -2389,6 +2389,9 @@ En este caso se define de forma recurrente, con frecuencia **diaria**, y se esta
 El uso de un *cursor local* en la siguiente procedure es que a la hora almacenar el conjunto de filas que devuelve la instruccion SELECT o tambien conocidas como conjunto de resultados. El cursos puede colocarse en una fila especifica o recuperar fila por fila del conjunto de datos, en este caso se usa para recorrer cada fija de la consulta que provee los PROC de la base de datos. 
 
 Al ser local, el nombre del cursor solo es valido en la sesion de ejecucion y se puede hacer referencia al mismo dentro del SP que lo almacena la asignacion del cursor se cancela cuando la ejecucion finaliza. Un ejecmplo de la visibilidad se encuentra en el bloque de codigo el cual dara error si se intenta acceder fuera del SP en el que fue declarado, ya que solamente es visible dentro.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 
@@ -2434,14 +2437,15 @@ FETCH NEXT FROM CURSOR_PROC INTO @PROCNAME;
 </details>
 
 ##### Uso de MERGE y COALESCE
- <details>
-   <summary>Haz clic para expandir</summary>
+
 	 
 La instruccion `MERGE` funciona para sincronizar datos a una tabla "destino" basado en la información de otra tabla "fuente", se pueden hacer insert, update y delete a partir de ciertas condiciones que se establcen segun los coomponentes de cada una de las tablas.
 En este caso se utiliza para automatizar los reminders, ya que se utiliza esta tabla como la tabla destino que será actualizada a partir de la tabla de suscripciones.  Se busca que cada vez que algun registro de la tabla de suscripciones sufra un cambio en su estado y pase a tenerlo como "expirado", se genere automaticamente un mensaje al usuario advirtiendole sobre esto.
 
 Por otro lado, también se incorpora la instruccion`COALESCE`, la cual puede gestionar los valores que permiten NULL  y se insertan de esta manera, puede devolver el primer valor no nulo de una columna solicitada hasta reemplazar la informacion cuando esté faltante. Para este caso, se utiliza coalesce para gestionar los datos que se insertarán como nulos con el objetivo de que al consultarlos no muestren 'NULL' sino que en vez de esto se muestre un string indicando otra cosa por defecto.
 
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 MERGE INTO caipi_reminders AS Destino	-- Tabla a actualizar
@@ -2470,8 +2474,7 @@ WHEN NOT MATCHED BY TARGET THEN
 
 
 ##### Uso de AVG - TOP - &&/AND - SCHEMABINDING - LTRIM - SUBSTRING
-<details>
-   <summary>Haz clic para expandir</summary>
+
 
 La instruccion `AVG` en SQL sirve para calcular el promedio aritmético de un conjunto de valores numérico.
 La instruccion `TOP` se usa para limitar la cantidad de filas que retorna una consulta. Es como decir “quiero solo los primeros N resultados”.
@@ -2486,6 +2489,9 @@ En este caso, `SUBSTRING` se utiliza para extraer el username de cada usuario de
 La siguiente view con schemabinding muestra el top 20 de promedios de 
 montos pagados por usuarios activos con plan, subs y membership activas
 y de plan tipo familiar
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 IF OBJECT_ID('dbo.caipi_VW_UserAvgPayFamilyPlan','V') IS NOT NULL
@@ -2536,6 +2542,9 @@ EXECUTE AS USER permite ejecutar instrucciones con los permisos de otro usuario,
 
 En este caso, se crea un procedimiento encriptado que inserta un usuario especial (id = 101), y se ejecuta con EXECUTE AS USER = 'dbo' para simular que lo ejecuta un usuario con privilegios completos. Esto demuestra cómo aplicar seguridad y control en escenarios reales.
 
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 IF OBJECT_ID('dbo.CrearUsuarioEspecial', 'P') IS NOT NULL
     DROP PROCEDURE dbo.CrearUsuarioEspecial;
@@ -2577,10 +2586,15 @@ EXEC dbo.CrearUsuarioEspecial;
 REVERT;
 ```
 
+</details>
+
 ##### Uso de UNION
 La instrucción UNION se utiliza para combinar los resultados de dos consultas con estructuras compatibles, eliminando duplicados por defecto. Es útil cuando se desea presentar datos de distintas fuentes o categorías como un solo conjunto coherente.
 
 En este caso, se usa UNION para unir planes de tipo individual (como "Básico" o "Familiar") y planes de tipo empresarial (como "Corporativo" o "Personalizado"), clasificándolos según el tipo de cliente. Esto permite visualizar ambos tipos de planes en una misma lista diferenciada, simulando una segmentación lógica de oferta en el sistema.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 -- UNION de planes individuales y empresariales basados en tipo de plan
@@ -2615,10 +2629,15 @@ WHERE
 ORDER BY
     tipoCliente, planName;
 ```
+</details>
 
 ##### Uso de DISTINCT
+
 La cláusula DISTINCT se utiliza para eliminar registros duplicados en una consulta, mostrando únicamente combinaciones únicas de columnas.
 En este caso, se aplica para listar servicios que han sido asignados al menos una vez en acuerdos (agreementTerms), sin repetirlos aunque estén vinculados a múltiples proveedores o combinaciones. Esto permite obtener una vista clara y sin redundancias de los servicios activos en el sistema.
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 -- Mostrar servicios únicos que han sido asignados en caipi_agreementTerms
@@ -2632,6 +2651,8 @@ INNER JOIN
 ORDER BY
     s.serviceId;
 ```
+
+</details>
 
 # Mantenimiento de la Seguridad
 
