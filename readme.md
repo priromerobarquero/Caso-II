@@ -4554,19 +4554,20 @@ COMMIT;
 
 -- Transaccion A
 -- Objetivo: Bloquear a B
--- Se intenta bloquear el primer recurso que usará B
+-- Se intenta bloquear el primer recurso que usar� B
 
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED
 BEGIN TRANSACTION
 	--Utilizo el ultimo recurso utilizado en C
-	UPDATE caipi_suppliers SET name = 'Condovac la Costa' WHERE idSupplier = 3 
+	UPDATE caipi_suppliers SET name = 'Condovac la Costa' WHERE idSupplier = 1 
 
 	WAITFOR DELAY '00:00:10'
 
-	--Bloque el primer recurso que utilizará Tran B
-	UPDATE caipi_suppliers SET name = 'Gym Kyros' WHERE idSupplier = 9 
+	--Bloque el primer recurso que utilizar� Tran B
+	UPDATE caipi_suppliers SET name = 'Gym Kyros' WHERE idSupplier = 7 
 
 COMMIT
+
 
 ```
 
@@ -4574,19 +4575,20 @@ COMMIT
 
 -- Transaccion B
 -- Objetivo: Bloquear a C
--- -- Se intenta bloquear el primer recurso que usará C
+-- -- Se intenta bloquear el primer recurso que usar� C
 
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED
 BEGIN TRANSACTION
 	-- Utiloza el ultimo recurso utilizado en A
-	UPDATE caipi_suppliers SET name = 'U-Wellness Center' WHERE idSupplier = 9 
+	UPDATE caipi_suppliers SET name = 'U-Wellness Center' WHERE idSupplier = 7
 
 	WAITFOR DELAY '00:00:010'
 
-	--Bloque el primer recurso que utilizará Tran C
-	UPDATE caipi_suppliers SET name = 'RIU Hotel' WHERE idSupplier = 5 
+	--Bloque el primer recurso que utilizar� Tran C
+	UPDATE caipi_suppliers SET name = 'RIU Hotel' WHERE idSupplier = 3 
 
 COMMIT
+
 
 ```
 
@@ -4595,19 +4597,20 @@ COMMIT
 
 -- Transaccion C
 -- Objetivo: Bloquear a A
--- Se intenta bloquear el primer recurso que usará C
+-- Se intenta bloquear el primer recurso que usar� C
 
 SET TRANSACTION ISOLATION LEVEL READ COMMITTED
 BEGIN TRANSACTION
 	-- Utilizo el ultimo recurso utilizado en B
-	UPDATE caipi_suppliers SET name = 'La Granjita Vet' WHERE idSupplier = 5 
+	UPDATE caipi_suppliers SET name = 'La Granjita Vet' WHERE idSupplier = 3 
 
 	WAITFOR DELAY '00:00:10'
 
-	--Bloque el primer recurso que utilizará Tran A
-	UPDATE caipi_suppliers SET name = 'Sonrisas Vet' WHERE idSupplier = 3 
+	--Bloque el primer recurso que utilizar� Tran A
+	UPDATE caipi_suppliers SET name = 'Sonrisas Vet' WHERE idSupplier = 1 
 
 COMMIT
+
 
 ```
 </details>
