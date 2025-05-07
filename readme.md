@@ -5103,14 +5103,6 @@ Proporciona estadísticas globales del test, incluyendo:
 
 **LISTO**  JMeter comenzará a enviar las solicitudes **POST** al endpoint `/insert-redemption`. 
 
-## ✅ Resultados Esperados
-
-Con esta configuración, se puede:
-
-- Evaluar cómo responde la API bajo carga.
-- Identificar posibles cuellos de botella.
-- Comparar diferentes versiones del backend.
-
 ## 📊 Resultados de la Prueba
 
 Tras ejecutar el test con la configuración descrita, se obtuvieron los siguientes resultados:
@@ -5141,7 +5133,7 @@ Este proyecto contiene una API construida con **Node.js** y **Express** que se c
 
 ---
 
-## 🚀 Cómo ejecutar la API con `node index.js`
+##  Cómo levantar la API con `node index.js`
 
 ### 📦 Requisitos previos
 
@@ -5154,7 +5146,7 @@ Antes de ejecutar la API, se debe tener instalado lo siguiente:
 
 ---
 
-### 📁 Archivos importantes
+### Archivos importantes
 
 El archivo principal del servidor es:
 
@@ -5164,9 +5156,9 @@ index.js
 
 ---
 
-### 📥 Instalación de dependencias
+###  Instalación de dependencias
 
-Desde la carpeta del proyecto, ejecuta en la terminal:
+Desde la carpeta del proyecto, ejecute en la terminal:
 
 ```
 npm install express mssql
@@ -5178,7 +5170,7 @@ Esto instalará las dependencias necesarias para ejecutar el servidor.
 
 ### ⚙️ Configuración de la conexión a la base de datos
 
-Abre `index.js` y verifica que la sección de configuración de la base de datos tenga tus credenciales reales:
+Abre `index.js` y verifique que la sección de configuración de la base de datos tenga tus credenciales reales:
 
 ```js
 const config = {
@@ -5213,7 +5205,7 @@ Servidor corriendo en http://localhost:3000
 
 ---
 
-### 📬 ¿Qué hace esta API?
+###  ¿Qué hace esta API?
 
 Esta API expone un endpoint `POST` en:
 
@@ -5325,7 +5317,7 @@ app.listen(port, () => {
 ![WhatsApp Image 2025-05-05 at 12 33 09_c097ccb5](https://github.com/user-attachments/assets/3eb92172-9c7b-44d1-8640-3213444c79c5)
 
 ---
-### Determine como podría triplicar el valor averiguado anteriormente sizn hacer cambios en su base de datos ni incrementar hardware ni modificando el query
+## Determine como podría triplicar el valor averiguado anteriormente sizn hacer cambios en su base de datos ni incrementar hardware ni modificando el query
 
 Durante una prueba de carga realizada con Apache JMeter, inicialmente habia un rendimiento máximo de 54 transacciones por segundo (TPS) en el backend desarrollado con Node.js y Express, conectado a una base de datos SQL Server. El cuello de botella principal se encontraba en la apertura y cierre de conexiones a la base de datos por cada solicitud.
 
@@ -5338,9 +5330,7 @@ Se decidio aplicar dos técnicas clave de optimización: connection pooling y ca
 
 ### Antes de optimizar:
 
-- Cada vez que llegaba una solicitud a mi endpoint `/insert-redemption`, se abría una conexión nueva a SQL Server.
-- Esto generaba una **alta latencia**, especialmente bajo condiciones de concurrencia.
-- Además, las solicitudes repetidas con los mismos parámetros realizaban el mismo trabajo varias veces en la base de datos, afectando la eficiencia.
+- Cada vez que llegaba una solicitud a mi endpoint `/insert-redemption`, se abría una conexión nueva a SQL Server. Esto generaba una **alta latencia**, especialmente bajo condiciones de concurrencia. Además, las solicitudes repetidas con los mismos parámetros realizaban el mismo trabajo varias veces en la base de datos, afectando la eficiencia.
 
 ### Resultado inicial:
 
@@ -5357,7 +5347,7 @@ El **connection pooling** consiste en mantener un grupo de conexiones abiertas y
 
 ### Implementacion
 
-Usé el módulo `mssql` en Node.js, configurando el objeto `sqlConfig` con un `pool`:
+Se uso el módulo `mssql` en Node.js, configurando el objeto `sqlConfig` con un `pool`:
 
 ```js
 pool: {
@@ -5383,12 +5373,6 @@ async function connectToSQL() {
 }
 connectToSQL();
 ```
-
-### Efecto en el rendimiento:
-
-- Se la latencia promedio de conexión.
-- Se la escalabilidad al soportar múltiples usuarios simultáneos.
-- TPS incrementó de **54 a cerca de 90** solo con el pooling.
 
 ---
 
