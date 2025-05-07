@@ -6191,26 +6191,30 @@ Esto ha hecho que ustedes como equipo de tecnología les toque realizar una migr
 
 Para poder realizar la migración de datos se ha decidido implementar la base de datos utilizada para la aplicacion de Payment Assistant
 
+Manejo del control de migracion -> En relaciona al uso de usuarios migrados dentro de SOLTURA se incorpora un campo de tipo `BIT` con el nombre migrado, con ello, el sistema podra identificarlos y por ende proceder a el debido control de seguridad como lo es la creacion de su contrasena en SOLTURA. Asi como del lado de Payment Assistant, este posee un mecanismo similiar con la finalidad de no migrar usuarios que ya lo hayan sido. Esto en adicion por que se desea evitar interrupciones con campos definidos con la caracteristica `UNIQUE`.
+
  <details>
    <summary>Haz clic para expandir</summary>
 	 
 ```py
-#Librerias
+
+# Librerias
 import pymysql
 import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text
 import pyodbc
 from urllib.parse import quote_plus
+import hashlib
 
 #para datos 
 import random
 from datetime import datetime
 
-#Conexion a la bd MYSQL (Payment Assistant)
+# Conexion a la bd MYSQL (Payment Assistant)
 conex_mysql = create_engine("mysql+pymysql://root:123456@127.0.0.1:3306/paymentdb")
 
-#Conexion a la bd SQL Server (caipiIA)
+# Conexion a la bd SQL Server (caipiIA)
 #conex_sql = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};''SERVER=localhost;''DATABASE=Clinica;''Trusted_Connection=yes;')
 
 # Set up SQLAlchemy engine for SQL Server connection    
@@ -6255,7 +6259,7 @@ except Exception as e:
 
 
 
-#Actualiza el campo 'migrado' a 1 para cada usuario en la tabla
+# Actualiza el campo 'migrado' a 1 para cada usuario en la tabla
 with conex_mysql.begin() as connection:
     for index, row in df.iterrows():
         user_id = row['userId']
@@ -6263,11 +6267,54 @@ with conex_mysql.begin() as connection:
             update_query = text("UPDATE payment_users SET migrado = 1 WHERE userId = :user_id")
             result = connection.execute(update_query, {"user_id": user_id})
         except Exception as e:
-            print(f"Error con userId {user_id}: {e}")
+            print(f"Error con userId {user_id}")
 
-#------------------------INFORMACION DE CONTACTO DE USUARIOS-----------------
+#ASIGNACIONES DE ROL AL USUARIO EN ESTE CASO SE TRATA COMO UN USUARIO SOLTURA
+df_roles = pd.read_sql("""SELECT roleId FROM caipi_roles 
+        WHERE name = 'Usuario Final'""", engine_sql) #Role asignado para usuarios Payment
 
-#Recorre cada fila de 'df' (usuarios)
+
+# Función para generar el checksum
+def generar_checksum(username):
+    return hashlib.sha256(username.encode()).digest()  # Esto devuelve bytes (32 bytes)
+
+# Construir el DataFrame con los datos necesarios
+rolesPerUser = pd.DataFrame({
+    'userId': 0, 
+    'username': df['username'], 
+    'checksum': df['username'],
+    'enable': 1, 
+    'deleted': 0, 
+    'roleId': df_roles['roleId'].iloc[0]
+})
+
+
+# Conectarse directamente a la base de datos para hacer un INSERT manual
+with engine_sql.connect() as conn:
+    for idx, row in rolesPerUser.iterrows():
+        username = row['username']
+        
+        # Obtención del id en SOLTURA
+        query = """
+        SELECT userId
+        FROM caipi_users 
+        WHERE username = ?
+        """
+        IdusuarioSoltura = pd.read_sql(query, engine_sql, params=(username,))
+        
+        # Extraer userId y actualizar en el DataFrame
+        rolesPerUser.at[idx, 'userId'] = int(IdusuarioSoltura['userId'].iloc[0])
+        
+
+try:
+    #Inserta los datos de MySQL a SQL SERVER
+    rolesPerUser.to_sql('caipi_userRoles', engine_sql, if_exists='append', index=False)
+except Exception as e:
+    print(f"Ocurrió un error al insertar los datos: {e}")
+
+#INFORMACION DE CONTACTO DE USUARIOS
+
+# Recorre cada fila de 'df' (usuarios)
 for index, row in df.iterrows():
     user_id = row['userId']
     username = row['username']
@@ -6278,7 +6325,7 @@ for index, row in df.iterrows():
         WHERE enabled = 1 AND FK_userId = %s
     """
     
-    #Pasa por parametro el id del usuario que se esta buscando
+    # Pasa por parametro el id del usuario que se esta buscando
     contactosUsuario = pd.read_sql(query, conex_mysql, params=(user_id,))
 
     query = """
@@ -6286,7 +6333,6 @@ for index, row in df.iterrows():
         FROM caipi_users 
         WHERE username = ?
     """
-
     IdusuarioSoltura = pd.read_sql(query, engine_sql, params=(username,))
     
     #recorro los contactos de cada usuario para pasar todos lo que tenga activos
@@ -6308,7 +6354,7 @@ for index, row in df.iterrows():
         row['enable'] = 1
         row['value'] = row['value']
         row['lastUpdate'] = datetime.now()
-        row['userid'] = user_id
+        row['userid'] = IdusuarioSoltura['userId'].iloc[0]
         row['contactInfoTypeId'] = idTipoContactSol['conatctInfoTypeId'].iloc[0]
 
         try:
@@ -6320,54 +6366,121 @@ for index, row in df.iterrows():
 
 #--------------------------------------MIGRADO DE PLANES POR USUARIO---------------------------
 
-#Leer usuarios desde MySQL habilitados
-df_users_mysql = pd.read_sql("SELECT userId, firstName, lastName, username FROM payment_users WHERE enabled = 1", conex_mysql)
+#--Suscriptions
 
-#Leer id usuarios para poder insertar el id real de sql server
-df_users_sql = pd.read_sql("SELECT userid AS userId_sql, username FROM caipi_users", engine_sql)
+df_subs = pd.read_sql("""SELECT userid, idPlan, scheduleId 
+            FROM caipi_subscriptions""", engine_sql)    #Subs SQLServer
 
-#Leer los planes de MySQL
-df_plans = pd.read_sql("""SELECT planPerUserId, adquisitionDate, enabled, FK_planPriceId, FK_userId, FK_scheduleId 
-    FROM payment_plansPerUser""", conex_mysql)
+#--Usuarios
+df_users_mysql = pd.read_sql("SELECT userId, firstName, lastName, username " \
+"FROM payment_users WHERE enabled = 1", conex_mysql) #Usuarios habilitados MySQL
 
-#Leer los datos de suscripciones para verificar y evitar repeticions
-df_subs = pd.read_sql("""SELECT userid, idPlan, scheduleId FROM caipi_subscriptions""", engine_sql)
+df_users_sql = pd.read_sql("SELECT userid AS userId_sql, username FROM caipi_users", engine_sql) #Usuarios SQLServer
 
-
-
-#los users se normalizan a lower case para evitar diferencia 
-df_users_mysql['username'] = df_users_mysql['username'].str.lower()
+df_users_mysql['username'] = df_users_mysql['username'].str.lower() #Normalizar para evitar inconsistencias
 df_users_sql['username'] = df_users_sql['username'].str.lower()
 
-#Se crea un mapeo entre usuarios de mysql y sqlServer para poder saber su id real basado en el username
+# Se crea un mapeo entre usuarios de mysql y sqlServer para poder saber su id real basado en el username
 df_user_map = pd.merge(df_users_mysql, df_users_sql, on='username', how='inner')
 
-#Se utiliza el nuevo userId que ahora corresponde a SQL server para asociarlo a la suscription 
+
+
+#--Planes
+
+df_plans = pd.read_sql("""SELECT FK_planPriceId, FK_userId, FK_scheduleId 
+        FROM payment_plansPerUser""", conex_mysql) #planes de MySQL
+
+df_plansSQL = pd.read_sql("""SELECT idPlan, name FROM caipi_plans 
+        WHERE name in ('Plan Básico Extra', 'Plan Personalizado Extra')""", engine_sql) #Planes exclusivos para Payment
+
+#se realiza un mapeo para asignar el id del plan al nombre del plan buscado 
+mapeo_planes = {'Plan Básico Extra': df_plansSQL.loc[df_plansSQL['name'] == 'Plan Básico Extra', 'idPlan'].iloc[0],
+    'Plan Personalizado Extra': df_plansSQL.loc[df_plansSQL['name'] == 'Plan Personalizado Extra', 'idPlan'].iloc[0]}
+
+#Asignamos el plan de soltura segun el el idPrice que tiene en MySQL que es el que define el tipo de plan que llevaba antes
+def planSoltura(planPrice): 
+    if planPrice == 1:
+        return mapeo_planes['Plan Básico Extra']
+    elif planPrice == 2:
+        return mapeo_planes['Plan Personalizado Extra']
+    else:
+        return None
+
+df_plans['idPlan'] = df_plans['FK_planPriceId'].apply(planSoltura)
+
+# Se utiliza el nuevo userId que ahora corresponde a SQL server para asociarlo a la suscription 
 df_plans = pd.merge(df_plans, df_user_map[['userId', 'userId_sql']], left_on='FK_userId', right_on='userId', how='inner')
 
-#Eviatr planes repetidos en suscriptions
-df_plans = pd.merge(df_plans,df_subs,left_on=['userId_sql', 'FK_planPriceId', 'FK_scheduleId'],
-    right_on=['userid', 'idPlan', 'scheduleId'],how='left',indicator=True)
 
-#Seleccionamos solo los planes que no han sido insertados en suscriptions 
-df_plans = df_plans[df_plans['_merge'] == 'left_only']
+#---Schedules
 
-#Se adapta el dataFrame de suscriptions segun los datos de mysql
-df_subs = pd.DataFrame()
-df_subs['suscription_typeid'] = df_plans['FK_scheduleId'].apply(lambda x: 1 if x == 1 else 2)
+df_schedules = pd.read_sql("""SELECT FK_planPriceId, FK_userId, FK_scheduleId 
+        FROM payment_plansPerUser""", conex_mysql) #planes de MySQL
+
+df_schedulesSQL = pd.read_sql("""SELECT scheduleId, recurrencyType FROM caipi_schedules 
+        WHERE recurrencyType in ('mensual', 'anual')""", engine_sql) #Planes exclusivos para Payment
+
+#se realiza un mapeo para asignar el id del schedule al tipo de recurrencia
+mapeo_schedules = {'mensual': df_schedulesSQL.loc[df_schedulesSQL['recurrencyType'] == 'mensual', 'scheduleId'].iloc[0],
+    'anual': df_schedulesSQL.loc[df_schedulesSQL['recurrencyType'] == 'anual', 'scheduleId'].iloc[0]}
+
+#Asignamos el schedule de soltura segun el el schedule que tiene en MySQL
+def scheduleSoltura(schedule): 
+    if schedule == 1:
+        return mapeo_schedules['mensual']
+    elif schedule == 2:
+        return mapeo_schedules['anual']
+    else:
+        return None
+
+df_schedules['scheduleId'] = df_schedules['FK_scheduleId'].apply(scheduleSoltura)
+
+
+
+#---Subscription Type
+
+df_suscriptionTypeSQL = pd.read_sql("""SELECT suscription_typeid, name FROM caipi_subscription_types 
+        WHERE name in ('Mensual', 'Anual')""", engine_sql) #Planes exclusivos para Payment
+
+#se realiza un mapeo para asignar el id del schedule al tipo de recurrencia
+mapeo_type = {'Mensual': df_suscriptionTypeSQL.loc[df_suscriptionTypeSQL['name'] == 'Mensual', 'suscription_typeid'].iloc[0],
+    'Anual': df_suscriptionTypeSQL.loc[df_suscriptionTypeSQL['name'] == 'Anual', 'suscription_typeid'].iloc[0]}
+
+#Asignamos el schedule de soltura segun el el schedule que tiene en MySQL
+def typeSoltura(type): 
+    if type == 1:
+        return mapeo_type['Mensual']
+    elif type == 2:
+        return mapeo_type['Anual']
+    else:
+        return None
+
+df_schedules['suscription_typeid'] = df_schedules['FK_scheduleId'].apply(typeSoltura)
+
+
+#---INSERCION
+
+
+df_subs['suscription_typeid'] = df_schedules['suscription_typeid'] #arreglar!!!!!
 df_subs['userid'] = df_plans['userId_sql']
-df_subs['social'] = [random.randint(0, 1) for _ in range(len(df_subs))]
+df_subs['social'] = 0   #Social = 0 significa que su plan es para 1 user, no tiene otros members.  
+                        #Como en payment no se contaba con esta opcion, pasan con 0 por default a soltura
 df_subs['enable'] = 1
 df_subs['startdate'] = datetime.now()
 df_subs['deleted'] = 0
-df_subs['statusid'] = 1  
-df_subs['scheduleId'] = df_plans['FK_scheduleId'].apply(lambda x: 2 if x == 1 else 3)
+df_subs['statusid'] = 1 #Todas las sucripciones vienen activas
+df_subs['scheduleId'] = df_schedules['suscription_typeid']  #ARREGLAR!!!! YA
 df_subs['auto_renew'] = 1
 df_subs['created_at'] = datetime.now()
-df_subs['idPlan'] = df_plans['FK_scheduleId'].apply(lambda x: 18 if x == 1 else 19) #Depende del id del plan que se establezca para soltura
+df_subs['idPlan'] = df_plans['idPlan'] #ARREGLAR!!!! YA
 
-#Se realiza la insercion de datos a la tabla suscription s
-df_subs.to_sql('caipi_subscriptions', engine_sql, if_exists='append', index=False)
+suscriptions = df_subs[['suscription_typeid', 'userid', 'social', 'enable','startdate', 'deleted', 'statusid',
+            'scheduleId', 'auto_renew', 'created_at','idPlan']]
+
+
+# Se realiza la insercion de datos a la tabla suscription s
+suscriptions.to_sql('caipi_subscriptions', engine_sql, if_exists='append', index=False)
+
 
 ```
 </details>
