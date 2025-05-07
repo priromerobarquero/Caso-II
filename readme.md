@@ -616,6 +616,10 @@ Crear scripts de llenado utilizando exclusivamente T-SQL, cumpliendo los siguien
 ### Catalogo Base del sistema
 El siguiente script corresponde a la carga de catálogos base del sistema, desarrollado en T-SQL:
 #### Tipos de Recordatorios (`caipi_remindertypes`)
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO [dbo].[caipi_remindertypes] ([name], [description])
 VALUES
@@ -626,7 +630,12 @@ VALUES
     ('Popup', 'Ventana emergente dentro del sistema');
 ```
 
+</details>
+
 #### Subscription Status
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 INSERT INTO [dbo].[caipi_subscription_status] ([name], [description], [enable])
@@ -638,9 +647,14 @@ VALUES
     ('Expirada', 'La suscripción ha llegado a su fecha de expiración', 1);
 ```
 
+</details>
+
 ---
 
 #### Subscription Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 INSERT INTO [dbo].[caipi_subscription_types] ([name], [description], [customizable])
@@ -655,9 +669,14 @@ VALUES
     ('Semestral Personalizable', 'Plan semestral con beneficios modificables por el usuario', 1);
 ```
 
+</details>
+
 ---
 
 #### Subscription Settings Types
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 INSERT INTO [dbo].[caipi_suscriptionSettingTypes] ([sucriptionSettingTypeId], [name], [description], [enable])
@@ -674,9 +693,14 @@ VALUES
     (10, 'Nivel de personalización', 'Grado en el que el usuario puede modificar los beneficios del plan', 1);
 ```
 
+</details>
+
 ---
 
 #### Payment Methods
+
+ <details>
+   <summary>Haz clic para expandir</summary>
 
 ```sql
 INSERT INTO [dbo].[caipi_paymentMethods] ([name], [apiURL], [secretKey], [key], [enable])
@@ -688,7 +712,13 @@ VALUES
     ('Apple Pay', 'https://api.apple.com/v1/', 0x0B5D6F3A2C8E9D234567890ABCDE1234567890ABCDEF0123456789ABCDE, 0x9C7F2A3D8B5E1F9A234567890ABCDE1234567890ABCDEF0123456789ABCDE, 1);
 ```
 
+</details>
+
 #### InsertarPaymentMethods Procedure
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 CREATE OR ALTER PROCEDURE InsertarPaymentMethods
 	--no hay parametros
@@ -751,6 +781,8 @@ BEGIN
     DEALLOCATE method_cursor;
 END
 ```
+
+</details>
 
 #### AddPaymentMethodsPerSupplier Procedure
 ```sql
