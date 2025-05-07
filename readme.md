@@ -1898,6 +1898,10 @@ END;
 </details>
 
 #### caipi_AgreementType
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO caipi_AgreementType (name, description, dataType)
 VALUES
@@ -1908,7 +1912,13 @@ VALUES
 ('Promoción Especial', 'Descuento o beneficio temporal sobre el precio de lista.', 'porcentaje');
 ```
 
+</details>
+
 #### caipi_agreementTerms
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 -- SMART FIT (idSupplier = 7)
 INSERT INTO caipi_agreementTerms (
@@ -1959,7 +1969,13 @@ FROM caipi_agreementTerms
 ORDER BY idagreementTerm;
 ```
 
+</details>
+
 #### caipi_AgreementsPerPlan
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 INSERT INTO caipi_AgreementsPerPlan (
     enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount
@@ -2027,7 +2043,13 @@ INSERT INTO caipi_AgreementsPerPlan VALUES
 (1, 0, 24, 11, '1 mes', 1, 600.00, 200.00); 
 ```
 
+</details>
+
 ### caipi_subscriptions
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
 ```sql
 -- Plan 16
 INSERT INTO caipi_subscriptions (suscription_typeid, userid, social, enable, startdate, deleted, statusid, scheduleId, auto_renew, created_at, idPlan) VALUES
@@ -2080,6 +2102,8 @@ INSERT INTO caipi_subscriptions VALUES
 (1, 29, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
 (1, 30, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22);
 ```
+
+</details>
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
