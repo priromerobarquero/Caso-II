@@ -41,7 +41,7 @@
 
 🧩 7. [Ir a la Migracion de los usuarios de Payment Assistant](#migracion-de-los-usuarios-de-payment-assistant)
 
-
+🧩 8.	[Diagrama](https://github.com/prosoli/Caso-II/blob/main/SQL-SERVER/DiagramaPDF.pdf)
 
 
 ---
