@@ -5205,11 +5205,11 @@ WAITFOR DELAY '00:00:01'
 
 ```
 
-El UPDATE en otra sesión anterior debe esperar a que el cursor termine de ejecutarse debido al bloqueo UPDLOCK aplicado por el cursor sobre los registros que está procesando. En el caso que mencionas, el cursor adquiere un bloqueo de actualización (UPDLOCK) sobre cada fila mientras la recorre. Este tipo de bloqueo impide que otras transacciones modifiquen los registros bloqueados hasta que el cursor termine su operación y libere el bloqueo.
+El UPDATE en otra sesión anterior debe esperar a que el cursor termine de ejecutarse debido al bloqueo UPDLOCK aplicado por el cursor sobre los registros que está procesando. En el caso mostrado, el cursor adquiere un bloqueo de actualización (UPDLOCK) sobre cada fila mientras la recorre. Este tipo de bloqueo impide que otras transacciones modifiquen los registros bloqueados hasta que el cursor termine su operación y libere el bloqueo.
 
-Cuando otra sesión intenta ejecutar un UPDATE sobre la tabla, como en el caso de actualizar el finalDate, se encuentra con que las filas que el cursor está procesando están bloqueadas con el UPDLOCK. Debido a esto, la sesión que intenta ejecutar el UPDATE no puede modificar esas filas hasta que el cursor haya terminado de procesarlas, ya que el bloqueo de actualización mantiene a otras transacciones a la espera.
+Cuando otra sesión va a intentar ejecutar un UPDATE sobre la tabla, como en el caso de actualizar el finalDate, se encuentra con que las filas que el cursor está procesando están bloqueadas con el UPDLOCK. Debido a esto, la otra sesión que intenta ejecutar el UPDATE no puede modificar esas filas hasta que el cursor haya terminado de procesarlas, ya que el bloqueo de actualización mantiene a otras transacciones a la espera.
 
-El UPDLOCK evita que otros procesos realicen actualizaciones en las filas bloqueadas, lo que asegura que no haya cambios concurrentes en los registros mientras el cursor está en ejecución. Una vez que el cursor termina y se cierra, los bloqueos se liberan, y las sesiones que estaban esperando pueden continuar con sus transacciones y modificar las filas si es necesario.
+El UPDLOCK evita que otros procesos realicen actualizaciones en las filas bloqueadas, lo que asegura que no haya cambios concurrentes en los registros mientras el cursor está en ejecución. Una vez que el cursor termina y se cierra, los bloqueos se liberan, y las sesiones que estaban esperando pueden continuar con sus transacciones y modificar las filas si es necesario. Al ejecutar el ejemplo brindando cuando se termina el porceso de ejecucion del cursor las demas sesiones terminan con rapidez sus tareas.
 
 ---
 ### Casos en los que un cursor no bloquearia una fila
@@ -5285,15 +5285,13 @@ WAITFOR DELAY '00:00:01'
 
 ### Casos en los que se recomienda utilizar un cursor dentro de SOLTURA
 
-En el sistema de Soltura, donde se manejan contratos, paquetes de servicios y beneficios mensuales para los clientes, el uso de cursores en SQL Server puede tener sentido en ciertos casos teniendo en cuenta el asilamiento que ellos generan cuando se le indica y tambien casos cuando no bloqueen, pero es importante saber cuándo conviene realmente usarlos debido a los bloqueos por fila que generan.
+En la base de datos Soltura, donde se manejan contratos, paquetes de servicios y beneficios mensuales para los clientes, el uso de cursores en SQL Server puede tener sentido en ciertos casos teniendo en cuenta el asilamiento que ellos generan cuando se le indica y tambien casos cuando no bloqueen, pero es importante saber cuándo conviene realmente usarlos debido a los bloqueos por fila que generan.
 
 - **Renovar beneficios uno por uno dependiendo del historial del usuario :** Por ejemplo, si tengo que revisar cliente por cliente su historial de uso y pagos antes de renovar su contrato, un cursor me permite aplicar lógica condicional específica por cada fila sin afectar a otros usuarios al mismo tiempo.
   
 - Se necesita procesar fila por fila y aplicar lógica compleja que no se puede resolver fácilmente con una sola consulta UPDATE o MERGE. Por ejemplo, si Soltura requiere revisar la fecha de vencimiento de cada contrato individualmente y tomar decisiones distintas para cada cliente según varios criterios, un cursor puede ser útil.
   
 - **Actualizar servicios activos con lógica extensa :** Si un cliente tiene servicios distintos como gimnasio, spa o dieta, y cada uno tiene reglas diferentes de renovación, el cursor me permite aplicar condiciones específicas para cada caso sin hacer todo en un solo UPDATE genérico.
-
-- Enviar notificaciones personalizadas al vencer contratosSi quiero enviar mensajes distintos dependiendo del tipo de paquete, cliente o historial, puedo recorrer uno a uno los registros y preparar notificaciones personalizadas.
 
 - Si el proceso implica tomar decisiones basadas en valores específicos de cada fila y estas decisiones no se pueden hacer en una sola consulta masiva. Por ejemplo, si cada fila necesita cálculos complejos o múltiples pasos de validación antes de realizar una acción.
 
@@ -5323,7 +5321,7 @@ Defina lo que es la "transacción de volumen" de su base de datos, por ejemplo, 
 
 ---
 
-El siguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación). Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). Está diseñado para ejecutarse en un entorno transaccional controlado y manejar adecuadamente errores con registros claros.
+El siguiente procedimiento almacenado permite registrar transacciones de redención de servicios ofrecidos a través de los planes del sistema. Valida que el usuario o proveedor tenga derecho a realizar la redención, verificando los límites disponibles según el tipo de acuerdo (por cantidad, monto o validación), asi como la asociacion al agreement que quiere canjear. Si los criterios se cumplen, inserta la transacción en la base de datos y actualiza el límite correspondiente, garantizando la integridad y trazabilidad mediante una suma de verificación (`checkSum`). 
 
 El nivel de insolacion READ COMMITTED se utiliza para evitar la lectura de datos no confirmados ("dirty reads") durante la transacción. Esto significa que cualquier dato leído durante la ejecución del procedimiento ya ha sido confirmado por otras transacciones, garantizando así que los valores utilizados para verificar límites o condiciones son válidos y estables durante toda la operación. Esto es esencial en este procedimiento, ya que trabaja con condiciones sensibles de límites de redención que, si se leyeran sin confirmar, podrían permitir redenciones incorrectas o inconsistentes.
 
@@ -5544,7 +5542,6 @@ Simular múltiples usuarios accediendo simultáneamente al endpoint `/insert-red
 
 - El tiempo de respuesta promedio.
 - La capacidad de la base de datos para manejar carga.
-- La estabilidad del backend bajo estrés.
 
 ---
 
@@ -5576,7 +5573,7 @@ Simular múltiples usuarios accediendo simultáneamente al endpoint `/insert-red
 
 ### 🧵 Thread Group (Grupo de Hilos)
 
-Se configuró para simular un escenario realista con los siguientes parámetros:
+Se configuró para simular un escenario realista a continuacion la explicacion de los parámetros:
 
 - **Number of Threads (Usuarios simulados):** `60`  
   → Representa la cantidad de usuarios simultáneos haciendo peticiones.
@@ -5587,22 +5584,22 @@ Se configuró para simular un escenario realista con los siguientes parámetros:
 - **Loop Count (Repeticiones por hilo):** `10`  
   → Cada usuario realizará la prueba 10 veces.
 
-🔁 **Total de solicitudes simuladas**: `60 hilos * 10 repeticiones = 600 solicitudes`
+**Total de solicitudes simuladas**: `60 hilos * 10 repeticiones = 600 solicitudes`
 
 ---
 
-### ⏲️ Temporizador: Uniform Random Timer
+### -> Temporizador: Uniform Random Timer
 
 Para evitar que las solicitudes se disparen de forma simultánea y poco realista, se añadió un **Uniform Random Timer** con los siguientes valores:
 
 - **Delay Offset:** `0 ms`
 - **Random Delay Maximum:** `100 ms`
 
-🔄 Esto introduce una variación aleatoria entre cada solicitud, simulando un comportamiento más natural y evitando picos de carga artificiales.
+Esto introduce una variación aleatoria entre cada solicitud, simulando un comportamiento más natural y evitando picos de carga artificiales.
 
 ---
 
-## 📈 Listeners Utilizados
+##  Listeners Utilizados
 
 ### 1. View Results Tree
 
@@ -5626,19 +5623,18 @@ Proporciona estadísticas globales del test, incluyendo:
 
 **LISTO**  JMeter comenzará a enviar las solicitudes **POST** al endpoint `/insert-redemption`. 
 
-## 📊 Resultados de la Prueba
+##  Resultados de la Prueba
 
 Tras ejecutar el test con la configuración descrita, se obtuvieron los siguientes resultados:
 
 - **Throughput (TPS - Transactions per Second):** `59.1 TPS`  
-  → Esto indica que el sistema pudo manejar aproximadamente 59 solicitudes por segundo, lo cual es un buen rendimiento para una carga de 60 usuarios concurrentes.
+  → Esto indica que el sistema pudo manejar aproximadamente 59 solicitudes por segundo.
 
 - **Average Response Time (Promedio):** `89 ms`  
-  → El tiempo promedio que tardó el servidor en responder a cada solicitud. Un tiempo por debajo de 100 ms indica una respuesta rápida bajo carga.
-
+  → El tiempo promedio que tardó el servidor en responder a cada solicitud. 
 - **Median Response Time (Mediana):** `34 ms`  
-  → El 50% de las solicitudes se resolvieron en menos de 34 ms, lo que muestra que la mayoría de las respuestas fueron muy rápidas.
-
+  → El 50% de las solicitudes se resolvieron en menos de 34 ms.
+  
 - **Samples (Muestras Totales):** `600`  
   → Equivale a las 600 solicitudes totales generadas por los 60 usuarios con 10 repeticiones cada uno.
 
@@ -5646,11 +5642,10 @@ Tras ejecutar el test con la configuración descrita, se obtuvieron los siguient
 
 ## Interpretación
 
-- El sistema mostró **alta capacidad de respuesta** y **estabilidad** con 60 usuarios concurrentes.
-- La mediana baja frente al promedio sugiere que unas pocas solicitudes más lentas elevaron el promedio, pero en general, la mayoría fueron muy rápidas.
+- El sistema mostró **alta capacidad de respuesta** y **estabilidad** con 60 usuarios concurrentes antes de llegar al 70% de uso al CPU del equipo en ejecucion.
 - Un Throughput de casi 60 TPS es adecuado para aplicaciones de backend que atienden transacciones individuales.
 
-# 📡 API de Inserción de Transacciones de Redención
+#  API de Inserción de Transacciones de Redención
 
 Este proyecto contiene una API construida con **Node.js** y **Express** que se conecta a una base de datos **SQL Server** para ejecutar un procedimiento almacenado (`dbo.CaipiSP_InsertRedemptionTransaction`).
 
@@ -5658,13 +5653,13 @@ Este proyecto contiene una API construida con **Node.js** y **Express** que se c
 
 ##  Cómo levantar la API con `node index.js`
 
-### 📦 Requisitos previos
+### Requisitos previos
 
 Antes de ejecutar la API, se debe tener instalado lo siguiente:
 
 - **Node.js** (versión 14 o superior)
 - **npm** (el gestor de paquetes de Node)
-- **SQL Server** (en funcionamiento localmente o accesible desde tu equipo)
+- **SQL Server** (para temas del caso se utiliza en funcionamiento localmente)
 - El procedimiento almacenado `CaipiSP_InsertRedemptionTransaction` creado en la base de datos `caipiIAdb`
 
 ---
@@ -5691,7 +5686,7 @@ Esto instalará las dependencias necesarias para ejecutar el servidor.
 
 ---
 
-### ⚙️ Configuración de la conexión a la base de datos
+###  Configuración de la conexión a la base de datos
 
 Abre `index.js` y verifique que la sección de configuración de la base de datos tenga tus credenciales reales:
 
@@ -5712,7 +5707,7 @@ Reemplace `UsuarioSQL`, `password2410` y otros valores según su configuracion d
 
 ---
 
-### ▶️ Ejecutar la API
+### Ejecutar la API
 
 Para iniciar el servidor, ejecute el siguiente comando:
 
