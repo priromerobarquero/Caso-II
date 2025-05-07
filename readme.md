@@ -1981,70 +1981,65 @@ ORDER BY idagreementTerm;
    <summary>Haz clic para expandir</summary>
 
 ```sql
-INSERT INTO caipi_AgreementsPerPlan (
-    enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount
-)
-VALUES (
-    1,
-    0,
-    16,
-    7,
-    '1 mes',
-    1,
-    722.50,
-    127.50
-);
+
+-- ##############################
+-- INSERCIÓN DE AGREEMENTSPERPLAN
+-- ##############################
+INSERT INTO caipi_AgreementsPerPlan
+(enable, deleted, idPlans, idAgreementTerm, quantity, idMeasureUnit, amount, disccount)
+VALUES
+(1,0,15,7,'1 mes',1,722.50,127.50);
 
 -- Plan 16: Joven Deportista
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 16, 7, '1 mes', 1, 722.50, 127.50),
-(1, 0, 16, 9, '1 mes', 1, 630.00, 70.00);
+(1, 0, 15, 7, '1 mes', 1, 722.50, 127.50),
+(1, 0, 15, 9, '1 mes', 1, 630.00, 70.00);
 
 -- Plan 17: Familia de Verano
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 17, 10, '1 mes', 1, 480.00, 120.00),
-(1, 0, 17, 11, '1 mes', 1, 600.00, 200.00),
-(1, 0, 17, 12, '1 mes', 1, 637.50, 112.50);
+(1, 0, 7, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 7, 11, '1 mes', 1, 600.00, 200.00),
+(1, 0, 7, 12, '1 mes', 1, 637.50, 112.50);
 
 -- Plan 18: Viajero Frecuente
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 18, 13, '1 mes', 1, 450.00, 50.00),
-(1, 0, 18, 14, '1 mes', 1, 570.00, 30.00);
+(1, 0, 8, 13, '1 mes', 1, 450.00, 50.00),
+(1, 0, 8, 14, '1 mes', 1, 570.00, 30.00);
 
 -- Plan 19: Nómada Digital
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 19, 18, '1 mes', 1, 375.00, 125.00),
-(1, 0, 19, 19, '1 mes', 1, 560.00, 140.00);
+(1, 0, 9, 8, '1 mes', 1, 375.00, 125.00),
+(1, 0, 9, 9, '1 mes', 1, 560.00, 140.00);
 
 -- Plan 20: Profesional en Movimiento
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 20, 20, '1 mes', 1, 425.00, 75.00),
-(1, 0, 20, 21, '1 mes', 1, 495.00, 55.00),
-(1, 0, 20, 15, '1 mes', 1, 360.00, 90.00);
+(1, 0, 10, 2, '1 mes', 1, 425.00, 75.00),
+(1, 0, 10, 1, '1 mes', 1, 495.00, 55.00),
+(1, 0, 10, 15, '1 mes', 1, 360.00, 90.00);
 
 -- Plan 21: Estudiante Proactivo
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 21, 10, '1 mes', 1, 480.00, 120.00),
-(1, 0, 21, 19, '1 mes', 1, 560.00, 140.00);
+(1, 0, 1, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 1, 9, '1 mes', 1, 560.00, 140.00);
 
 -- Plan 22: Creativo Freelance
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 22, 7, '1 mes', 1, 722.50, 127.50),
-(1, 0, 22, 9, '1 mes', 1, 630.00, 70.00),
-(1, 0, 22, 17, '1 mes', 1, 490.00, 210.00);
+(1, 0, 2, 7, '1 mes', 1, 722.50, 127.50),
+(1, 0, 2, 9, '1 mes', 1, 630.00, 70.00),
+(1, 0, 2, 17, '1 mes', 1, 490.00, 210.00);
 
 -- Plan 23: Full Wellness
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 23, 10, '1 mes', 1, 480.00, 120.00),
-(1, 0, 23, 22, '1 mes', 1, 540.00, 60.00),
-(1, 0, 23, 24, '1 mes', 1, 660.00, 90.00);
+(1, 0, 3, 10, '1 mes', 1, 480.00, 120.00),
+(1, 0, 3, 2, '1 mes', 1, 540.00, 60.00),
+(1, 0, 3, 4, '1 mes', 1, 660.00, 90.00);
 
 -- Plan 24: Tiempo en Familia
 INSERT INTO caipi_AgreementsPerPlan VALUES
-(1, 0, 24, 13, '1 mes', 1, 450.00, 50.00),
-(1, 0, 24, 14, '1 mes', 1, 570.00, 30.00),
-(1, 0, 24, 16, '1 mes', 1, 425.00, 75.00),
-(1, 0, 24, 11, '1 mes', 1, 600.00, 200.00); 
+(1, 0, 4, 13, '1 mes', 1, 450.00, 50.00),
+(1, 0, 4, 14, '1 mes', 1, 570.00, 30.00),
+(1, 0, 4, 16, '1 mes', 1, 425.00, 75.00),
+(1, 0, 4, 11, '1 mes', 1, 600.00, 200.00);
 ```
 
 </details>
@@ -2055,56 +2050,58 @@ INSERT INTO caipi_AgreementsPerPlan VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
+-- INSERCIÓN DE SUSCRIPCIONES A CADA USUARIO
 -- Plan 16
 INSERT INTO caipi_subscriptions (suscription_typeid, userid, social, enable, startdate, deleted, statusid, scheduleId, auto_renew, created_at, idPlan) VALUES
-(1, 1, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16),
-(1, 2, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16),
-(1, 3, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 16);
-
+(1, 1, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15),
+(1, 2, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15),
+(1, 3, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 15);
+	
 -- Plan 17
 INSERT INTO caipi_subscriptions VALUES
-(1, 4, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
-(1, 5, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
-(1, 6, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17),
-(1, 7, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 17);
+(1, 4, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7),
+(1, 5, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7),
+(1, 6, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7),
+(1, 7, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 7);
 
 -- Plan 18
 INSERT INTO caipi_subscriptions VALUES
-(1, 8, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 9, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 10, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 11, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18),
-(1, 12, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 18);
+(1, 8, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 9, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 10, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 11, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8),
+(1, 12, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 8);
 
 -- Plan 19
 INSERT INTO caipi_subscriptions VALUES
-(1, 13, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19),
-(1, 14, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19),
-(1, 15, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 19);
+(1, 13, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 9),
+(1, 14, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 9),
+(1, 15, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 9);
 
 -- Plan 20
 INSERT INTO caipi_subscriptions VALUES
-(1, 16, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 17, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 18, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 19, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 20, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20),
-(1, 21, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 20);
+(1, 16, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 17, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 18, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 19, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 20, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10),
+(1, 21, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 10);
 
 -- Plan 21
 INSERT INTO caipi_subscriptions VALUES
-(1, 22, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
-(1, 23, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
-(1, 24, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21),
-(1, 25, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 21);
+(1, 22, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1),
+(1, 23, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1),
+(1, 24, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1),
+(1, 25, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 1);
 
 -- Plan 22
 INSERT INTO caipi_subscriptions VALUES
-(1, 26, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 27, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 28, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 29, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22),
-(1, 30, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 22);
+(1, 26, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 27, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 28, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 29, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2),
+(1, 30, 0, 1, GETDATE(), 0, 1, 2, 1, GETDATE(), 2);
+
 ```
 
 </details>
