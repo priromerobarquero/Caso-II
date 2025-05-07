@@ -6507,16 +6507,39 @@ Soltura anuncia que los servicios pertenecientes al sistema de Payment Assistant
         "url_masInfo": "https://soltura.cr/informacion/appAssis",
         "imagenURL": "https://soltura.cr/media/appAssistant.jpg",
         "formato": "jpg",
+        "fecha_migracion": "2025-05-01",
         "resolucion": "2470x3510 px",
         "dimensiones": {
           "ancho": 1080,
           "alto": 1080
         },
-        "etiquetas": ["pagos ", "beneficios"],
+        "etiquetas": ["banner", "pagos ", "beneficios", "payment Asisstant"],
         "fecha_publicacion": "2025-05-01T12:00:00Z",
         "estadisticas": {
             "vistas": 5200,
             "comentarios": 40
+        },
+        "estado": "activo"
+      },
+      {
+        "media_id": "006",
+        "tipo": "imagen",
+        "titulo": "Todo en un solo lugar: Soltura ahora tambien implementa pagos recurrentes",
+        "descripcion": "Desde el 1 de mayo del 2025, Soltura integra todas las funciones de Payment Assistant. Simplificá tus pagos con una sola plataforma.",
+        "url_masInfo": "https://soltura.cr/guia-migracion",
+        "imagenURL": "https://soltura.cr/media/home-integracion.jpg",
+        "formato": "jpg",
+        "fecha_migracion": "2025-05-01",
+        "resolucion": "2480x1480 px",
+        "dimensiones": {
+          "ancho": 1080,
+          "alto": 720
+        },
+        "etiquetas": ["home", "pagos", "soltura", "paymentAssistant"],
+        "fecha_publicacion": "2025-05-01T08:10:00Z",
+        "estadisticas": {
+          "vistas": 0,
+          "comentarios": 0
         },
         "estado": "activo"
       }
