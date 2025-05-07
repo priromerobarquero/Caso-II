@@ -2778,7 +2778,7 @@ GO
  
 </details>
 
-##### 1.4 Habrá alguna forma de implementar RLS, row level security
+#### 2. Habrá alguna forma de implementar RLS, row level security
 
 <details>
 	<summary>Mostrar script</summary>
@@ -2818,7 +2818,7 @@ GO
 </details>
 
 
-#### 2. Crear un certificado y llave asimétrica.
+#### 3. Crear un certificado y llave asimétrica.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2845,7 +2845,7 @@ SECRET = 'CaipiClaveAsimetrica'
 
 </details>
 
-#### 3. Crear una llave simétrica.
+#### 4. Crear una llave simétrica.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2880,7 +2880,7 @@ FROM sys.openkeys;
 ```
 </details>
 
-#### 4. Cifrar datos sensibles usando cifrado simétrico y proteger la llave privada con las llaves asimétrica definidas en un certificado del servidor.
+#### 5. Cifrar datos sensibles usando cifrado simétrico y proteger la llave privada con las llaves asimétrica definidas en un certificado del servidor.
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2921,7 +2921,7 @@ CLOSE SYMMETRIC KEY ClaveSimetrica;
 ```
 </details>
 
-#### 5. Crear un SP que descifre los datos protegidos usando las llaves anteriores.
+#### 6. Crear un SP que descifre los datos protegidos usando las llaves anteriores.
 
  <details>
    <summary>Haz clic para expandir</summary>
