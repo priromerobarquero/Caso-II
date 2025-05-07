@@ -1244,7 +1244,10 @@ VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
-CREATE PROCEDURE LlenarPlanes
+-- ##############################
+-- INSERCIÓN DE PLANES
+-- ##############################
+CREATE OR ALTER PROCEDURE dbo.caipiSP_LlenarPlanes
 AS
 BEGIN
     DECLARE @countPlanes INT = 15;
@@ -1302,7 +1305,11 @@ BEGIN
 
         SET @i += 1;
     END
-END
+END;
+GO
+
+EXEC dbo.caipiSP_LlenarPlanes;
+GO
 ```
 
 </details>
