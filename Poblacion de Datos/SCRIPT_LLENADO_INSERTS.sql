@@ -747,6 +747,7 @@ UPDATE caipi_plansLimits
 SET [limit] = 10000
 where idPlansLimits = 1
 
+--Planes para usuarios de payment assitant	
 INSERT INTO caipi_plans (name, description, enable, deleted, checkSum, idplanTypes, effectiveDate, totalAmount)
 VALUES ('Plan Básico Extra', 'appAssistant', 1, 0, HASHBYTES('SHA2_512', CONCAT(NEWID(), '723489ansdjflq723')), 1, 2020-05-01, 3.99);
 
