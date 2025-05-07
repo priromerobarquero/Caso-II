@@ -2049,7 +2049,7 @@ INSERT INTO caipi_AgreementsPerPlan VALUES
 
 </details>
 
-### caipi_subscriptions
+#### caipi_subscriptions
 
  <details>
    <summary>Haz clic para expandir</summary>
@@ -2108,6 +2108,217 @@ INSERT INTO caipi_subscriptions VALUES
 ```
 
 </details>
+
+#### caipi_payments
+
+ <details>
+   <summary>Haz clic para expandir</summary>
+
+```sql
+
+-- Insertar pago 1
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (125.50, 125.50, 'OK', 'ATH-589', 'REF1001', CONVERT(varbinary(100), 'prueba'), 'Suscripción Básica', 'Exitosa', CONVERT(varbinary(100), 'pruebacheck'),
+   '2025-05-05 09:15:00',  1, 1, 1, 10, 10);
+
+-- Insertar pago 2
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (2500.00, 2400.00, 'REFUNDED', 'ATH-590', 'REF1002', CONVERT(varbinary(100), 'descuento'), 'Pago Premium con descuento', 'Error', CONVERT(varbinary(100), 'descuentoCheck'),
+   '2025-05-05 11:30:00',  2, 2, 2, 20, 20);
+
+-- Insertar pago 3
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (75.00, 75.00, 'OK', 'ATH-591', 'REF1003', CONVERT(varbinary(100), 'adicional'), 'Servicio Adicional X', 'Exitosa', CONVERT(varbinary(100), 'adicionalCheck'),
+   '2025-05-06 14:45:00',  1, 3, 3, 30, 30);
+
+-- Insertar pago 4
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (500.00, 500.00, 'ERROR', 'ATH-592', 'REF1004', CONVERT(varbinary(100), 'error'), 'Pago Plan Intermedio', 'Error', CONVERT(varbinary(100), 'errorCheck'),
+   '2025-05-07 08:00:00',  3, 1, 4, 40, 40);
+
+-- Insertar pago 5
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1500.75, 1500.75, 'OK', 'ATH-593', 'REF1005', CONVERT(varbinary(100), 'upgrade'), 'Upgrade a Plan Oro', 'Exitosa', CONVERT(varbinary(100), 'upgradeCheck'),
+   '2025-05-07 16:20:00',  2, 2, 5, 50, 50);
+
+-- Inserciones en caipi_payments
+
+-- Insertar pago 1
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (125.50, 125.50, 'OK', 'ATH-589', 'REF1001', CONVERT(varbinary(100), 'prueba'), 'Suscripción Básica', 'Exitosa', CONVERT(varbinary(100), 'pruebacheck'),
+   '2025-05-05 09:15:00',  1, 1, 1, 10, 10);
+
+-- Insertar pago 2
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (2500.00, 2400.00, 'REFUNDED', 'ATH-590', 'REF1002', CONVERT(varbinary(100), 'descuento'), 'Pago Premium con descuento', 'Error', CONVERT(varbinary(100), 'descuentoCheck'),
+   '2025-05-05 11:30:00',  2, 2, 2, 20, 20);
+
+-- Insertar pago 3
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (75.00, 75.00, 'OK', 'ATH-591', 'REF1003', CONVERT(varbinary(100), 'adicional'), 'Servicio Adicional X', 'Exitosa', CONVERT(varbinary(100), 'adicionalCheck'),
+   '2025-05-06 14:45:00',  1, 3, 3, 30, 30);
+
+-- Insertar pago 4
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (500.00, 500.00, 'ERROR', 'ATH-592', 'REF1004', CONVERT(varbinary(100), 'error'), 'Pago Plan Intermedio', 'Error', CONVERT(varbinary(100), 'errorCheck'),
+   '2025-05-07 08:00:00',  3, 1, 4, 40, 40);
+
+-- Insertar pago 5
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1500.75, 1500.75, 'OK', 'ATH-593', 'REF1005', CONVERT(varbinary(100), 'upgrade'), 'Upgrade a Plan Oro', 'Exitosa', CONVERT(varbinary(100), 'upgradeCheck'),
+   '2025-05-07 16:20:00',  2, 2, 5, 50, 50);
+
+-- Insertar pago 6
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (200.00, 200.00, 'OK', 'ATH-594', 'REF1006', CONVERT(varbinary(100), 'plan'), 'Plan Básico Anual', 'Exitosa', CONVERT(varbinary(100), 'planCheck'),
+   '2025-05-08 09:45:00',  1, 3, 6, 15, 15);
+
+-- Insertar pago 7
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (600.00, 600.00, 'OK', 'ATH-595', 'REF1007', CONVERT(varbinary(100), 'nuevoPlan'), 'Pago Plan Plus', 'Exitosa', CONVERT(varbinary(100), 'nuevoPlanCheck'),
+   '2025-05-08 13:00:00',  2, 2, 7, 12, 12);
+
+-- Insertar pago 8
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (800.00, 800.00, 'OK', 'ATH-596', 'REF1008', CONVERT(varbinary(100), 'pagoExtra'), 'Pago adicional por servicios', 'Exitosa', CONVERT(varbinary(100), 'pagoExtraCheck'),
+   '2025-05-09 10:30:00',  3, 1, 8, 60, 60);
+
+-- Insertar pago 9
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1000.00, 1000.00, 'ERROR', 'ATH-597', 'REF1009', CONVERT(varbinary(100), 'cancelado'), 'Pago Plan Cancelado', 'Error', CONVERT(varbinary(100), 'canceladoCheck'),
+   '2025-05-09 15:00:00',  1, 3, 9, 20, 20);
+
+-- Insertar pago 10
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (150.00, 150.00, 'OK', 'ATH-598', 'REF1010', CONVERT(varbinary(100), 'intermediate'), 'Pago Plan Intermedio', 'Exitosa', CONVERT(varbinary(100), 'intermediateCheck'),
+   '2025-05-10 09:00:00',  2, 2, 10, 30, 30);
+
+-- Insertar pago 11
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (180.00, 180.00, 'OK', 'ATH-599', 'REF1011', CONVERT(varbinary(100), 'addOn'), 'Pago Adicional Plan Básico', 'Exitosa', CONVERT(varbinary(100), 'addOnCheck'),
+   '2025-05-11 12:30:00',  3, 1, 11, 40, 40);
+
+-- Insertar pago 12
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (500.00, 500.00, 'ERROR', 'ATH-600', 'REF1012', CONVERT(varbinary(100), 'fallo'), 'Pago con Fallo de Transacción', 'Error', CONVERT(varbinary(100), 'falloCheck'),
+   '2025-05-12 08:00:00',  1, 3, 12, 50, 50);
+
+-- Insertar pago 13
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (2200.00, 2200.00, 'OK', 'ATH-601', 'REF1013', CONVERT(varbinary(100), 'descuentoPlan'), 'Descuento sobre Plan Oro', 'Exitosa', CONVERT(varbinary(100), 'descuentoPlanCheck'),
+   '2025-05-12 10:15:00',  2, 2, 13, 60, 60);
+
+-- Insertar pago 14
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (350.00, 350.00, 'OK', 'ATH-602', 'REF1014', CONVERT(varbinary(100), 'pagoExtra'), 'Pago Extra por Extensión', 'Exitosa', CONVERT(varbinary(100), 'pagoExtraCheck'),
+   '2025-05-13 11:30:00',  3, 1, 14, 70, 70);
+
+-- Insertar pago 15
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (999.99, 999.99, 'OK', 'ATH-603', 'REF1015', CONVERT(varbinary(100), 'premium'), 'Pago Premium Anual', 'Exitosa', CONVERT(varbinary(100), 'premiumCheck'),
+   '2025-05-13 13:45:00',  2, 3, 15, 80, 80);
+
+-- Insertar pago 16
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (999.00, 999.00, 'ERROR', 'ATH-604', 'REF1016', CONVERT(varbinary(100), 'falloPlan'), 'Error en pago de Plan', 'Error', CONVERT(varbinary(100), 'falloPlanCheck'),
+   '2025-05-14 08:30:00',  1, 1, 16, 90, 90);
+
+-- Insertar pago 17
+INSERT INTO caipi_payments
+  (amount, actualAmount, result, authNumber, reference, chargeToken, description, error, checksum,
+   date, paymentMethodId, methodId, scheduleId,
+   userId, personId)
+VALUES
+  (1200.00, 1200.00, 'OK', 'ATH-605', 'REF1017', CONVERT(varbinary(100), 'intermedio'), 'Pago Plan Intermedio Anual', 'Exitosa', CONVERT(varbinary(100), 'intermedioCheck'),
+   '2025-05-14 10:00:00',  2, 3, 17, 100, 100);
+
+```
+  
+ </details>
 
 ### 🔎 Demostraciones T-SQL (uso de instrucciones específicas)
 Todos las pruebas a continuación se deben hacer en uno o varios scripts TSQL. Perfectamente un solo query puede resolver varios puntos de las pruebas.
