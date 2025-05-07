@@ -720,7 +720,8 @@ VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
-CREATE OR ALTER PROCEDURE InsertarPaymentMethods
+GO
+CREATE OR ALTER PROCEDURE dbo.caipiSP_InsertarPaymentMethods
 	--no hay parametros
 AS
 BEGIN
@@ -730,8 +731,8 @@ BEGIN
     DECLARE @methodId INT;
     DECLARE @token NVARCHAR(100);
     DECLARE @expTokenDate DATETIME;
-    DECLARE @maskAccount VARCHAR(10);
-    DECLARE @callbackURL NVARCHAR(100);
+    DECLARE @maskAccount NVARCHAR(MAX);
+    DECLARE @callbackURL NVARCHAR(200);
     DECLARE @configurationDetails NVARCHAR(MAX);
     DECLARE @refreshToken VARBINARY(MAX);
 
@@ -749,7 +750,7 @@ BEGIN
 		-- Asignar valores dinámicos a las variables
         SET @token = CONVERT(NVARCHAR(100), NEWID());
         SET @expTokenDate = DATEADD(DAY, @i * 30, GETDATE());  -- Asignación de fechas, incrementa cada 30 días
-        SET @maskAccount = CONCAT('****', RIGHT('000' + CAST((1000 + @i * 7) AS VARCHAR), 4));  -- Cuenta enmascarada con incremento
+        SET @maskAccount = CONCAT('****', RIGHT('000' + CAST((1000 + @i * 7) AS NVARCHAR), 4));  -- Cuenta enmascarada con incremento
         SET @callbackURL = CONCAT('https://example.com/callback/method', @i);
         SET @configurationDetails = CONCAT('{"currency":"USD", "method":"', @name, '"}');
         SET @refreshToken = CAST(HASHBYTES('SHA2_256', @token) AS VARBINARY(MAX));  -- Encriptación del token
@@ -779,7 +780,10 @@ BEGIN
     -- Cerrar y liberar el cursor
     CLOSE method_cursor;
     DEALLOCATE method_cursor;
-END
+END;
+GO
+
+EXEC dbo.caipiSP_InsertarPaymentMethods;
 ```
 
 </details>
