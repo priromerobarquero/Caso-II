@@ -1456,12 +1456,15 @@ VALUES
    <summary>Haz clic para expandir</summary>
 
 ```sql
+-- ##############################
+-- INSERCIÓN DE USERS
+-- ##############################
 /*
  procedimiento almacenado: dbo.sp_crearusuarios
  descripcion: inserta 100 usuarios de ejemplo en dbo.caipi_users
 */
 GO
-CREATE OR ALTER PROCEDURE dbo.sp_crearusuarios
+CREATE OR ALTER PROCEDURE dbo.caipiSP_CrearUsuarios
 AS
 BEGIN
     -- este bloque desactiva mensajes de conteo de filas
@@ -1503,7 +1506,7 @@ BEGIN
         );
 
         -- este bloque genera contrasena como hash sha2_256 de pass + contador
-        DECLARE @Password VARBINARY(255) = HASHBYTES('SHA2_256', 'pass' + CAST(@i AS NVARCHAR));
+        DECLARE @Password NVARCHAR(256) = 'pass' + CAST(@i AS NVARCHAR);
 
         -- este bloque define flags de estado eliminacion y activo
         DECLARE @Deleted BIT = 0;
@@ -1534,8 +1537,10 @@ BEGIN
         -- este bloque incrementa el contador
         SET @i = @i + 1;
     END
-END
+END;
 GO
+
+EXEC dbo.caipiSP_CrearUsuarios;
 
 ```
 
